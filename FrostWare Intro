@@ -45,7 +45,7 @@ local function FrostWareIntro()
     end
 
     wait(1)
-    typeWriterEffect(frostWareTypewriterLabel, "Don't just watch, feel the Frost!", 0.1)
+    typeWriterEffect(frostWareTypewriterLabel, "Don't just watch, Feel The Frost!", 0.1)
 
     wait(4)
 
