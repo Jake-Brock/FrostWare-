@@ -110,7 +110,7 @@ local function FrostWareIntro()
     fadeTween.Completed:Connect(function()
         frostWareScreenGui:Destroy()
         wait(0.3)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/nathzzi/FrostWare/refs/heads/main/main.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"))()
     end)
 
     animateTitleColor(frostWareTitleLabel)
