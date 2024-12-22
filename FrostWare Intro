@@ -3,17 +3,19 @@ local TweenService = game:GetService("TweenService")
 local function FrostWareIntro()
     local frostWareScreenGui = Instance.new("ScreenGui")
     frostWareScreenGui.Name = "FrostWareIntroGui"
+    frostWareScreenGui.IgnoreGuiInset = true
     frostWareScreenGui.Parent = gethui()
 
     local frostWareFrame = Instance.new("Frame")
     frostWareFrame.Size = UDim2.new(1, 0, 1, 0)
     frostWareFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     frostWareFrame.BackgroundTransparency = 0
+    frostWareFrame.Position = UDim2.new(0, 0, 0, 0)
     frostWareFrame.Parent = frostWareScreenGui
 
     local frostWareLogoImage = Instance.new("ImageLabel")
     frostWareLogoImage.Size = UDim2.new(0, 150, 0, 150)
-    frostWareLogoImage.Position = UDim2.new(0.5, -75, 0, 0)
+    frostWareLogoImage.Position = UDim2.new(0.5, -75, 0.2, -75)
     frostWareLogoImage.BackgroundTransparency = 1
     frostWareLogoImage.Image = "rbxassetid://114936734174789"
     frostWareLogoImage.Parent = frostWareFrame
@@ -30,22 +32,12 @@ local function FrostWareIntro()
     frostWareGlowLabel.Font = Enum.Font.SourceSansBold
     frostWareGlowLabel.Parent = frostWareFrame
 
-    local frostWareTitleLabel = Instance.new("TextLabel")
-    frostWareTitleLabel.Size = UDim2.new(1, 0, 0.2, 0)
-    frostWareTitleLabel.Position = UDim2.new(0, 0, 0.4, 0)
-    frostWareTitleLabel.BackgroundTransparency = 1
-    frostWareTitleLabel.Text = "FrostWare Android"
-    frostWareTitleLabel.TextColor3 = Color3.fromRGB(0, 0, 60)
-    frostWareTitleLabel.TextScaled = true
-    frostWareTitleLabel.Font = Enum.Font.SourceSansBold
-    frostWareTitleLabel.Parent = frostWareFrame
-
     local frostWareTypewriterLabel = Instance.new("TextLabel")
     frostWareTypewriterLabel.Size = UDim2.new(1, 0, 0.1, 0)
     frostWareTypewriterLabel.Position = UDim2.new(0, 0, 0.7, 0)
     frostWareTypewriterLabel.BackgroundTransparency = 1
     frostWareTypewriterLabel.Text = ""
-    frostWareTypewriterLabel.TextColor3 = Color3.fromRGB(0, 0, 60)
+    frostWareTypewriterLabel.TextColor3 = Color3.fromRGB(0, 0, 255)
     frostWareTypewriterLabel.TextScaled = true
     frostWareTypewriterLabel.Font = Enum.Font.SourceSans
     frostWareTypewriterLabel.TextTransparency = 1
@@ -55,7 +47,7 @@ local function FrostWareIntro()
         local tween = TweenService:Create(
             label,
             TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true),
-            { TextColor3 = Color3.fromRGB(135, 206, 250) }
+            { TextColor3 = Color3.fromRGB(173, 216, 230) }
         )
         tween:Play()
     end
@@ -79,22 +71,15 @@ local function FrostWareIntro()
         TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
         { BackgroundTransparency = 1 }
     )
-    fadeTween:Play()
-
-    local fadeTextTween = TweenService:Create(
-        frostWareTitleLabel,
-        TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-        { TextTransparency = 1 }
-    )
-    local fadeGlowTextTween = TweenService:Create(
-        frostWareGlowLabel,
-        TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-        { TextTransparency = 1 }
-    )
-    local fadeImageTween = TweenService:Create(
+    local fadeLogoTween = TweenService:Create(
         frostWareLogoImage,
         TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
         { ImageTransparency = 1 }
+    )
+    local fadeGlowLabelTween = TweenService:Create(
+        frostWareGlowLabel,
+        TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        { TextTransparency = 1 }
     )
     local fadeTypewriterTween = TweenService:Create(
         frostWareTypewriterLabel,
@@ -102,9 +87,9 @@ local function FrostWareIntro()
         { TextTransparency = 1 }
     )
 
-    fadeTextTween:Play()
-    fadeGlowTextTween:Play()
-    fadeImageTween:Play()
+    fadeTween:Play()
+    fadeLogoTween:Play()
+    fadeGlowLabelTween:Play()
     fadeTypewriterTween:Play()
 
     fadeTween.Completed:Connect(function()
@@ -112,8 +97,6 @@ local function FrostWareIntro()
         wait(0.3)
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"))()
     end)
-
-    animateTitleColor(frostWareTitleLabel)
 end
 
 FrostWareIntro()
