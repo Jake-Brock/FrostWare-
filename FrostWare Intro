@@ -95,7 +95,7 @@ local function FrostWareIntro()
     fadeTween.Completed:Connect(function()
         frostWareScreenGui:Destroy()
         wait(0.3)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/deprescat22/script/main/Krypton_Executor.lua.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"))()
     end)
 end
 
