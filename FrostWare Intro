@@ -75,95 +75,157 @@ local function createLoader()
 
     wait(3)
 
-    loaderBarBackground:Destroy()
-    logoImage:Destroy()
+local a = game:GetService("TweenService")
 
-    local frostWareText = Instance.new("TextLabel")
-    frostWareText.Size = UDim2.new(1, 0, 0.2, 0)
-    frostWareText.Position = UDim2.new(0, 0, 0.4, 0)
-    frostWareText.BackgroundTransparency = 1
-    frostWareText.Text = "FrostWare Android"
-    frostWareText.TextColor3 = Color3.fromRGB(173, 216, 230)
-    frostWareText.TextStrokeTransparency = 0.3
-    frostWareText.TextStrokeColor3 = Color3.fromRGB(0, 0, 255)
-    frostWareText.TextScaled = true
-    frostWareText.Font = Enum.Font.GothamBlack 
-    frostWareText.TextTransparency = 1
-    frostWareText.Parent = frostLoader
+local function b()
+    if not game:IsLoaded() then
+        game.Loaded:Wait()
+    end
 
-    local frostGlow = Instance.new("UIStroke")
-    frostGlow.Parent = frostWareText
-    frostGlow.Color = Color3.fromRGB(0, 255, 255)
-    frostGlow.Thickness = 2
-    frostGlow.Transparency = 0.7
+    local c = Instance.new("ScreenGui")
+    c.Name = "FrostLoader"
+    c.IgnoreGuiInset = true
+    c.Parent = gethui()
 
-    local tweenTextFadeIn = TweenService:Create(
-        frostWareText,
+    local d = Instance.new("BlurEffect")
+    d.Size = 0
+    d.Parent = game.Lighting
+
+    a:Create(
+        d,
+        TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+        {Size = 30}
+    ):Play()
+
+    local e = Instance.new("Frame")
+    e.Size = UDim2.new(1, 0, 1, 0)
+    e.BackgroundTransparency = 0.6
+    e.BorderSizePixel = 0
+    e.Parent = c
+
+    local f = Instance.new("UIGradient")
+    f.Parent = e
+    f.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 0, 255))
+    })
+    f.Rotation = 45
+
+    a:Create(
+        f,
+        TweenInfo.new(5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+        {Rotation = 405}
+    ):Play()
+
+    local g = Instance.new("ImageLabel")
+    g.Size = UDim2.new(0, 150, 0, 150)
+    g.Position = UDim2.new(0.5, -75, 0.35, -75)
+    g.BackgroundTransparency = 1
+    g.Image = "rbxassetid://114936734174789"
+    g.Parent = c
+
+    a:Create(
+        g,
+        TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, -1, true),
+        {Rotation = 360, Size = UDim2.new(0, 180, 0, 180)}
+    ):Play()
+
+    local h = Instance.new("Frame")
+    h.Size = UDim2.new(0.8, 0, 0.05, 0)
+    h.Position = UDim2.new(0.1, 0, 0.7, 0)
+    h.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    h.BorderSizePixel = 0
+    h.Parent = c
+
+    local i = Instance.new("Frame")
+    i.Size = UDim2.new(0, 0, 1, 0)
+    i.BackgroundColor3 = Color3.fromRGB(173, 216, 230)
+    i.Parent = h
+
+    local j = Instance.new("UIGradient")
+    j.Parent = i
+    j.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(173, 216, 230)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 255))
+    })
+
+    a:Create(
+        i,
+        TweenInfo.new(3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out),
+        {Size = UDim2.new(1, 0, 1, 0)}
+    ):Play()
+
+    wait(3)
+    h:Destroy()
+    g:Destroy()
+
+    local k = Instance.new("TextLabel")
+    k.Size = UDim2.new(1, 0, 0.2, 0)
+    k.Position = UDim2.new(0, 0, 0.4, 0)
+    k.BackgroundTransparency = 1
+    k.Text = "FrostWare Android"
+    k.TextColor3 = Color3.fromRGB(173, 216, 230)
+    k.TextStrokeTransparency = 0.2
+    k.TextStrokeColor3 = Color3.fromRGB(0, 255, 255)
+    k.TextScaled = true
+    k.Font = Enum.Font.Garamond
+    k.TextTransparency = 1
+    k.Parent = c
+
+    local l = Instance.new("UIStroke")
+    l.Parent = k
+    l.Color = Color3.fromRGB(0, 255, 255)
+    l.Thickness = 3
+    l.Transparency = 0.7
+
+    a:Create(
+        k,
         TweenInfo.new(2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
         {TextTransparency = 0}
-    )
-    tweenTextFadeIn:Play()
+    ):Play()
 
     wait(2)
 
-    local typewriterText = "Don't just watch. Feel The Frost!"
-    local typewriterLabel = Instance.new("TextLabel")
-    typewriterLabel.Size = UDim2.new(1, 0, 0.1, 0)
-    typewriterLabel.Position = UDim2.new(0, 0, 0.6, 0)
-    typewriterLabel.BackgroundTransparency = 1
-    typewriterLabel.Text = ""
-    typewriterLabel.TextColor3 = Color3.fromRGB(173, 216, 230)
-    typewriterLabel.TextStrokeTransparency = 0.3
-    typewriterLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 255)
-    typewriterLabel.TextScaled = true
-    typewriterLabel.Font = Enum.Font.GothamBlack 
-    typewriterLabel.Parent = frostLoader
+    local m = "Don't just watch. Feel The Frost!"
+    local n = Instance.new("TextLabel")
+    n.Size = UDim2.new(1, 0, 0.1, 0)
+    n.Position = UDim2.new(0, 0, 0.6, 0)
+    n.BackgroundTransparency = 1
+    n.Text = ""
+    n.TextColor3 = Color3.fromRGB(173, 216, 230)
+    n.TextStrokeTransparency = 0.3
+    n.TextStrokeColor3 = Color3.fromRGB(0, 255, 255)
+    n.TextScaled = true
+    n.Font = Enum.Font.Garamond
+    n.Parent = c
 
-    local function typewriterEffectWithBounce()
-        for i = 1, #typewriterText do
-            typewriterLabel.Text = string.sub(typewriterText, 1, i)
-        
-            local bounceTween = TweenService:Create(
-                typewriterLabel,
-                TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out),
-                {TextTransparency = 0.7} 
-            )
-            bounceTween:Play()
-            wait(0.06)
-        end
+    for o = 1, #m do
+        n.Text = string.sub(m, 1, o)
+        wait(0.05)
     end
-    typewriterEffectWithBounce()
 
     wait(2)
 
-    local tweenFadeOutFrostWare = TweenService:Create(
-        frostWareText,
-        TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    a:Create(
+        k,
+        TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
         {TextTransparency = 1}
-    )
-    local tweenFadeOutFeelTheFrost = TweenService:Create(
-        typewriterLabel,
-        TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    ):Play()
+
+    a:Create(
+        n,
+        TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
         {TextTransparency = 1}
-    )
+    ):Play()
 
-    tweenFadeOutFrostWare:Play()
-    tweenFadeOutFeelTheFrost:Play()
+    wait(1.5)
+    c:Destroy()
+    d:Destroy()
 
-    tweenFadeOutFeelTheFrost.Completed:Wait()
-    frostLoader:Destroy()
-    blurEffect:Destroy()
-
-    if game:IsLoaded() then
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"))()
-    else
-        game.Loaded:Wait()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"))()
-    end
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"))()
 end
 
-createLoader()
-
+b() Enum.EasingStyle.Quad, Enum.EasingDirectio
 for i,v in pairs(({"Internal","HttpCache","Instances","Signals","Script","PhysicsCollision","PhysicsParts","GraphicsSolidModels","GraphicsMeshParts","GraphicsParticles","GraphicsParts","GraphicsSpatialHash","GraphicsTerrain","GraphicsTexture","GraphicsTextureCharacter","Sounds","StreamingSounds","TerrainVoxels","Gui","Animation","Navigation","GeometryCSG"})) do
     memorystats.restore(v)
 end
