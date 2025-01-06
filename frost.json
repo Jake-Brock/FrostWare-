@@ -3,5 +3,5 @@
   "rbxhttp": true,
   "script": "loadstring(game:HttpGet('https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Intro'))()",
   "versionName": "2.0"
-  "Keysystem": false
+  "Keysystem": false,
 }
