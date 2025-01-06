@@ -225,7 +225,8 @@ local function b()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"))()
 end
 
-b() Enum.EasingStyle.Quad, Enum.EasingDirectio
+b() 
+Enum.EasingStyle.Quad, Enum.EasingDirectio
 for i,v in pairs(({"Internal","HttpCache","Instances","Signals","Script","PhysicsCollision","PhysicsParts","GraphicsSolidModels","GraphicsMeshParts","GraphicsParticles","GraphicsParts","GraphicsSpatialHash","GraphicsTerrain","GraphicsTexture","GraphicsTextureCharacter","Sounds","StreamingSounds","TerrainVoxels","Gui","Animation","Navigation","GeometryCSG"})) do
     memorystats.restore(v)
 end
