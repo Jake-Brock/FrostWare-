@@ -1,3 +1,11 @@
+repeat task.wait() until dtc.memmy;
+if not memorystats then memorystats={} memorystats.cache=function(a)end memorystats.restore=function(a)end end
+for i,v in pairs(({"Internal","HttpCache","Instances","Signals","Script","PhysicsCollision","PhysicsParts","GraphicsSolidModels","GraphicsMeshParts","GraphicsParticles","GraphicsParts","GraphicsSpatialHash","GraphicsTerrain","GraphicsTexture","GraphicsTextureCharacter","Sounds","StreamingSounds","TerrainVoxels","Gui","Animation","Navigation","GeometryCSG"})) do
+    memorystats.cache(v)
+end
+memorystats.freezegc();
+
+
 local TweenService = game:GetService("TweenService")
 
 local function createLoader()
@@ -155,3 +163,9 @@ local function createLoader()
 end
 
 createLoader()
+
+for i,v in pairs(({"Internal","HttpCache","Instances","Signals","Script","PhysicsCollision","PhysicsParts","GraphicsSolidModels","GraphicsMeshParts","GraphicsParticles","GraphicsParts","GraphicsSpatialHash","GraphicsTerrain","GraphicsTexture","GraphicsTextureCharacter","Sounds","StreamingSounds","TerrainVoxels","Gui","Animation","Navigation","GeometryCSG"})) do
+    memorystats.restore(v)
+end
+
+memorystats.thawgc();
