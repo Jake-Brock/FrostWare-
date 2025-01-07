@@ -133,15 +133,7 @@ dtc.flow = nil;
 dtc.pushautoexec = nil;
 setreadonly(dtc, true);
 
-getKeyButton.MouseButton1Click:Connect(function()
-    _flow();
-    resultLabel.Text = "Key link copied to clipboard!"
-    resultLabel.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-end)
-
-checkKeyButton.MouseButton1Click:Connect(function()
-    local enteredKey = keyTextBox.Text
-    local correctKey = "123456"
+local function checky()
     if _auth() then
         resultLabel.Text = "Key is valid!"
         resultLabel.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
@@ -158,4 +150,18 @@ checkKeyButton.MouseButton1Click:Connect(function()
         resultLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
         keyTextBox.Text = "Invalid Key"
     end
+end
+
+getKeyButton.MouseButton1Click:Connect(function()
+    _flow();
+    resultLabel.Text = "Key link copied to clipboard!"
+    resultLabel.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 end)
+
+checkKeyButton.MouseButton1Click:Connect(function()
+    local enteredKey = keyTextBox.Text
+    local correctKey = "123456"
+    checky();
+end)
+
+checky();
