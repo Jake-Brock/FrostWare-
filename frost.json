@@ -1,6 +1,6 @@
 {
   "moduleName": "FrostWare",
   "rbxhttp": true,
-  "script": "loadstring(game:HttpGet('https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Intro'))()",
+  "script": "dtc.schedule(game:HttpGet('https://raw.githubusercontent.com/Jake-Brock/FrostWare-/refs/heads/main/a'))",
   "versionName": "2.0"
 }
