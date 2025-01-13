@@ -371,6 +371,18 @@ dtc.flow = nil;
 dtc.pushautoexec = nil;
 setreadonly(dtc, true);
 
+if isfile("frosty.key") then -- cba
+  if Config:Verify_Key(readfile("frosty.key")) then
+        screenGui:Destroy()
+        
+        dtc.schedule(
+            game:HttpGet('https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Intro')
+        );
+        
+        _auto();
+  end
+end
+
 getKeyButton.MouseButton1Click:Connect(function()
     Config:CopyKey_Link();
     resultLabel.Text = "Key link copied to clipboard!"
@@ -391,6 +403,7 @@ checkKeyButton.MouseButton1Click:Connect(function()
         );
         
         _auto();
+        writefile("frosty.key", enteredKey); -- yall are hwid locked, no worries
     else
         resultLabel.Text = "Invalid Key!"
         resultLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
