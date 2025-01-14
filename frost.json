@@ -1,4 +1,4 @@
-no{
+{
   "moduleName": "FrostWare",
   "rbxhttp": true,
   "script": "dtc.schedule(game:HttpGet('https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/a.lua'))",
