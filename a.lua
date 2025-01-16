@@ -50,7 +50,7 @@ else
   title.Parent = frame
   
   local subtext = Instance.new("TextLabel")
-  subtext.Text = "Complete this simple 1 step keysystem and enjoy exploiting ;)"
+  subtext.Text = "Complete this simple 2 step keysystem and enjoy exploiting ;)"
   subtext.Size = UDim2.new(1, 0, 0, 40)
   subtext.Position = UDim2.new(0, 0, 0.25, 0)
   subtext.BackgroundTransparency = 1
