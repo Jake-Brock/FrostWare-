@@ -399,6 +399,8 @@ Code.TextSize = 14.000
 Code.TextWrapped = true
 Code.TextXAlignment = Enum.TextXAlignment.Left
 Code.TextYAlignment = Enum.TextYAlignment.Top
+Code.ClearTextOnFocus = false;
+Code.MultiLine = true;
 
 Clear.Name = "Clear"
 Clear.Parent = Code
