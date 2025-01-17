@@ -689,23 +689,17 @@ local function PHFF_fake_script() -- Clear.LocalScript
 end
 coroutine.wrap(PHFF_fake_script)()
 local function PMROOSA_fake_script() -- Execute.LocalScript 
-	local script = Instance.new('LocalScript', Execute)
+    local script = Instance.new('LocalScript', Execute)
 
-	local TextBox = script.Parent.Parent
-	
-	local ExecuteButton = script.Parent
-	ExecuteButton.MouseButton1Click:Connect(function()
-		local luaCode = TextBox.Text
-		local success, err = pcall(function()
-			loadstring(luaCode)()
-		end)
-	
-		if not success then
-			warn("The script is either patched or does not work and for that reason your code couldn't run, if issue stays even after using more scripts, contact developers, Error Code: 1" .. err)
-		end
-	end)
-	
+    local TextBox = script.Parent.Parent
+    
+    local ExecuteButton = script.Parent
+    ExecuteButton.MouseButton1Click:Connect(function()
+        local luaCode = TextBox.Text
+        dtc.schedule(luaCode)()
+    end)
 end
+
 coroutine.wrap(PMROOSA_fake_script)()
 
 local function UITBIOF_fake_script() -- OpenButton.LocalScript 
