@@ -696,9 +696,10 @@ local function PMROOSA_fake_script() -- Execute.LocalScript
     local ExecuteButton = script.Parent
     ExecuteButton.MouseButton1Click:Connect(function()
         local luaCode = TextBox.Text
-        dtc.schedule(luaCode)()
+        loadstring(luaCode)()
     end)
 end
+ 
 
 coroutine.wrap(PMROOSA_fake_script)()
 
