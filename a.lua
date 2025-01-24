@@ -88,7 +88,7 @@ else
 
   KeyGui.Name = "KeyGui"
 
-  KeyGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+  KeyGui.Parent = gethui(); -- ARE YOU SERIOUS KeyGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
   KeyGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
