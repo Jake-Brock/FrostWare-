@@ -44,7 +44,7 @@ if isfile("FrostWare_Key.txt") and (KeySys:Verify_Default(readfile("FrostWare_Ke
 
   _auto()
 
-  loadstring(game:HttpGet("https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Intro"))()
+  loadstring(game:HttpGet("https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"))()
 
 else
 
