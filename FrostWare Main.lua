@@ -236,7 +236,7 @@ TextLabel_2.BorderSizePixel = 0
 TextLabel_2.Position = UDim2.new(-0.0367908813, 0, 0.790123463, 0)
 TextLabel_2.Size = UDim2.new(0, 100, 0, 50)
 TextLabel_2.Font = Enum.Font.FredokaOne
-TextLabel_2.Text = "Version: 3.0"
+TextLabel_2.Text = "Version: 3.2"
 TextLabel_2.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_2.TextSize = 14.000
 Frame2.Name = "Frame2"
@@ -311,19 +311,22 @@ TextLabel_7.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_7.TextSize = 15.000
 TextLabel_7.TextXAlignment = Enum.TextXAlignment.Left
 TextLabel_7.TextYAlignment = Enum.TextYAlignment.Top
+local Settings_2 = Instance.new("Frame")
 Settings_2.Name = "Settings"
 Settings_2.Parent = Main
 Settings_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Settings_2.BackgroundTransparency = 0.600
+Settings_2.BackgroundTransparency = 0.6
 Settings_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Settings_2.BorderSizePixel = 0
 Settings_2.Position = UDim2.new(0.101707332, 0, 0.171977207, 0)
 Settings_2.Size = UDim2.new(0, 433, 0, 236)
 Settings_2.Visible = false
+local UICorner_7 = Instance.new("UICorner")
 UICorner_7.Parent = Settings_2
+local TextLabel_8 = Instance.new("TextLabel")
 TextLabel_8.Parent = Settings_2
 TextLabel_8.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_8.BackgroundTransparency = 1.000
+TextLabel_8.BackgroundTransparency = 1.0
 TextLabel_8.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel_8.BorderSizePixel = 0
 TextLabel_8.Position = UDim2.new(0.0640756339, 0, 0.3434937, 0)
@@ -331,8 +334,9 @@ TextLabel_8.Size = UDim2.new(0, 377, 0, 62)
 TextLabel_8.Font = Enum.Font.FredokaOne
 TextLabel_8.Text = "Settings coming soon!"
 TextLabel_8.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_8.TextSize = 32.000
+TextLabel_8.TextSize = 32.0
 TextLabel_8.TextWrapped = true
+local Executor_2 = Instance.new("Frame")
 Executor_2.Name = "Executor"
 Executor_2.Parent = Main
 Executor_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -340,64 +344,68 @@ Executor_2.BackgroundTransparency = 0.600
 Executor_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Executor_2.BorderSizePixel = 0
 Executor_2.Position = UDim2.new(0.101626016, 0, 0.179661021, 0)
-Executor_2.Size = UDim2.new(0, 433, 0, 233)
+Executor_2.Size = UDim2.new(0, 433, 0, 233)  
 Executor_2.Visible = false
+local UICorner_8 = Instance.new("UICorner")
 UICorner_8.Parent = Executor_2
+local Code = Instance.new("TextBox")
 Code.Name = "Code"
 Code.Parent = Executor_2
 Code.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Code.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Code.BorderSizePixel = 0
 Code.Position = UDim2.new(0.014309573, 0, 0.0276296716, 0)
-Code.Size = UDim2.new(0, 419, 0, 183)
+Code.Size = UDim2.new(0, 419, 0, 183)  
 Code.Font = Enum.Font.SourceSans
 Code.PlaceholderColor3 = Color3.fromRGB(88, 88, 88)
-Code.PlaceholderText = "print(\"FrostWare 3.0\")"
+Code.PlaceholderText = "print(\"FrostWare 3.2\")"
 Code.Text = ""
 Code.TextColor3 = Color3.fromRGB(255, 255, 255)
 Code.TextSize = 14.000
 Code.TextWrapped = true
 Code.TextXAlignment = Enum.TextXAlignment.Left
 Code.TextYAlignment = Enum.TextYAlignment.Top
-Code.ClearTextOnFocus = false;
-Code.MultiLine = true;
-Clear.Name = "Clear"
-Clear.Parent = Code
-Clear.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Clear.BorderColor3 = Color3.fromRGB(0, 0, 0)
-Clear.BorderSizePixel = 0
-Clear.Position = UDim2.new(-0.000808023906, 0, 1.02905297, 0)
-Clear.Size = UDim2.new(0, 106, 0, 34)
-Clear.Font = Enum.Font.SourceSans
-Clear.Text = "Clear"
-Clear.TextColor3 = Color3.fromRGB(255, 255, 255)
-Clear.TextSize = 17.000
-UICorner_9.Parent = Clear
-Execute.Name = "Execute"
-Execute.Parent = Code
-Execute.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Execute.BorderColor3 = Color3.fromRGB(0, 0, 0)
-Execute.BorderSizePixel = 0
-Execute.Position = UDim2.new(0.74625659, 0, 1.02507329, 0)
-Execute.Size = UDim2.new(0, 106, 0, 34)
-Execute.Font = Enum.Font.SourceSans
-Execute.Text = "Execute"
-Execute.TextColor3 = Color3.fromRGB(255, 255, 255)
-Execute.TextSize = 17.000
-UICorner_10.Parent = Execute
-UICorner_11.Parent = Code
-Paste.Name = "Paste"
-Paste.Parent = Code
-Paste.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Paste.BorderColor3 = Color3.fromRGB(0, 0, 0)
-Paste.BorderSizePixel = 0
-Paste.Position = UDim2.new(0.476221502, 0, 1.02507329, 0)
-Paste.Size = UDim2.new(0, 106, 0, 34)
-Paste.Font = Enum.Font.SourceSans
-Paste.Text = "Paste"
-Paste.TextColor3 = Color3.fromRGB(255, 255, 255)
-Paste.TextSize = 17.000
-UICorner_12.Parent = Paste
+Code.ClearTextOnFocus = false
+Code.MultiLine = true
+Code.TextTruncate = Enum.TextTruncate.AtEnd  
+local UICorner_9 = Instance.new("UICorner")
+UICorner_9.Parent = Code
+local function createButton(name, position, text, parent)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Parent = parent
+    button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    button.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    button.BorderSizePixel = 0
+    button.Position = position
+    button.Size = UDim2.new(0, 100, 0, 30)  
+    button.Font = Enum.Font.SourceSans
+    button.Text = text
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 17.000
+    local UICorner = Instance.new("UICorner")
+    UICorner.Parent = button
+    return button
+end
+local buttonWidth = 100
+local buttonSpacing = 10
+local buttonHeight = 30
+local numButtons = 4  
+local totalWidth = buttonWidth * numButtons + buttonSpacing * (numButtons - 1)
+local startX = (Executor_2.Size.X.Offset - totalWidth) / 2  
+local Clear = createButton("Clear", UDim2.new(0, startX, 0.85, 0), "Clear", Executor_2)
+local Execute = createButton("Execute", UDim2.new(0, startX + buttonWidth + buttonSpacing, 0.85, 0), "Execute", Executor_2)
+local Paste = createButton("Paste", UDim2.new(0, startX + (buttonWidth + buttonSpacing) * 2, 0.85, 0), "Paste", Executor_2)
+local ExecuteClipboard = createButton("ExecuteClipboard", UDim2.new(0, startX + (buttonWidth + buttonSpacing) * 3, 0.85, 0), "Execute Clipboard", Executor_2)
+ExecuteClipboard.MouseButton1Click:Connect(function()
+    local clipboardContent = getclipboard()  
+    local success, result = pcall(function()
+        loadstring(clipboardContent)()  
+    end)
+    if not success then
+        warn("Error executing clipboard code: " .. result)
+    end
+end)
 Credits_2.Name = "Credits"
 Credits_2.Parent = Main
 Credits_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -510,7 +518,7 @@ OpenButton.Visible = false
 OpenButton.Image = "rbxassetid://114936734174789"
 UICorner_18.CornerRadius = UDim.new(1, 0)
 UICorner_18.Parent = OpenButton
-local function NVXVLM_fake_script() 
+local function NVXVLM() 
 	local script = Instance.new('LocalScript', Executor)
 	script.Parent.MouseButton1Click:Connect(function()
 		script.Parent.Parent.Parent.Credits.Visible = false
@@ -519,8 +527,8 @@ local function NVXVLM_fake_script()
 		script.Parent.Parent.Parent.Settings.Visible = false
 	end)
 end
-coroutine.wrap(NVXVLM_fake_script)()
-local function ZRKA_fake_script() 
+coroutine.wrap(NVXVLM)()
+local function ZRKA() 
 	local script = Instance.new('LocalScript', home)
 	script.Parent.MouseButton1Click:Connect(function()
 		script.Parent.Parent.Parent.Credits.Visible = false
@@ -529,8 +537,8 @@ local function ZRKA_fake_script()
 		script.Parent.Parent.Parent.Settings.Visible = false
 	end)
 end
-coroutine.wrap(ZRKA_fake_script)()
-local function JRWL_fake_script() 
+coroutine.wrap(ZRKA)()
+local function JRWL() 
 	local script = Instance.new('LocalScript', Settings)
 	script.Parent.MouseButton1Click:Connect(function()
 		script.Parent.Parent.Parent.Credits.Visible = false
@@ -539,8 +547,8 @@ local function JRWL_fake_script()
 		script.Parent.Parent.Parent.Settings.Visible = true
 	end)
 end
-coroutine.wrap(JRWL_fake_script)()
-local function MXDI_fake_script() 
+coroutine.wrap(JRWL)()
+local function MXDI() 
 	local script = Instance.new('LocalScript', Credits)
 	script.Parent.MouseButton1Click:Connect(function()
 		script.Parent.Parent.Parent.Credits.Visible = true
@@ -549,78 +557,81 @@ local function MXDI_fake_script()
 		script.Parent.Parent.Parent.Settings.Visible = false
 	end)
 end
-coroutine.wrap(MXDI_fake_script)()
-local function QPFP_fake_script() 
+coroutine.wrap(MXDI)()
+local function QPFP() 
 	local script = Instance.new('LocalScript', TextButton)
 	script.Parent.MouseButton1Click:Connect(function()
 		script.Parent.Parent.Parent.Parent.Main.Visible = false
 	    script.Parent.Parent.Parent.Parent["Open Button"].Visible = true
 	end)
 end
-coroutine.wrap(QPFP_fake_script)()
-local function PEWWH_fake_script() 
-	local script = Instance.new('LocalScript', Top)
-	local UserInputService = game:GetService("UserInputService")
-	local MainFrame = script.Parent.Parent.Parent.Main
-	local TopBar = MainFrame:WaitForChild("Top")
-	local Camera = workspace:WaitForChild("Camera")
-	local DragMousePosition
-	local FramePosition
-	local Draggable = false
-	TopBar.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			Draggable = true
-			DragMousePosition = Vector2.new(input.Position.X, input.Position.Y)
-			FramePosition= Vector2.new(MainFrame.Position.X.Scale, MainFrame.Position.Y.Scale)
-		end
-	end)
-	TopBar.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			Draggable = false
-		end
-	end)
-	UserInputService.InputChanged:Connect(function(input)
-		if Draggable == true then
-			local NewPosition = FramePosition + ( (Vector2.new(input.Position.X, input.Position.Y) - DragMousePosition) / Camera.ViewportSize)
-			MainFrame.Position = UDim2.new(NewPosition.X, 0, NewPosition.Y, 0)
-		end
-	end)
+coroutine.wrap(QPFP)()
+local function PEWWH()
+    local script = Instance.new('LocalScript', Top)
+    local UserInputService = game:GetService("UserInputService")
+    local MainFrame = script.Parent.Parent.Parent.Main
+    local TopBar = MainFrame:WaitForChild("Top")
+    local Camera = workspace:WaitForChild("Camera")
+    local DragMousePosition
+    local FramePosition
+    local Draggable = false
+    TopBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            Draggable = true
+            DragMousePosition = input.Position
+            FramePosition = MainFrame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    Draggable = false
+                end
+            end)
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if Draggable and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - DragMousePosition
+            MainFrame.Position = UDim2.new(
+                FramePosition.X.Scale, FramePosition.X.Offset + delta.X,
+                FramePosition.Y.Scale, FramePosition.Y.Offset + delta.Y
+            )
+        end
+    end)
 end
-coroutine.wrap(PEWWH_fake_script)()
-local function SUKHB_fake_script() 
+coroutine.wrap(PEWWH)()
+local function SUKHB() 
 	local script = Instance.new('LocalScript', Main)
 	task.wait(2)
 	warn("if you got any errors don't mind the errors they're from FrostWare ui")
 end
-coroutine.wrap(SUKHB_fake_script)()
-local function PHFF_fake_script() 
+coroutine.wrap(SUKHB)()
+local function PHFF() 
 	local script = Instance.new('LocalScript', Clear)
 	local TextBox = script.Parent.Parent
 	local ClearButton = script.Parent
 	ClearButton.MouseButton1Click:Connect(function()
-		TextBox.Text = ""
+		Code.Text = ""
 	end)
 end
-coroutine.wrap(PHFF_fake_script)()
-local function PMROOSA_fake_script() 
+coroutine.wrap(PHFF)()
+local function PMROOSA() 
     local script = Instance.new('LocalScript', Execute)
     local TextBox = script.Parent.Parent
     local ExecuteButton = script.Parent
     ExecuteButton.MouseButton1Click:Connect(function()
-        local luaCode = TextBox.Text
+        local luaCode = Code.Text
         loadstring(luaCode)()
     end)
 end
-coroutine.wrap(PMROOSA_fake_script)()
-local function UITBIOF_fake_script() 
+coroutine.wrap(PMROOSA)()
+local function UITBIOF() 
 	local script = Instance.new('LocalScript', OpenButton)
 	script.Parent.MouseButton1Click:Connect(function()
 		script.Parent.Parent.Main.Visible = true
 		script.Parent.Parent["Open Button"].Visible = false
 	end)
 end
-coroutine.wrap(UITBIOF_fake_script)()
-local function XXTZ_fake_script() 
+coroutine.wrap(UITBIOF)()
+local function XXTZ() 
 	local script = Instance.new('LocalScript', OpenButton)
 	local UserInputService = game:GetService("UserInputService")
 	local MainFrame = script.Parent
@@ -650,12 +661,12 @@ local function XXTZ_fake_script()
 		end
 	end)
 end
-coroutine.wrap(XXTZ_fake_script)()
-local function BJOYQ_fake_script() 
+coroutine.wrap(XXTZ)()
+local function BJOYQ() 
 	local script = Instance.new('LocalScript', ScreenGui)
 end
-coroutine.wrap(BJOYQ_fake_script)()
-local function NKFJBJX_fake_script() 
+coroutine.wrap(BJOYQ)()
+local function NKFJBJX() 
     local script = Instance.new('LocalScript', Paste)
 end
 Paste.MouseButton1Click:Connect(function()
