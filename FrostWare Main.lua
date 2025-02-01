@@ -1,12 +1,6 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local userId = player.UserId
 local Name = player.DisplayName
-local content, isReady = Players:GetUserThumbnailAsync(
-    userId,
-    Enum.ThumbnailType.HeadShot,
-    Enum.ThumbnailSize.Size420x420 
-)
 local TweenService = game:GetService("TweenService")
 local ScreenGui = Instance.new("ScreenGui")
 local Main = Instance.new("Frame")
@@ -172,39 +166,6 @@ Home.BorderSizePixel = 0
 Home.Position = UDim2.new(0.103170753, 0, 0.171977416, 0)
 Home.Size = UDim2.new(0, 433, 0, 237)
 UICorner_4.Parent = Home
-user.Name = "user"
-user.Parent = Home
-user.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
-user.BackgroundTransparency = 0.600
-user.BorderColor3 = Color3.fromRGB(0, 0, 0)
-user.BorderSizePixel = 0
-user.Position = UDim2.new(-0.000198469977, 0, -0.00264949235, 0)
-user.Size = UDim2.new(0, 220, 0, 75)
-user.ZIndex = 2
-User.Name = "User"
-User.Parent = user
-User.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-User.BackgroundTransparency = 1.000
-User.BorderColor3 = Color3.fromRGB(0, 0, 0)
-User.BorderSizePixel = 0
-User.Position = UDim2.new(0.0581817627, 0, 0.094617106, 0)
-User.Size = UDim2.new(0, 47, 0, 59)
-User.ZIndex = 2
-User.Image = content
-UserText.Name = "UserText"
-UserText.Parent = User
-UserText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-UserText.BackgroundTransparency = 1.000
-UserText.BorderColor3 = Color3.fromRGB(0, 0, 0)
-UserText.BorderSizePixel = 0
-UserText.Position = UDim2.new(1.11682653, 0, 0.213267952, 0)
-UserText.Size = UDim2.new(0, 155, 0, 35)
-UserText.ZIndex = 324234234
-UserText.Font = Enum.Font.Gotham
-UserText.Text = "  Welcome "..Name.." Thanks for using FrostWare!"
-UserText.TextColor3 = Color3.fromRGB(255, 255, 255)
-UserText.TextSize = 12.000
-UserText.TextWrapped = true
 UICorner_5.Parent = User
 Frame.Parent = user
 Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
