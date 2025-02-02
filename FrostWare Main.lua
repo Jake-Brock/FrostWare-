@@ -1,5 +1,7 @@
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local player = Players.LocalPlayer  
+local userId = player.UserId
+local content, isReady = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 local Name = player.DisplayName
 local TweenService = game:GetService("TweenService")
 local ScreenGui = Instance.new("ScreenGui")
@@ -9,7 +11,7 @@ local Side = Instance.new("Frame")
 local UICorner_2 = Instance.new("UICorner")
 local Executor = Instance.new("ImageButton")
 local home = Instance.new("ImageButton")
-local Settings = Instance.new("ImageButton")
+local Console = Instance.new("ImageButton")
 local Credits = Instance.new("ImageButton")
 local Top = Instance.new("Frame")
 local UICorner_3 = Instance.new("UICorner")
@@ -32,7 +34,7 @@ local TextLabel_4 = Instance.new("TextLabel")
 local TextLabel_5 = Instance.new("TextLabel")
 local TextLabel_6 = Instance.new("TextLabel")
 local TextLabel_7 = Instance.new("TextLabel")
-local Settings_2 = Instance.new("Frame")
+local Console_2 = Instance.new("Frame")
 local UICorner_7 = Instance.new("UICorner")
 local TextLabel_8 = Instance.new("TextLabel")
 local Executor_2 = Instance.new("Frame")
@@ -98,18 +100,20 @@ home.Position = UDim2.new(0.121417709, 0, 0.0263929199, 0)
 home.Size = UDim2.new(0, 28, 0, 28)
 home.Image = "rbxassetid://119897226376123"
 local goalPosition = UDim2.new(0.205163598, 0, 0.0687371343, 0)
+local startPosition = UDim2.new(0.205163598, 0, 1, 0) 
 local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 local tween = TweenService:Create(Main, tweenInfo, {Position = goalPosition})
+Main.Position = startPosition  
 tween:Play()
-Settings.Name = "Settings"
-Settings.Parent = Side
-Settings.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Settings.BackgroundTransparency = 1.000
-Settings.BorderColor3 = Color3.fromRGB(0, 0, 0)
-Settings.BorderSizePixel = 0
-Settings.Position = UDim2.new(0.121417709, 0, 0.294906735, 0)
-Settings.Size = UDim2.new(0, 28, 0, 28)
-Settings.Image = "http://www.roblox.com/asset/?id=119011453171150"
+Console.Name = "Console"
+Console.Parent = Side
+Console.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Console.BackgroundTransparency = 1.000
+Console.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Console.BorderSizePixel = 0
+Console.Position = UDim2.new(0.121417709, 0, 0.294906735, 0)
+Console.Size = UDim2.new(0, 28, 0, 28)
+Console.Image = "http://www.roblox.com/asset/?id=119011453171150"
 Credits.Name = "Credits"
 Credits.Parent = Side
 Credits.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -157,8 +161,6 @@ TextButton.Font = Enum.Font.SourceSans
 TextButton.Text = "X"
 TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextButton.TextSize = 26.000
-local userId = player.UserId
-local content, isReady = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 Home.Name = "Home"
 Home.Parent = Main
 Home.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -197,7 +199,7 @@ UserText.Position = UDim2.new(1.11682653, 0, 0.213267952, 0)
 UserText.Size = UDim2.new(0, 155, 0, 35)
 UserText.ZIndex = 324234234
 UserText.Font = Enum.Font.Gotham
-UserText.Text = "  Welcome " .. player.Name .. " Thanks for using FrostWare!"
+UserText.Text = "  Welcome " .. Name .. " Thanks for using FrostWare!"
 UserText.TextColor3 = Color3.fromRGB(255, 255, 255)
 UserText.TextSize = 12.000
 UserText.TextWrapped = true
@@ -228,7 +230,7 @@ TextLabel_2.BorderSizePixel = 0
 TextLabel_2.Position = UDim2.new(-0.0367908813, 0, 0.790123463, 0)
 TextLabel_2.Size = UDim2.new(0, 100, 0, 50)
 TextLabel_2.Font = Enum.Font.FredokaOne
-TextLabel_2.Text = "Version: 3.2"
+TextLabel_2.Text = "Version: 3.5"
 TextLabel_2.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_2.TextSize = 14.000
 Frame2.Name = "Frame2"
@@ -303,26 +305,26 @@ TextLabel_7.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_7.TextSize = 15.000
 TextLabel_7.TextXAlignment = Enum.TextXAlignment.Left
 TextLabel_7.TextYAlignment = Enum.TextYAlignment.Top
-local Settings_2 = Instance.new("Frame")
-Settings_2.Name = "Settings"
-Settings_2.Parent = Main
-Settings_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Settings_2.BackgroundTransparency = 0.6
-Settings_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
-Settings_2.BorderSizePixel = 0
-Settings_2.Position = UDim2.new(0.101707332, 0, 0.171977207, 0)
-Settings_2.Size = UDim2.new(0, 433, 0, 236)
-Settings_2.Visible = false
+local Console_2 = Instance.new("Frame")
+Console_2.Name = "Console"
+Console_2.Parent = Main
+Console_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Console_2.BackgroundTransparency = 0.6
+Console_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Console_2.BorderSizePixel = 0
+Console_2.Position = UDim2.new(0.101707332, 0, 0.171977207, 0)
+Console_2.Size = UDim2.new(0, 433, 0, 236)
+Console_2.Visible = false
 local UICorner_7 = Instance.new("UICorner")
-UICorner_7.Parent = Settings_2
+UICorner_7.Parent = Console_2
 local ConsoleBox = Instance.new("TextBox")
-ConsoleBox.Parent = Settings_2
+ConsoleBox.Parent = Console_2
 ConsoleBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 ConsoleBox.BackgroundTransparency = 0.2
 ConsoleBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
 ConsoleBox.BorderSizePixel = 0
 ConsoleBox.Position = UDim2.new(0.05, 0, 0.1, 0)
-ConsoleBox.Size = UDim2.new(0, 390, 0, 150)
+ConsoleBox.Size = UDim2.new(0.9, 0, 0.65, 0)
 ConsoleBox.Font = Enum.Font.Code
 ConsoleBox.Text = ""
 ConsoleBox.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -334,47 +336,69 @@ ConsoleBox.MultiLine = true
 ConsoleBox.ClearTextOnFocus = false
 local UICorner_Console = Instance.new("UICorner")
 UICorner_Console.Parent = ConsoleBox
-local ClearButton = Instance.new("TextButton")
-ClearButton.Parent = Settings_2
-ClearButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-ClearButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-ClearButton.BorderSizePixel = 0
-ClearButton.Position = UDim2.new(0.05, 0, 0.75, 0)
-ClearButton.Size = UDim2.new(0, 120, 0, 30)
-ClearButton.Font = Enum.Font.SourceSans
-ClearButton.Text = "Clear Console"
-ClearButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ClearButton.TextSize = 16
-local UICorner_Clear = Instance.new("UICorner")
-UICorner_Clear.Parent = ClearButton
-local CopyButton = Instance.new("TextButton")
-CopyButton.Parent = Settings_2
-CopyButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-CopyButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-CopyButton.BorderSizePixel = 0
-CopyButton.Position = UDim2.new(0.68, 0, 0.75, 0)
-CopyButton.Size = UDim2.new(0, 120, 0, 30)
-CopyButton.Font = Enum.Font.SourceSans
-CopyButton.Text = "Copy Console"
-CopyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CopyButton.TextSize = 16
-local UICorner_Copy = Instance.new("UICorner")
-UICorner_Copy.Parent = CopyButton
-ClearButton.MouseButton1Click:Connect(function()
+local buttons = {}
+local buttonWidth = 0.22 
+local spacing = 0.04 
+local function createButton(name, text, posX)
+    local button = Instance.new("TextButton")
+    button.Parent = Console_2
+    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    button.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    button.BorderSizePixel = 0
+    button.Position = UDim2.new(posX, 0, 0.8, 0)
+    button.Size = UDim2.new(buttonWidth, 0, 0.15, 0)
+    button.Font = Enum.Font.SourceSans
+    button.Text = text
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 16
+    local UICorner = Instance.new("UICorner")
+    UICorner.Parent = button
+    buttons[name] = button
+end
+createButton("Warn", "Warn", 0) 
+createButton("Error", "Error", buttonWidth + spacing)
+createButton("Output", "Output", 2 * (buttonWidth + spacing))
+createButton("All", "All", 3 * (buttonWidth + spacing)) 
+local logs = {}
+local filterType = "All"
+local function updateConsole()
     ConsoleBox.Text = ""
-end)
-CopyButton.MouseButton1Click:Connect(function()
-    setclipboard(ConsoleBox.Text)
-end)
+    for _, log in ipairs(logs) do
+        if filterType == "All" or log.type == filterType then
+            ConsoleBox.Text ..= (ConsoleBox.Text == "" and "" or "\n") .. log.text
+        end
+    end
+end
 local function appendConsole(msg, msgType)
     local prefix = "[INFO]"
+    local logType = "Output"
     if msgType == Enum.MessageType.MessageWarning then
         prefix = "[WARNING]"
+        logType = "Warn"
     elseif msgType == Enum.MessageType.MessageError then
         prefix = "[ERROR]"
+        logType = "Error"
     end
-    ConsoleBox.Text ..= (ConsoleBox.Text == "" and "" or "\n") .. string.format("%s %s", prefix, msg)
+    local formattedMsg = string.format("%s %s", prefix, msg)
+    table.insert(logs, { text = formattedMsg, type = logType })
+    updateConsole()
 end
+buttons.Warn.MouseButton1Click:Connect(function()
+    filterType = "Warn"
+    updateConsole()
+end)
+buttons.Error.MouseButton1Click:Connect(function()
+    filterType = "Error"
+    updateConsole()
+end)
+buttons.Output.MouseButton1Click:Connect(function()
+    filterType = "Output"
+    updateConsole()
+end)
+buttons.All.MouseButton1Click:Connect(function()
+    filterType = "All"
+    updateConsole()
+end)
 game:GetService("LogService").MessageOut:Connect(appendConsole)
 getgenv().rconsoleprint = function(msg)
     appendConsole(msg, Enum.MessageType.MessageOutput)
@@ -386,7 +410,8 @@ getgenv().rconsoleerror = function(msg)
     appendConsole(msg, Enum.MessageType.MessageError)
 end
 getgenv().rconsoleclear = function()
-    ConsoleBox.Text = ""
+    logs = {}
+    updateConsole()
 end
 local Executor_2 = Instance.new("Frame")
 Executor_2.Name = "Executor"
@@ -410,7 +435,7 @@ Code.Position = UDim2.new(0.014309573, 0, 0.0276296716, 0)
 Code.Size = UDim2.new(0, 419, 0, 183)  
 Code.Font = Enum.Font.SourceSans
 Code.PlaceholderColor3 = Color3.fromRGB(88, 88, 88)
-Code.PlaceholderText = "print(\"FrostWare 3.2\")"
+Code.PlaceholderText = "print(\"FrostWare 3.5\")"
 Code.Text = ""
 Code.TextColor3 = Color3.fromRGB(255, 255, 255)
 Code.TextSize = 14.000
@@ -473,37 +498,24 @@ TextLabel_9.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_9.BackgroundTransparency = 1.000
 TextLabel_9.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel_9.BorderSizePixel = 0
-TextLabel_9.Position = UDim2.new(-0.0282523707, 0, -0.0421940945, 0)
+TextLabel_9.Position = UDim2.new(0, 0, -0.0421940945, 0)
 TextLabel_9.Size = UDim2.new(0, 150, 0, 50)
 TextLabel_9.Font = Enum.Font.FredokaOne
 TextLabel_9.Text = "Developers:"
 TextLabel_9.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_9.TextSize = 23.000
-ImageLabel_2.Parent = Credits_2
-ImageLabel_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ImageLabel_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
-ImageLabel_2.BorderSizePixel = 0
-ImageLabel_2.Position = UDim2.new(0.0209753737, 0, 0.18140395, 0)
-ImageLabel_2.Size = UDim2.new(0, 50, 0, 50)
-ImageLabel_2.Image = "rbxassetid://18460454647"
-ImageLabel_3.Parent = Credits_2
-ImageLabel_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ImageLabel_3.BorderColor3 = Color3.fromRGB(0, 0, 0)
-ImageLabel_3.BorderSizePixel = 0
-ImageLabel_3.Position = UDim2.new(0.0209753737, 0, 0.438787907, 0)
-ImageLabel_3.Size = UDim2.new(0, 50, 0, 50)
 TextLabel_10.Parent = Credits_2
 TextLabel_10.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_10.BackgroundTransparency = 1.000
 TextLabel_10.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel_10.BorderSizePixel = 0
-TextLabel_10.Position = UDim2.new(0.0851695538, 0, 0.475216389, 0)
+TextLabel_10.Position = UDim2.new(0, 0, 0.175, 0)
 TextLabel_10.Size = UDim2.new(0, 421, 0, 32)
 TextLabel_10.ZIndex = 2
 TextLabel_10.Font = Enum.Font.SourceSansBold
-TextLabel_10.Text = "Designed,Scripted by Diet Coke"
-TextLabel_10.TextColor3 = Color3.fromRGB(3, 7, 255)
-TextLabel_10.TextSize = 29.000
+TextLabel_10.Text = "Designed, Scripted by Diet Coke"
+TextLabel_10.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel_10.TextSize = 20.000
 TextLabel_10.TextWrapped = true
 UICorner_14.Parent = TextLabel_10
 TextLabel_11.Parent = Credits_2
@@ -511,12 +523,12 @@ TextLabel_11.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_11.BackgroundTransparency = 1.000
 TextLabel_11.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel_11.BorderSizePixel = 0
-TextLabel_11.Position = UDim2.new(0.0205044299, 0, 0.217832416, 0)
+TextLabel_11.Position = UDim2.new(0, 0, 0.275, 0)
 TextLabel_11.Size = UDim2.new(0, 421, 0, 32)
 TextLabel_11.Font = Enum.Font.SourceSansBold
-TextLabel_11.Text = "Designed,Scripted by I4KC"
-TextLabel_11.TextColor3 = Color3.fromRGB(0, 255, 255)
-TextLabel_11.TextSize = 29.000
+TextLabel_11.Text = "Designed, Scripted by I4KC"
+TextLabel_11.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel_11.TextSize = 20.000
 TextLabel_11.TextWrapped = true
 UICorner_15.Parent = TextLabel_11
 TextLabel_12.Parent = Credits_2
@@ -524,25 +536,25 @@ TextLabel_12.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_12.BackgroundTransparency = 1.000
 TextLabel_12.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel_12.BorderSizePixel = 0
-TextLabel_12.Position = UDim2.new(0.31639722, 0, 0.434599161, 0)
-TextLabel_12.Size = UDim2.new(0, 200, 0, 50)
+TextLabel_12.Position = UDim2.new(0, 0, 0.375, 0)
+TextLabel_12.Size = UDim2.new(0, 421, 0, 32)
 TextLabel_12.Font = Enum.Font.SourceSansBold
 TextLabel_12.Text = "W Dev"
 TextLabel_12.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_12.TextSize = 71.000
+TextLabel_12.TextSize = 20.000
 TextLabel_12.TextTransparency = 0.990
 TextLabel_13.Parent = Credits_2
 TextLabel_13.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_13.BackgroundTransparency = 1.000
 TextLabel_13.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel_13.BorderSizePixel = 0
-TextLabel_13.Position = UDim2.new(0.0851695538, 0, 0.475216389, 0)
+TextLabel_13.Position = UDim2.new(0, 0, 0.475, 0)
 TextLabel_13.Size = UDim2.new(0, 421, 0, 32)
 TextLabel_13.ZIndex = 2
 TextLabel_13.Font = Enum.Font.SourceSansBold
-TextLabel_13.Text = "Designed,Scripted by Diet Coke"
-TextLabel_13.TextColor3 = Color3.fromRGB(3, 7, 255)
-TextLabel_13.TextSize = 29.000
+TextLabel_13.Text = "Designed, Scripted by Diet Coke"
+TextLabel_13.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel_13.TextSize = 20.000
 TextLabel_13.TextWrapped = true
 UICorner_16.Parent = TextLabel_13
 TextLabel_14.Parent = Credits_2
@@ -550,14 +562,27 @@ TextLabel_14.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_14.BackgroundTransparency = 1.000
 TextLabel_14.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel_14.BorderSizePixel = 0
-TextLabel_14.Position = UDim2.new(-0.0580175109, 0, 0.643992722, 0)
+TextLabel_14.Position = UDim2.new(0, 0, 0.575, 0)
 TextLabel_14.Size = UDim2.new(0, 421, 0, 32)
 TextLabel_14.ZIndex = 2
 TextLabel_14.Font = Enum.Font.SourceSansBold
 TextLabel_14.Text = "Main Dev: Diet Coke"
-TextLabel_14.TextColor3 = Color3.fromRGB(3, 7, 255)
-TextLabel_14.TextSize = 29.000
+TextLabel_14.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel_14.TextSize = 20.000
 TextLabel_14.TextWrapped = true
+TextLabel_UIUX = Instance.new("TextLabel")
+TextLabel_UIUX.Parent = Credits_2
+TextLabel_UIUX.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel_UIUX.BackgroundTransparency = 1  
+TextLabel_UIUX.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel_UIUX.BorderSizePixel = 0
+TextLabel_UIUX.Position = UDim2.new(0, 0, 0.675, 0)
+TextLabel_UIUX.Size = UDim2.new(0, 421, 0, 32)
+TextLabel_UIUX.Font = Enum.Font.SourceSansBold
+TextLabel_UIUX.Text = "UI/UX: #codertoolroblox"
+TextLabel_UIUX.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel_UIUX.TextSize = 20.000
+TextLabel_UIUX.TextWrapped = true
 UICorner_17.Parent = TextLabel_14
 OpenButton.Name = "Open Button"
 OpenButton.Parent = ScreenGui
@@ -576,7 +601,7 @@ local function NVXVLM()
 		script.Parent.Parent.Parent.Credits.Visible = false
 		script.Parent.Parent.Parent.Executor.Visible = true
 		script.Parent.Parent.Parent.Home.Visible = false
-		script.Parent.Parent.Parent.Settings.Visible = false
+		script.Parent.Parent.Parent.Console.Visible = false
 	end)
 end
 coroutine.wrap(NVXVLM)()
@@ -586,17 +611,17 @@ local function ZRKA()
 		script.Parent.Parent.Parent.Credits.Visible = false
 		script.Parent.Parent.Parent.Executor.Visible = false
 		script.Parent.Parent.Parent.Home.Visible = true
-		script.Parent.Parent.Parent.Settings.Visible = false
+		script.Parent.Parent.Parent.Console.Visible = false
 	end)
 end
 coroutine.wrap(ZRKA)()
 local function JRWL() 
-	local script = Instance.new('LocalScript', Settings)
+	local script = Instance.new('LocalScript', Console)
 	script.Parent.MouseButton1Click:Connect(function()
 		script.Parent.Parent.Parent.Credits.Visible = false
 		script.Parent.Parent.Parent.Executor.Visible = false
 		script.Parent.Parent.Parent.Home.Visible = false
-		script.Parent.Parent.Parent.Settings.Visible = true
+		script.Parent.Parent.Parent.Console.Visible = true
 	end)
 end
 coroutine.wrap(JRWL)()
@@ -606,7 +631,7 @@ local function MXDI()
 		script.Parent.Parent.Parent.Credits.Visible = true
 		script.Parent.Parent.Parent.Executor.Visible = false
 		script.Parent.Parent.Parent.Home.Visible = false
-		script.Parent.Parent.Parent.Settings.Visible = false
+		script.Parent.Parent.Parent.Console.Visible = false
 	end)
 end
 coroutine.wrap(MXDI)()
@@ -650,12 +675,6 @@ local function PEWWH()
     end)
 end
 coroutine.wrap(PEWWH)()
-local function SUKHB() 
-	local script = Instance.new('LocalScript', Main)
-	task.wait(2)
-	warn("if you got any errors don't mind the errors they're from FrostWare ui")
-end
-coroutine.wrap(SUKHB)()
 local function PHFF() 
 	local script = Instance.new('LocalScript', Clear)
 	local TextBox = script.Parent.Parent
