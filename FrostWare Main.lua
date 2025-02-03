@@ -1,9 +1,7 @@
 repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
-
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local userId = player and player.UserId
-
+local player = Players.LocalPlayer  
+local userId = player.UserId
 local content, isReady = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 local Name = player.DisplayName
 local TweenService = game:GetService("TweenService")
@@ -280,138 +278,131 @@ tween:Play()
 user.Name = "user"
 user.Parent = Home
 user.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-user.BackgroundTransparency = 0.600
-user.BorderColor3 = Color3.fromRGB(0, 0, 0)
+user.BackgroundTransparency = 0.6
 user.BorderSizePixel = 0
-user.Position = UDim2.new(-0.000198469977, 0, -0.00264949235, 0)
+user.Position = UDim2.new(-0.0002, 0, -0.0026, 0)
 user.Size = UDim2.new(0, 220, 0, 75)
 user.ZIndex = 2
+local User = Instance.new("ImageLabel")
 User.Name = "User"
 User.Parent = user
-User.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-User.BackgroundTransparency = 1.000
-User.BorderColor3 = Color3.fromRGB(0, 0, 0)
-User.BorderSizePixel = 0
-User.Position = UDim2.new(0.0581817627, 0, 0.094617106, 0)
+User.BackgroundTransparency = 1.0
+User.Position = UDim2.new(0.058, 0, 0.094, 0)
 User.Size = UDim2.new(0, 47, 0, 59)
 User.ZIndex = 2
 User.Image = content
+local UserText = Instance.new("TextLabel")
 UserText.Name = "UserText"
 UserText.Parent = User
-UserText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-UserText.BackgroundTransparency = 1.000
-UserText.BorderColor3 = Color3.fromRGB(0, 0, 0)
-UserText.BorderSizePixel = 0
-UserText.Position = UDim2.new(1.11682653, 0, 0.213267952, 0)
+UserText.BackgroundTransparency = 1.0
+UserText.Position = UDim2.new(1.116, 0, 0.213, 0)
 UserText.Size = UDim2.new(0, 155, 0, 35)
-UserText.ZIndex = 324234234
+UserText.ZIndex = 2
 UserText.Font = Enum.Font.Gotham
 UserText.Text = "  Welcome " .. Name .. " Thanks for using FrostWare!"
 UserText.TextColor3 = Color3.fromRGB(255, 255, 255)
-UserText.TextSize = 12.000
+UserText.TextSize = 12
 UserText.TextWrapped = true
+local UICorner_5 = Instance.new("UICorner")
 UICorner_5.Parent = User
+local Frame = Instance.new("Frame")
 Frame.Parent = user
 Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Frame.BackgroundTransparency = 0.400
-Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-Frame.BorderSizePixel = 0
-Frame.Position = UDim2.new(0.0140000004, 0, 0.0500000007, 0)
+Frame.BackgroundTransparency = 0.4
+Frame.Position = UDim2.new(0.014, 0, 0.05, 0)
 Frame.Size = UDim2.new(0, 67, 0, 67)
+local UICorner_6 = Instance.new("UICorner")
 UICorner_6.CornerRadius = UDim.new(1, 0)
 UICorner_6.Parent = Frame
+local Frame1 = Instance.new("Frame")
 Frame1.Name = "Frame1"
 Frame1.Parent = Home
 Frame1.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Frame1.BackgroundTransparency = 0.600
-Frame1.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame1.BackgroundTransparency = 0.6
 Frame1.BorderSizePixel = 0
-Frame1.Position = UDim2.new(-0.000198469977, 0, 0.313806206, 0)
+Frame1.Position = UDim2.new(-0.0002, 0, 0.313, 0)
 Frame1.Size = UDim2.new(0, 220, 0, 162)
 Frame1.ZIndex = 2
+local TextLabel_2 = Instance.new("TextLabel")
 TextLabel_2.Parent = Frame1
-TextLabel_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_2.BackgroundTransparency = 1.000
-TextLabel_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_2.BorderSizePixel = 0
-TextLabel_2.Position = UDim2.new(-0.0367908813, 0, 0.790123463, 0)
+TextLabel_2.BackgroundTransparency = 1.0
+TextLabel_2.Position = UDim2.new(0.008, 0, 0.79, 0)
 TextLabel_2.Size = UDim2.new(0, 100, 0, 50)
 TextLabel_2.Font = Enum.Font.FredokaOne
-TextLabel_2.Text = "Version: 2.657.603"
+TextLabel_2.Text = "Version: 2.4"
 TextLabel_2.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_2.TextSize = 14.000
+TextLabel_2.TextSize = 14
+local Frame2 = Instance.new("Frame")
 Frame2.Name = "Frame2"
 Frame2.Parent = Home
 Frame2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Frame2.BackgroundTransparency = 0.600
-Frame2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame2.BackgroundTransparency = 0.6
 Frame2.BorderSizePixel = 0
-Frame2.Position = UDim2.new(0.509348094, 0, -0.00264949235, 0)
+Frame2.Position = UDim2.new(0.509, 0, -0.0026, 0)
 Frame2.Size = UDim2.new(0, 212, 0, 236)
 Frame2.ZIndex = 2
-TextLabel_3.Parent = Frame2
-TextLabel_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_3.BackgroundTransparency = 1.000
-TextLabel_3.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_3.BorderSizePixel = 0
-TextLabel_3.Position = UDim2.new(-0.0610000007, 0, -0.0649999976, 0)
-TextLabel_3.Size = UDim2.new(0, 116, 0, 50)
-TextLabel_3.Font = Enum.Font.FredokaOne
-TextLabel_3.Text = "Features:"
-TextLabel_3.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_3.TextSize = 20.000
-TextLabel_4.Parent = Frame2
-TextLabel_4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_4.BackgroundTransparency = 1.000
-TextLabel_4.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_4.BorderSizePixel = 0
-TextLabel_4.Position = UDim2.new(0.0199999548, 0, 0.132000029, 0)
-TextLabel_4.Size = UDim2.new(0, 208, 0, 28)
-TextLabel_4.Font = Enum.Font.FredokaOne
-TextLabel_4.Text = "Executor with 100% UNC"
-TextLabel_4.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_4.TextSize = 20.000
-TextLabel_4.TextXAlignment = Enum.TextXAlignment.Left
-TextLabel_4.TextYAlignment = Enum.TextYAlignment.Top
-TextLabel_5.Parent = Frame2
-TextLabel_5.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_5.BackgroundTransparency = 1.000
-TextLabel_5.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_5.BorderSizePixel = 0
-TextLabel_5.Position = UDim2.new(0.0199999548, 0, 0.280305117, 0)
-TextLabel_5.Size = UDim2.new(0, 208, 0, 28)
-TextLabel_5.Font = Enum.Font.FredokaOne
-TextLabel_5.Text = "User friendly interface"
-TextLabel_5.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_5.TextSize = 20.000
-TextLabel_5.TextXAlignment = Enum.TextXAlignment.Left
-TextLabel_5.TextYAlignment = Enum.TextYAlignment.Top
-TextLabel_6.Parent = Frame2
-TextLabel_6.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_6.BackgroundTransparency = 1.000
-TextLabel_6.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_6.BorderSizePixel = 0
-TextLabel_6.Position = UDim2.new(0.0199999548, 0, 0.437084794, 0)
-TextLabel_6.Size = UDim2.new(0, 208, 0, 28)
-TextLabel_6.Font = Enum.Font.FredokaOne
-TextLabel_6.Text = "Smooth UI"
-TextLabel_6.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_6.TextSize = 20.000
-TextLabel_6.TextXAlignment = Enum.TextXAlignment.Left
-TextLabel_6.TextYAlignment = Enum.TextYAlignment.Top
-TextLabel_7.Parent = Frame2
-TextLabel_7.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_7.BackgroundTransparency = 1.000
-TextLabel_7.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_7.BorderSizePixel = 0
-TextLabel_7.Position = UDim2.new(0.0199999548, 0, 0.598101735, 0)
-TextLabel_7.Size = UDim2.new(0, 208, 0, 28)
-TextLabel_7.Font = Enum.Font.FredokaOne
-TextLabel_7.Text = "FPS: "
-TextLabel_7.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_7.TextSize = 15.000
-TextLabel_7.TextXAlignment = Enum.TextXAlignment.Left
-TextLabel_7.TextYAlignment = Enum.TextYAlignment.Top
+local function createTextLabel(parent, position, size, text, textSize)
+    local label = Instance.new("TextLabel")
+    label.Parent = parent
+    label.BackgroundTransparency = 1.0
+    label.Position = position
+    label.Size = size
+    label.Font = Enum.Font.FredokaOne
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = textSize
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    return label
+end
+createTextLabel(Frame2, UDim2.new(0.02, 0, 0.062, 0), UDim2.new(0, 116, 0, 50), "Features:", 20)
+createTextLabel(Frame2, UDim2.new(0.02, 0, 0.232, 0), UDim2.new(0, 208, 0, 28), "Executor with 100% UNC", 20) 
+createTextLabel(Frame2, UDim2.new(0.02, 0, 0.38, 0), UDim2.new(0, 208, 0, 28), "User friendly interface", 20) 
+createTextLabel(Frame2, UDim2.new(0.02, 0, 0.547, 0), UDim2.new(0, 208, 0, 28), "Smooth UI", 20) 
+local FPSLabel = createTextLabel(Frame2, UDim2.new(0.02, 0, 0.698, 0), UDim2.new(0, 208, 0, 28), "FPS: ", 15) 
+local TimeLabel = createTextLabel(Frame2, UDim2.new(0.02, 0, 0.8, 0), UDim2.new(0, 208, 0, 28), "TIME: ", 15) 
+local RunService = game:GetService("RunService")
+local lastTick = tick()
+local frameCount = 0
+RunService.RenderStepped:Connect(function()
+    frameCount = frameCount + 1
+    local currentTick = tick()
+    if currentTick - lastTick >= 1 then
+        FPSLabel.Text = "FPS: " .. frameCount
+        frameCount = 0
+        lastTick = currentTick
+    end
+end)
+local function UpdateLocalTime()
+    local date = os.date("*t")
+    local hour = date.hour % 24
+    local ampm = hour < 12 and "AM" or "PM"
+    local formattedTime = string.format("%02i:%02i:%02i %s", ((hour - 1) % 12) + 1, date.min, date.sec, ampm)
+    local formattedDate = string.format("%02d/%02d/%04d", date.day, date.month, date.year)
+    local LocalizationService = game:GetService("LocalizationService")
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    local regionCode = "Unknown"
+    local success, code = pcall(function()
+        return LocalizationService:GetCountryRegionForPlayerAsync(player)
+    end)
+    if success then
+        regionCode = code
+    end
+    TimeLabel.Text = formattedDate .. " - " .. formattedTime .. " [ " .. regionCode .. " ]"
+end
+spawn(function()
+    while true do
+        UpdateLocalTime()
+        game:GetService("RunService").RenderStepped:Wait()
+    end
+end)
+local line = Instance.new("Frame")
+line.Parent = Frame2
+line.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+line.BackgroundTransparency = 0
+line.Size = UDim2.new(0, 208, 0, 2)  
+line.Position = UDim2.new(0.02, 0, 0.698, 0)  
+line.ZIndex = 2
 local DexExplorerButton = Instance.new("TextButton")
 DexExplorerButton.Name = "DexExplorerButton"
 DexExplorerButton.Parent = Frame1
@@ -684,7 +675,7 @@ Code.Position = UDim2.new(0.09, 0, 0.027, 0)
 Code.Size = UDim2.new(0, 389, 0, 160)
 Code.Font = Enum.Font.SourceSans
 Code.PlaceholderColor3 = Color3.fromRGB(88, 88, 88)
-Code.PlaceholderText = 'print("FrostWare 2.657.603")'
+Code.PlaceholderText = 'print("FrostWare 2.4")'
 Code.Text = ""
 Code.TextColor3 = Color3.fromRGB(255, 255, 255)
 Code.TextSize = 12
