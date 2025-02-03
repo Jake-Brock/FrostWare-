@@ -1,6 +1,9 @@
+repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
+
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer  
-local userId = player.UserId
+local player = Players.LocalPlayer
+local userId = player and player.UserId
+
 local content, isReady = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 local Name = player.DisplayName
 local TweenService = game:GetService("TweenService")
