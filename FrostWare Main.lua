@@ -2,7 +2,7 @@ repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlaye
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer  
 local userId = player.UserId
-local content, isReady = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+local content = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 local Name = player.DisplayName
 local TweenService = game:GetService("TweenService")
 local ScreenGui = Instance.new("ScreenGui")
@@ -463,21 +463,60 @@ end)
 local SimpleSpyButton = Instance.new("TextButton")
 SimpleSpyButton.Name = "SimpleSpyButton"
 SimpleSpyButton.Parent = Frame1
-SimpleSpyButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+SimpleSpyButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 SimpleSpyButton.BackgroundTransparency = 0.400
 SimpleSpyButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 SimpleSpyButton.BorderSizePixel = 0
-SimpleSpyButton.Position = UDim2.new(0.55, 0, 0.1, 0) 
-SimpleSpyButton.Size = UDim2.new(0, 80, 0, 15) 
+SimpleSpyButton.Position = UDim2.new(0.55, 0, 0.1, 0)
+SimpleSpyButton.Size = UDim2.new(0, 80, 0, 15)
 SimpleSpyButton.Text = "Simple Spy"
 SimpleSpyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-SimpleSpyButton.TextSize = 13 
-SimpleSpyButton.Font = Enum.Font.Bangers 
-SimpleSpyButton.TextXAlignment = Enum.TextXAlignment.Right 
+SimpleSpyButton.TextSize = 13
+SimpleSpyButton.Font = Enum.Font.Bangers
+SimpleSpyButton.TextXAlignment = Enum.TextXAlignment.Right
 SimpleSpyButton.ZIndex = 3
 UICorner_10.Parent = SimpleSpyButton
 SimpleSpyButton.MouseButton1Click:Connect(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/realredz/SimpleSpy/refs/heads/main/Mobile.lua"))()
+end)
+local CheckUNCButton = Instance.new("TextButton")
+CheckUNCButton.Name = "CheckUNCButton"
+CheckUNCButton.Parent = Frame1
+CheckUNCButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+CheckUNCButton.BackgroundTransparency = 0.400
+CheckUNCButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+CheckUNCButton.BorderSizePixel = 0
+CheckUNCButton.Position = UDim2.new(0.55, 0, 0.3, 0)
+CheckUNCButton.Size = UDim2.new(0, 80, 0, 15)
+CheckUNCButton.Text = "Check UNC"
+CheckUNCButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CheckUNCButton.TextSize = 13
+CheckUNCButton.Font = Enum.Font.Bangers
+CheckUNCButton.TextXAlignment = Enum.TextXAlignment.Right
+CheckUNCButton.ZIndex = 3
+UICorner_11.Parent = CheckUNCButton
+CheckUNCButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/unified-naming-convention/NamingStandard/main/UNCCheckEnv.lua", true))()
+    game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.F9, false, game)
+end)
+local DiscordButton = Instance.new("TextButton")
+DiscordButton.Name = "DiscordButton"
+DiscordButton.Parent = Frame1
+DiscordButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+DiscordButton.BackgroundTransparency = 0.400
+DiscordButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+DiscordButton.BorderSizePixel = 0
+DiscordButton.Position = UDim2.new(0.55, 0, 0.5, 0)
+DiscordButton.Size = UDim2.new(0, 80, 0, 15)
+DiscordButton.Text = "Discord"
+DiscordButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+DiscordButton.TextSize = 13
+DiscordButton.Font = Enum.Font.Bangers
+DiscordButton.TextXAlignment = Enum.TextXAlignment.Right
+DiscordButton.ZIndex = 3
+UICorner_12.Parent = DiscordButton
+DiscordButton.MouseButton1Click:Connect(function()
+    setclipboard("discord.gg/getfrost")
 end)
 local VerticalLine = Instance.new("Frame")
 VerticalLine.Name = "VerticalLine"
@@ -498,14 +537,17 @@ Console_2.Size = UDim2.new(0, 433, 0, 236)
 Console_2.Visible = false
 local UICorner_7 = Instance.new("UICorner")
 UICorner_7.Parent = Console_2
-local ConsoleBox = Instance.new("TextBox")
-ConsoleBox.Parent = Console_2
-ConsoleBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-ConsoleBox.BackgroundTransparency = 0.2
-ConsoleBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
-ConsoleBox.BorderSizePixel = 0
-ConsoleBox.Position = UDim2.new(0.05, 0, 0.1, 0)
-ConsoleBox.Size = UDim2.new(0.9, 0, 0.65, 0)
+local ScrollingFrame = Instance.new("ScrollingFrame")
+ScrollingFrame.Parent = Console_2
+ScrollingFrame.Size = UDim2.new(0.9, 0, 0.7, 0)
+ScrollingFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
+ScrollingFrame.BackgroundTransparency = 1
+ScrollingFrame.ScrollBarThickness = 5
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 1, 0)
+local ConsoleBox = Instance.new("TextLabel")
+ConsoleBox.Parent = ScrollingFrame
+ConsoleBox.Size = UDim2.new(1, 0, 1, 0)
+ConsoleBox.BackgroundTransparency = 1
 ConsoleBox.Font = Enum.Font.Code
 ConsoleBox.Text = ""
 ConsoleBox.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -513,11 +555,7 @@ ConsoleBox.TextSize = 14
 ConsoleBox.TextWrapped = true
 ConsoleBox.TextXAlignment = Enum.TextXAlignment.Left
 ConsoleBox.TextYAlignment = Enum.TextYAlignment.Top
-ConsoleBox.MultiLine = true
-ConsoleBox.ClearTextOnFocus = false
-ConsoleBox.RichText = true  
-local UICorner_Console = Instance.new("UICorner")
-UICorner_Console.Parent = ConsoleBox
+ConsoleBox.RichText = true
 local buttons = {}
 local buttonWidth = 0.14  
 local spacing = 0.03  
@@ -528,8 +566,8 @@ local function createButton(name, text, posX)
     button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     button.BorderColor3 = Color3.fromRGB(0, 0, 0)
     button.BorderSizePixel = 0
-    button.Position = UDim2.new(posX / totalWidth, 0, 0.8, 0)  
-    button.Size = UDim2.new(buttonWidth / 0.9, 0, 0.15, 0)  
+    button.Position = UDim2.new(posX / totalWidth, 0, 0.85, 0)  
+    button.Size = UDim2.new(buttonWidth / 0.9, 0, 0.12, 0)  
     button.Font = Enum.Font.SourceSans
     button.Text = text
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -553,6 +591,8 @@ local function updateConsole()
             ConsoleBox.Text ..= (ConsoleBox.Text == "" and "" or "\n") .. log.text
         end
     end
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, ConsoleBox.TextBounds.Y + 20)
+    ScrollingFrame.CanvasPosition = Vector2.new(0, ScrollingFrame.CanvasSize.Y.Offset)
 end
 local function appendConsole(msg, msgType)
     local prefix = "[INFO]:"
