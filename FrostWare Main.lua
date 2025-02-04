@@ -2,6 +2,8 @@ repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlaye
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer  
 local userId = player.UserId
+local Search = Instance.new("ImageButton")
+local Search_2 = Instance.new("Frame")
 local content = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 local Name = player.DisplayName
 local TweenService = game:GetService("TweenService")
@@ -275,6 +277,124 @@ local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection
 local tween = TweenService:Create(Main, tweenInfo, {Position = goalPosition})
 Main.Position = startPosition  
 tween:Play()
+Search.Name = "Search"
+Search.Parent = Side
+Search.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Search.BackgroundTransparency = 1.000
+Search.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Search.BorderSizePixel = 0
+Search.Position = UDim2.new(0.1, 0, 0.80, 0)
+Search.Size = UDim2.new(0, 28, 0, 28)
+Search.Image = "http://www.roblox.com/asset/?id=79275007433546"
+local function createUICorner(parent, radius)
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, radius)
+	corner.Parent = parent
+end
+Search_2.Name = "Search" 
+Search_2.Parent = Main 
+Search_2.BackgroundColor3 = Color3.fromRGB(30, 30, 30) 
+Search_2.BackgroundTransparency = 0.2 
+Search_2.BorderSizePixel = 0 
+Search_2.Position = UDim2.new(0.101707332, 0, 0.171977207, 0)
+Search_2.Size = UDim2.new(0, 433, 0, 236)
+Search_2.Visible = false
+createUICorner(Search_2, 10)
+local SearchBox = Instance.new("TextBox") 
+SearchBox.Parent = Search_2 
+SearchBox.Size = UDim2.new(1, 0, 0, 35) 
+SearchBox.Position = UDim2.new(0, 0, 0, 0) 
+SearchBox.PlaceholderText = "Enter Name Game" 
+SearchBox.Font = Enum.Font.SourceSansBold 
+SearchBox.TextSize = 18 
+SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255) 
+SearchBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50) 
+SearchBox.BorderSizePixel = 0 
+SearchBox.TextXAlignment = Enum.TextXAlignment.Left 
+SearchBox.Text = "" 
+createUICorner(SearchBox, 8)
+local SearchResults = Instance.new("ScrollingFrame") 
+SearchResults.Parent = Search_2 
+SearchResults.Size = UDim2.new(1, 0, 1, -45) 
+SearchResults.Position = UDim2.new(0, 0, 0, 40) 
+SearchResults.CanvasSize = UDim2.new(0, 0, 2, 0) 
+SearchResults.ScrollBarThickness = 4 
+SearchResults.BackgroundTransparency = 1 
+SearchResults.ClipsDescendants = true
+local UIListLayout = Instance.new("UIListLayout") 
+UIListLayout.Parent = SearchResults 
+UIListLayout.Padding = UDim.new(0, 6) 
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+SearchBox.FocusLost:Connect(function(enterPressed) 
+	if not enterPressed then return end 
+	local httpservice = game:GetService("HttpService") 
+	local searchedquery = SearchBox.Text
+	local page = 1
+	local yOffset = 0 
+	for _, v in pairs(SearchResults:GetChildren()) do
+		if v:IsA("Frame") then v:Destroy() end
+	end
+	if not SearchResults:IsA("ScrollingFrame") then return end
+	SearchResults.CanvasSize = UDim2.new(0, 0, 0, 0) 
+	while true do
+		local response = request({
+			Url = "https://scriptblox.com/api/script/search?q=" .. httpservice:UrlEncode(searchedquery) .. "&max=5&mode=free&page=" .. page,
+			Method = "GET"
+		})
+		local decoded = httpservice:JSONDecode(response.Body)
+		local scripts = decoded.result.scripts
+		if #scripts == 0 then break end 
+		for _, script in pairs(scripts) do
+			local ScriptBox = Instance.new("Frame")
+			ScriptBox.Parent = SearchResults
+			ScriptBox.Size = UDim2.new(1, -10, 0, 30) 
+			ScriptBox.Position = UDim2.new(0, 0, 0, yOffset) 
+			ScriptBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+			ScriptBox.BorderSizePixel = 0
+			createUICorner(ScriptBox, 6)
+			local CopyButton = Instance.new("TextButton")
+			CopyButton.Parent = ScriptBox
+			CopyButton.Size = UDim2.new(0.12, 0, 0.7, 0)
+			CopyButton.Position = UDim2.new(0.70, 0, 0.15, 0) 
+			CopyButton.Text = "📋"
+			CopyButton.TextSize = 10
+			CopyButton.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
+			CopyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+			CopyButton.Font = Enum.Font.SourceSansBold
+			createUICorner(CopyButton, 6)
+			CopyButton.MouseButton1Click:Connect(function()
+				setclipboard(script.script)
+			end)
+			local ExecuteButton = Instance.new("TextButton")
+			ExecuteButton.Parent = ScriptBox
+			ExecuteButton.Size = UDim2.new(0.12, 0, 0.7, 0)
+			ExecuteButton.Position = UDim2.new(0.85, 0, 0.15, 0) 
+			ExecuteButton.Text = "▶"
+			ExecuteButton.TextSize = 10
+			ExecuteButton.BackgroundColor3 = Color3.fromRGB(34, 139, 34)
+			ExecuteButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+			ExecuteButton.Font = Enum.Font.SourceSansBold
+			createUICorner(ExecuteButton, 6)
+			ExecuteButton.MouseButton1Click:Connect(function()
+				loadstring(script.script)()
+			end)
+			local ScriptName = Instance.new("TextLabel")
+			ScriptName.Parent = ScriptBox
+			ScriptName.Size = UDim2.new(0.65, -5, 1, 0) 
+			ScriptName.Position = UDim2.new(0, 5, 0, 0) 
+			ScriptName.Text = "📜 " .. script.title
+			ScriptName.TextSize = 12
+			ScriptName.Font = Enum.Font.SourceSansBold
+			ScriptName.TextColor3 = Color3.fromRGB(255, 255, 255)
+			ScriptName.BackgroundTransparency = 1
+			ScriptName.TextXAlignment = Enum.TextXAlignment.Left
+			ScriptName.TextTruncate = Enum.TextTruncate.AtEnd 
+			yOffset = yOffset + 35 
+		end
+		SearchResults.CanvasSize = UDim2.new(0, 0, 0, yOffset) 
+		page = page + 1
+	end
+end)
 user.Name = "user"
 user.Parent = Home
 user.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -439,7 +559,7 @@ NamelessAdminButton.TextXAlignment = Enum.TextXAlignment.Left
 NamelessAdminButton.ZIndex = 3
 UICorner_8.Parent = NamelessAdminButton
 NamelessAdminButton.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/main/Source'))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/101iii101/file/refs/heads/main/Nameless%20admin%20Perm.txt"))()
 end)
 local InfinityYieldButton = Instance.new("TextButton")
 InfinityYieldButton.Name = "InfinityYieldButton"
@@ -497,7 +617,6 @@ CheckUNCButton.ZIndex = 3
 UICorner_11.Parent = CheckUNCButton
 CheckUNCButton.MouseButton1Click:Connect(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/unified-naming-convention/NamingStandard/main/UNCCheckEnv.lua", true))()
-    game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.F9, false, game)
 end)
 local DiscordButton = Instance.new("TextButton")
 DiscordButton.Name = "DiscordButton"
@@ -895,9 +1014,21 @@ local function NVXVLM()
 		script.Parent.Parent.Parent.Home.Visible = false
 		script.Parent.Parent.Parent.Console.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = false
+		script.Parent.Parent.Parent.Search.Visible = false
 	end)
 end
 coroutine.wrap(NVXVLM)()
+local function JRLI() 
+	local script = Instance.new('LocalScript', Search)
+	script.Parent.MouseButton1Click:Connect(function()
+		script.Parent.Parent.Parent.Credits.Visible = false
+		script.Parent.Parent.Parent.Executor.Visible = false
+		script.Parent.Parent.Parent.Home.Visible = false
+		script.Parent.Parent.Parent.Search.Visible = true
+		script.Parent.Parent.Parent.Settings.Visible = false
+	end)
+end
+coroutine.wrap(JRLI)()
 local function ZRKA() 
 	local script = Instance.new('LocalScript', home)
 	script.Parent.MouseButton1Click:Connect(function()
@@ -906,6 +1037,7 @@ local function ZRKA()
 		script.Parent.Parent.Parent.Home.Visible = true
 		script.Parent.Parent.Parent.Console.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = false
+		script.Parent.Parent.Parent.Search.Visible = false
 	end)
 end
 coroutine.wrap(ZRKA)()
@@ -917,6 +1049,7 @@ local function JRWL()
 		script.Parent.Parent.Parent.Home.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = false
 		script.Parent.Parent.Parent.Console.Visible = true
+		script.Parent.Parent.Parent.Search.Visible = false
 	end)
 end
 coroutine.wrap(JRWL)()
@@ -926,6 +1059,7 @@ local function JRL()
 		script.Parent.Parent.Parent.Credits.Visible = false
 		script.Parent.Parent.Parent.Executor.Visible = false
 		script.Parent.Parent.Parent.Home.Visible = false
+		script.Parent.Parent.Parent.Search.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = true
 	end)
 end
@@ -938,6 +1072,7 @@ local function MXDI()
 		script.Parent.Parent.Parent.Home.Visible = false
 		script.Parent.Parent.Parent.Console.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = false
+		script.Parent.Parent.Parent.Search.Visible = false
 	end)
 end
 coroutine.wrap(MXDI)()
