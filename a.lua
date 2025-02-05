@@ -254,7 +254,7 @@ else
 
     local Succ = pcall(function()
 
-      setclipboard(KeySys:GetKeyLink())
+      setclipboard(KeySys:GetKeyLink("1096"))
 
     end)
 
