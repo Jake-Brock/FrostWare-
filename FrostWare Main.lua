@@ -416,11 +416,15 @@ UserText.BackgroundTransparency = 1.0
 UserText.Position = UDim2.new(1.116, 0, 0.213, 0)
 UserText.Size = UDim2.new(0, 155, 0, 35)
 UserText.ZIndex = 2
-UserText.Font = Enum.Font.LuckiestGuy 
-UserText.Text = "Welcome " .. Name .. " Thanks for using FrostWare!"
+UserText.Font = Enum.Font.LuckiestGuy
+local displayName = Name
+if #Name > 3 then
+    displayName = string.sub(Name, 1, 3) .. "***"
+end
+UserText.Text = "Welcome " .. displayName .. "\nThanks for using FrostWare!"  
 UserText.TextColor3 = Color3.fromRGB(255, 255, 255)
-UserText.TextSize = 7 
-UserText.TextWrapped = false
+UserText.TextSize = 10 
+UserText.TextWrapped = true  
 UserText.TextXAlignment = Enum.TextXAlignment.Left
 local UICorner_5 = Instance.new("UICorner")
 UICorner_5.Parent = User
@@ -472,12 +476,12 @@ local function createTextLabel(parent, position, size, text, textSize)
     label.TextXAlignment = Enum.TextXAlignment.Left
     return label
 end
-createTextLabel(Frame2, UDim2.new(0.02, 0, 0.062, 0), UDim2.new(0, 116, 0, 50), "Features:", 20)
-createTextLabel(Frame2, UDim2.new(0.02, 0, 0.232, 0), UDim2.new(0, 208, 0, 28), "Executor with 100% UNC", 20) 
-createTextLabel(Frame2, UDim2.new(0.02, 0, 0.38, 0), UDim2.new(0, 208, 0, 28), "User friendly interface", 20) 
-createTextLabel(Frame2, UDim2.new(0.02, 0, 0.547, 0), UDim2.new(0, 208, 0, 28), "Smooth UI", 20) 
-local FPSLabel = createTextLabel(Frame2, UDim2.new(0.02, 0, 0.698, 0), UDim2.new(0, 208, 0, 28), "FPS: ", 15) 
-local TimeLabel = createTextLabel(Frame2, UDim2.new(0.02, 0, 0.8, 0), UDim2.new(0, 208, 0, 28), "TIME: ", 15) 
+createTextLabel(Frame2, UDim2.new(0.02, 0, 0.062 * 1.3 * 2.60, 0), UDim2.new(0, 116, 0, 50), "Features:", 15)
+createTextLabel(Frame2, UDim2.new(0.02, 0, 0.232 * 1.3 * 1.30, 0), UDim2.new(0, 208, 0, 28), "Executor with 100% UNC", 15)
+createTextLabel(Frame2, UDim2.new(0.02, 0, 0.38 * 1.3 * 1.03 * 1.05, 0), UDim2.new(0, 208, 0, 28), "User friendly interface", 15)
+createTextLabel(Frame2, UDim2.new(0.02, 0, 0.547 * 1.3 * 1.03, 0), UDim2.new(0, 208, 0, 28), "Smooth UI", 15)
+local FPSLabel = createTextLabel(Frame2, UDim2.new(0.02, 0, 0.698 * 1.3 * 0.90 * 1.05, 0), UDim2.new(0, 208, 0, 28), "FPS: ", 15)
+local TimeLabel = createTextLabel(Frame2, UDim2.new(0.02, 0, 0.8 * 1.3 * 0.97 * 0.97, 0), UDim2.new(0, 208, 0, 28), "TIME: ", 15)
 local RunService = game:GetService("RunService")
 local lastTick = tick()
 local frameCount = 0
