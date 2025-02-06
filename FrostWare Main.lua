@@ -1,4 +1,3 @@
-repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer  
 local userId = player.UserId
@@ -17,7 +16,7 @@ local UICorner_2 = Instance.new("UICorner")
 local home = Instance.new("ImageButton")
 local Executor = Instance.new("ImageButton")
 local Console = Instance.new("ImageButton")
-local Credits = Instance.new("ImageButton")
+local AI = Instance.new("ImageButton")
 local Setting = Instance.new("ImageButton")  
 local Top = Instance.new("Frame")
 local UICorner_3 = Instance.new("UICorner")
@@ -53,7 +52,7 @@ local UICorner_10 = Instance.new("UICorner")
 local UICorner_11 = Instance.new("UICorner")
 local Paste = Instance.new("TextButton")
 local UICorner_12 = Instance.new("UICorner")
-local Credits_2 = Instance.new("Frame")
+local AI_2 = Instance.new("Frame")
 local UICorner_13 = Instance.new("UICorner")
 local TextLabel_9 = Instance.new("TextLabel")
 local ImageLabel_2 = Instance.new("ImageLabel")
@@ -83,7 +82,7 @@ UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = Main
 Side.Name = "Side"
 Side.Parent = Main
-Side.BackgroundColor3 = Color3.fromRGB(30, 30, 30) 
+Side.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
 Side.BackgroundTransparency = 1
 Side.Size = UDim2.new(0, 50, 1, -40)
 Side.Position = UDim2.new(0, 5, 0, 35)
@@ -106,23 +105,23 @@ Console.Name = "Console"
 Console.Parent = Side
 Console.Position = UDim2.new(0.1, 0, 0.35, 0)
 Console.Image = "http://www.roblox.com/asset/?id=119011453171150"
-Credits = home:Clone()
-Credits.Name = "Credits"
-Credits.Parent = Side
-Credits.Position = UDim2.new(0.1, 0, 0.5, 0)
-Credits.Image = "rbxassetid://138073973227244"
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:FindFirstChildOfClass("Humanoid")
+AI = home:Clone()
+AI.Name = "AI"
+AI.Parent = Side
+AI.Position = UDim2.new(0.1, 0, 0.5, 0)
+AI.Image = "rbxassetid://85267769704392"
 Settings_2.Name = "Settings"
 Settings_2.Parent = Main
 Settings_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Settings_2.BackgroundTransparency = 0.6
 Settings_2.BorderSizePixel = 0
-Settings_2.Position = UDim2.new(0.101707332, 0, 0.171977207, 0)
+Settings_2.Position = UDim2.new(0.101, 0, 0.172, 0)
 Settings_2.Size = UDim2.new(0, 433, 0, 236)
 Settings_2.Visible = false
-WalkSpeedBox = Instance.new("TextBox")
+local UICorner_Settings = Instance.new("UICorner")
+UICorner_Settings.CornerRadius = UDim.new(0, 10)
+UICorner_Settings.Parent = Settings_2
+local WalkSpeedBox = Instance.new("TextBox")
 WalkSpeedBox.Parent = Settings_2
 WalkSpeedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 WalkSpeedBox.Size = UDim2.new(0, 160, 0, 30)
@@ -132,9 +131,10 @@ WalkSpeedBox.PlaceholderText = "Enter WalkSpeed"
 WalkSpeedBox.Text = ""
 WalkSpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 WalkSpeedBox.TextSize = 16
-UICorner_Walk = Instance.new("UICorner")
+local UICorner_Walk = Instance.new("UICorner")
+UICorner_Walk.CornerRadius = UDim.new(0, 8)
 UICorner_Walk.Parent = WalkSpeedBox
-JumpPowerBox = Instance.new("TextBox")
+local JumpPowerBox = Instance.new("TextBox")
 JumpPowerBox.Parent = Settings_2
 JumpPowerBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 JumpPowerBox.Size = UDim2.new(0, 160, 0, 30)
@@ -144,14 +144,15 @@ JumpPowerBox.PlaceholderText = "Enter JumpPower"
 JumpPowerBox.Text = ""
 JumpPowerBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 JumpPowerBox.TextSize = 16
-UICorner_Jump = Instance.new("UICorner")
+local UICorner_Jump = Instance.new("UICorner")
+UICorner_Jump.CornerRadius = UDim.new(0, 8)
 UICorner_Jump.Parent = JumpPowerBox
 local Line = Instance.new("Frame")
 Line.Parent = Settings_2
 Line.Size = UDim2.new(0, 2, 1, 0)
 Line.Position = UDim2.new(0.5, -1, 0, 0)
 Line.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-FPSButton = Instance.new("TextButton")
+local FPSButton = Instance.new("TextButton")
 FPSButton.Parent = Settings_2
 FPSButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 FPSButton.Size = UDim2.new(0, 160, 0, 30)
@@ -160,63 +161,73 @@ FPSButton.Font = Enum.Font.SourceSansBold
 FPSButton.Text = "FPS: OFF"
 FPSButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 FPSButton.TextSize = 16
-UICorner_FPS = Instance.new("UICorner")
+local UICorner_FPS = Instance.new("UICorner")
+UICorner_FPS.CornerRadius = UDim.new(0, 8)
 UICorner_FPS.Parent = FPSButton
-local OpenButton = Instance.new("ImageButton")
-OpenButton.Name = "Open Button"
-OpenButton.Parent = ScreenGui
-OpenButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-OpenButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-OpenButton.BorderSizePixel = 0
-OpenButton.Position = UDim2.new(0.472801805, 0, 0.0164237954 - 0.14, 0)  
-OpenButton.Size = UDim2.new(0, 50, 0, 50)
-OpenButton.Visible = true
-OpenButton.Image = "rbxassetid://114936734174789" 
-local UICorner_18 = Instance.new("UICorner")
-UICorner_18.Parent = OpenButton
-local shapeSelection = "Circle" 
-local function updateButtonShape()
-    if shapeSelection == "Circle" then
-        UICorner_18.CornerRadius = UDim.new(1, 0) 
-        OpenButton.Image = "rbxassetid://114936734174789" 
-    elseif shapeSelection == "Square" then
-        UICorner_18.CornerRadius = UDim.new(0, 10) 
-        OpenButton.Image = "rbxassetid://114936734174789" 
-    end
-end
 local ShapeButton = Instance.new("TextButton")
 ShapeButton.Parent = Settings_2
 ShapeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 ShapeButton.Size = UDim2.new(0, 160, 0, 30)
-ShapeButton.Position = UDim2.new(0.55, 0, 0.25, 0) 
+ShapeButton.Position = UDim2.new(0.55, 0, 0.25, 0)
 ShapeButton.Font = Enum.Font.SourceSans
 ShapeButton.Text = "Circle  |  Square"
 ShapeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ShapeButton.TextSize = 16
 local UICorner_Shape = Instance.new("UICorner")
+UICorner_Shape.CornerRadius = UDim.new(0, 8)
 UICorner_Shape.Parent = ShapeButton
+OpenButton.Name = "Open Button"
+OpenButton.Parent = ScreenGui
+OpenButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+OpenButton.BorderSizePixel = 0
+OpenButton.Position = UDim2.new(0.472801805, 0, 0.0164237954 - 0.14, 0)
+OpenButton.Size = UDim2.new(0, 50, 0, 50)
+OpenButton.Image = "rbxassetid://114936734174789"
+local UICorner_Open = Instance.new("UICorner")
+UICorner_Open.Parent = OpenButton
+local shapeSelection = "Circle"
+local function updateButtonShape()
+	if shapeSelection == "Circle" then
+		UICorner_Open.CornerRadius = UDim.new(1, 0)
+		OpenButton.Image = "rbxassetid://114936734174789"
+	else
+		UICorner_Open.CornerRadius = UDim.new(0, 10)
+		OpenButton.Image = "rbxassetid://114936734174789"
+	end
+end
 ShapeButton.MouseButton1Click:Connect(function()
-    if shapeSelection == "Circle" then
-        shapeSelection = "Square"
-        ShapeButton.Text = "Square  |  Circle"  
-    else
-        shapeSelection = "Circle"
-        ShapeButton.Text = "Circle  |  Square"  
-    end
-    updateButtonShape()  
+	if shapeSelection == "Circle" then
+		shapeSelection = "Square"
+		ShapeButton.Text = "Square  |  Circle"
+	else
+		shapeSelection = "Circle"
+		ShapeButton.Text = "Circle  |  Square"
+	end
+	updateButtonShape()
 end)
 local fpsEnabled = false
 local function setFPSCap(state)
-    if state then
-        settings().Rendering.QualityLevel = "Level01"
-    else
-        settings().Rendering.QualityLevel = "Level10"
-    end
+	if state then
+		settings().Rendering.QualityLevel = "Level01"
+	else
+		settings().Rendering.QualityLevel = "Level10"
+	end
 end
 FPSButton.MouseButton1Click:Connect(function()
-    fpsEnabled = not fpsEnabled
-    FPSButton.Text = fpsEnabled and "FPS: ON" or "FPS: OFF"
-    setFPSCap(fpsEnabled)
+	fpsEnabled = not fpsEnabled
+	FPSButton.Text = fpsEnabled and "FPS: ON" or "FPS: OFF"
+	setFPSCap(fpsEnabled)
+end)
+WalkSpeedBox.FocusLost:Connect(function(enterPressed)
+	if enterPressed and tonumber(WalkSpeedBox.Text) then
+		game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = tonumber(WalkSpeedBox.Text)
+	end
+end)
+JumpPowerBox.FocusLost:Connect(function(enterPressed)
+	if enterPressed and tonumber(JumpPowerBox.Text) then
+		game.Players.LocalPlayer.Character.Humanoid.UseJumpPower = true
+		game.Players.LocalPlayer.Character.Humanoid.JumpPower = tonumber(JumpPowerBox.Text)
+	end
 end)
 updateButtonShape()
 Settings.Name = "Settings"
@@ -253,15 +264,6 @@ ImageLabel.BackgroundTransparency = 1
 ImageLabel.Position = UDim2.new(0, -5, 0, -5)
 ImageLabel.Size = UDim2.new(0, 45, 0, 45)
 ImageLabel.Image = "rbxassetid://114936734174789"
-local TextButton = Instance.new("TextButton")
-TextButton.Parent = Top
-TextButton.BackgroundTransparency = 1
-TextButton.Position = UDim2.new(0.9, 0, 0, 0)
-TextButton.Size = UDim2.new(0, 35, 0, 35)
-TextButton.Font = Enum.Font.GothamBold
-TextButton.Text = "X"
-TextButton.TextColor3 = Color3.fromRGB(255, 75, 75)
-TextButton.TextSize = 22
 Home.Name = "Home"
 Home.Parent = Main
 Home.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -272,14 +274,14 @@ local UICorner_4 = Instance.new("UICorner")
 UICorner_4.CornerRadius = UDim.new(0, 10)
 UICorner_4.Parent = Home
 local goalPosition = UDim2.new(0.205163598, 0, 0.0687371343, 0)
-local startPosition = UDim2.new(0.205163598, 0, 1, 0) 
-local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local startPosition = UDim2.new(0.205163598, 0, 1, 0)
+local tweenInfo = TweenInfo.new(0.8, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out) 
 local tween = TweenService:Create(Main, tweenInfo, {Position = goalPosition})
-Main.Position = startPosition  
+Main.Position = startPosition
 tween:Play()
 Search.Name = "Search"
 Search.Parent = Side
-Search.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Search.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Search.BackgroundTransparency = 1.000
 Search.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Search.BorderSizePixel = 0
@@ -293,7 +295,7 @@ local function createUICorner(parent, radius)
 end
 Search_2.Name = "Search" 
 Search_2.Parent = Main 
-Search_2.BackgroundColor3 = Color3.fromRGB(30, 30, 30) 
+Search_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
 Search_2.BackgroundTransparency = 0.2 
 Search_2.BorderSizePixel = 0 
 Search_2.Position = UDim2.new(0.101707332, 0, 0.171977207, 0)
@@ -308,7 +310,7 @@ SearchBox.PlaceholderText = "Enter Name Game"
 SearchBox.Font = Enum.Font.SourceSansBold 
 SearchBox.TextSize = 18 
 SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255) 
-SearchBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50) 
+SearchBox.BackgroundColor3 = Color3.fromRGB(0,0,0) 
 SearchBox.BorderSizePixel = 0 
 SearchBox.TextXAlignment = Enum.TextXAlignment.Left 
 SearchBox.Text = "" 
@@ -325,75 +327,71 @@ local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.Parent = SearchResults 
 UIListLayout.Padding = UDim.new(0, 6) 
 UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-SearchBox.FocusLost:Connect(function(enterPressed) 
-	if not enterPressed then return end 
-	local httpservice = game:GetService("HttpService") 
-	local searchedquery = SearchBox.Text
-	local page = 1
-	local yOffset = 0 
-	for _, v in pairs(SearchResults:GetChildren()) do
-		if v:IsA("Frame") then v:Destroy() end
-	end
-	if not SearchResults:IsA("ScrollingFrame") then return end
-	SearchResults.CanvasSize = UDim2.new(0, 0, 0, 0) 
-	while true do
-		local response = request({
-			Url = "https://scriptblox.com/api/script/search?q=" .. httpservice:UrlEncode(searchedquery) .. "&max=5&mode=free&page=" .. page,
-			Method = "GET"
-		})
-		local decoded = httpservice:JSONDecode(response.Body)
-		local scripts = decoded.result.scripts
-		if #scripts == 0 then break end 
-		for _, script in pairs(scripts) do
-			local ScriptBox = Instance.new("Frame")
-			ScriptBox.Parent = SearchResults
-			ScriptBox.Size = UDim2.new(1, -10, 0, 30) 
-			ScriptBox.Position = UDim2.new(0, 0, 0, yOffset) 
-			ScriptBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-			ScriptBox.BorderSizePixel = 0
-			createUICorner(ScriptBox, 6)
-			local CopyButton = Instance.new("TextButton")
-			CopyButton.Parent = ScriptBox
-			CopyButton.Size = UDim2.new(0.12, 0, 0.7, 0)
-			CopyButton.Position = UDim2.new(0.70, 0, 0.15, 0) 
-			CopyButton.Text = "📋"
-			CopyButton.TextSize = 10
-			CopyButton.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
-			CopyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-			CopyButton.Font = Enum.Font.SourceSansBold
-			createUICorner(CopyButton, 6)
-			CopyButton.MouseButton1Click:Connect(function()
-				setclipboard(script.script)
-			end)
-			local ExecuteButton = Instance.new("TextButton")
-			ExecuteButton.Parent = ScriptBox
-			ExecuteButton.Size = UDim2.new(0.12, 0, 0.7, 0)
-			ExecuteButton.Position = UDim2.new(0.85, 0, 0.15, 0) 
-			ExecuteButton.Text = "▶"
-			ExecuteButton.TextSize = 10
-			ExecuteButton.BackgroundColor3 = Color3.fromRGB(34, 139, 34)
-			ExecuteButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-			ExecuteButton.Font = Enum.Font.SourceSansBold
-			createUICorner(ExecuteButton, 6)
-			ExecuteButton.MouseButton1Click:Connect(function()
-				loadstring(script.script)()
-			end)
-			local ScriptName = Instance.new("TextLabel")
-			ScriptName.Parent = ScriptBox
-			ScriptName.Size = UDim2.new(0.65, -5, 1, 0) 
-			ScriptName.Position = UDim2.new(0, 5, 0, 0) 
-			ScriptName.Text = "📜 " .. script.title
-			ScriptName.TextSize = 12
-			ScriptName.Font = Enum.Font.SourceSansBold
-			ScriptName.TextColor3 = Color3.fromRGB(255, 255, 255)
-			ScriptName.BackgroundTransparency = 1
-			ScriptName.TextXAlignment = Enum.TextXAlignment.Left
-			ScriptName.TextTruncate = Enum.TextTruncate.AtEnd 
-			yOffset = yOffset + 35 
-		end
-		SearchResults.CanvasSize = UDim2.new(0, 0, 0, yOffset) 
-		page = page + 1
-	end
+SearchBox.FocusLost:Connect(function(enterPressed)
+    if not enterPressed or SearchBox.Text == "" then return end 
+    local httpservice = game:GetService("HttpService")
+    local searchedquery = SearchBox.Text
+    local page = 1
+    local yOffset = 0
+    for _, v in pairs(SearchResults:GetChildren()) do
+        if v:IsA("Frame") then v:Destroy() end
+    end
+    if not SearchResults:IsA("ScrollingFrame") then return end
+    SearchResults.CanvasSize = UDim2.new(0, 0, 0, 0)
+    while true do
+        local response = request({
+            Url = "https://scriptblox.com/api/script/search?q=" .. httpservice:UrlEncode(searchedquery) .. "&max=20&mode=free&page=" .. page,
+            Method = "GET"
+        })
+        local decoded = httpservice:JSONDecode(response.Body)
+        local scripts = decoded.result.scripts
+        if #scripts == 0 then break end
+        for _, script in pairs(scripts) do
+            local ScriptBox = Instance.new("Frame")
+            ScriptBox.Parent = SearchResults
+            ScriptBox.Size = UDim2.new(1, -10, 0, 30)
+            ScriptBox.Position = UDim2.new(0, 0, 0, yOffset)
+            ScriptBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            ScriptBox.BorderSizePixel = 0
+            createUICorner(ScriptBox, 6)
+            local CopyButton = Instance.new("TextButton")
+            CopyButton.Parent = ScriptBox
+            CopyButton.Size = UDim2.new(0.12, 0, 0.7, 0)
+            CopyButton.Position = UDim2.new(0.70, 0, 0.15, 0)
+            CopyButton.Text = "📋"
+            CopyButton.TextSize = 10
+            CopyButton.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
+            CopyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            CopyButton.Font = Enum.Font.SourceSansBold
+            createUICorner(CopyButton, 6)
+            CopyButton.MouseButton1Click:Connect(function() setclipboard(script.script) end)
+            local ExecuteButton = Instance.new("TextButton")
+            ExecuteButton.Parent = ScriptBox
+            ExecuteButton.Size = UDim2.new(0.12, 0, 0.7, 0)
+            ExecuteButton.Position = UDim2.new(0.85, 0, 0.15, 0)
+            ExecuteButton.Text = "▶"
+            ExecuteButton.TextSize = 10
+            ExecuteButton.BackgroundColor3 = Color3.fromRGB(34, 139, 34)
+            ExecuteButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            ExecuteButton.Font = Enum.Font.SourceSansBold
+            createUICorner(ExecuteButton, 6)
+            ExecuteButton.MouseButton1Click:Connect(function() loadstring(script.script)() end)
+            local ScriptName = Instance.new("TextLabel")
+            ScriptName.Parent = ScriptBox
+            ScriptName.Size = UDim2.new(0.65, -5, 1, 0)
+            ScriptName.Position = UDim2.new(0, 5, 0, 0)
+            ScriptName.Text = "📜 " .. script.title
+            ScriptName.TextSize = 12
+            ScriptName.Font = Enum.Font.SourceSansBold
+            ScriptName.TextColor3 = Color3.fromRGB(255, 255, 255)
+            ScriptName.BackgroundTransparency = 1
+            ScriptName.TextXAlignment = Enum.TextXAlignment.Left
+            ScriptName.TextTruncate = Enum.TextTruncate.AtEnd
+            yOffset = yOffset + 35
+        end
+        SearchResults.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+        page = page + 1
+    end
 end)
 user.Name = "user"
 user.Parent = Home
@@ -418,11 +416,12 @@ UserText.BackgroundTransparency = 1.0
 UserText.Position = UDim2.new(1.116, 0, 0.213, 0)
 UserText.Size = UDim2.new(0, 155, 0, 35)
 UserText.ZIndex = 2
-UserText.Font = Enum.Font.Gotham
-UserText.Text = "  Welcome " .. Name .. " Thanks for using FrostWare!"
+UserText.Font = Enum.Font.LuckiestGuy 
+UserText.Text = "Welcome " .. Name .. " Thanks for using FrostWare!"
 UserText.TextColor3 = Color3.fromRGB(255, 255, 255)
-UserText.TextSize = 12
-UserText.TextWrapped = true
+UserText.TextSize = 7 
+UserText.TextWrapped = false
+UserText.TextXAlignment = Enum.TextXAlignment.Left
 local UICorner_5 = Instance.new("UICorner")
 UICorner_5.Parent = User
 local Frame = Instance.new("Frame")
@@ -434,7 +433,6 @@ Frame.Size = UDim2.new(0, 67, 0, 67)
 local UICorner_6 = Instance.new("UICorner")
 UICorner_6.CornerRadius = UDim.new(1, 0)
 UICorner_6.Parent = Frame
-local Frame1 = Instance.new("Frame")
 Frame1.Name = "Frame1"
 Frame1.Parent = Home
 Frame1.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -905,111 +903,140 @@ if savedFile and savedFile ~= "" and not hasExecuted then
     loadstring(savedFile)()
     hasExecuted = true
 end
-Credits_2.Name = "Credits"
-Credits_2.Parent = Main
-Credits_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Credits_2.BackgroundTransparency = 0.600
-Credits_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
-Credits_2.BorderSizePixel = 0
-Credits_2.Position = UDim2.new(0.101138234, 0, 0.171977416, 0)
-Credits_2.Size = UDim2.new(0, 433, 0, 237)
-Credits_2.Visible = false
-UICorner_13.Parent = Credits_2
-TextLabel_9.Parent = Credits_2
-TextLabel_9.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_9.BackgroundTransparency = 1.000
-TextLabel_9.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_9.BorderSizePixel = 0
-TextLabel_9.Position = UDim2.new(0, 0, -0.0421940945, 0)
-TextLabel_9.Size = UDim2.new(0, 150, 0, 50)
-TextLabel_9.Font = Enum.Font.FredokaOne
-TextLabel_9.Text = "Developers:"
-TextLabel_9.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_9.TextSize = 23.000
-TextLabel_10.Parent = Credits_2
-TextLabel_10.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_10.BackgroundTransparency = 1.000
-TextLabel_10.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_10.BorderSizePixel = 0
-TextLabel_10.Position = UDim2.new(0, 0, 0.175, 0)
-TextLabel_10.Size = UDim2.new(0, 421, 0, 32)
-TextLabel_10.ZIndex = 2
-TextLabel_10.Font = Enum.Font.SourceSansBold
-TextLabel_10.Text = "Designed, Scripted by Diet Coke"
-TextLabel_10.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_10.TextSize = 20.000
-TextLabel_10.TextWrapped = true
-UICorner_14.Parent = TextLabel_10
-TextLabel_11.Parent = Credits_2
-TextLabel_11.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_11.BackgroundTransparency = 1.000
-TextLabel_11.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_11.BorderSizePixel = 0
-TextLabel_11.Position = UDim2.new(0, 0, 0.275, 0)
-TextLabel_11.Size = UDim2.new(0, 421, 0, 32)
-TextLabel_11.Font = Enum.Font.SourceSansBold
-TextLabel_11.Text = "Designed, Scripted by I4KC"
-TextLabel_11.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_11.TextSize = 20.000
-TextLabel_11.TextWrapped = true
-UICorner_15.Parent = TextLabel_11
-TextLabel_12.Parent = Credits_2
-TextLabel_12.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_12.BackgroundTransparency = 1.000
-TextLabel_12.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_12.BorderSizePixel = 0
-TextLabel_12.Position = UDim2.new(0, 0, 0.375, 0)
-TextLabel_12.Size = UDim2.new(0, 421, 0, 32)
-TextLabel_12.Font = Enum.Font.SourceSansBold
-TextLabel_12.Text = "W Dev"
-TextLabel_12.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_12.TextSize = 20.000
-TextLabel_12.TextTransparency = 0.990
-TextLabel_13.Parent = Credits_2
-TextLabel_13.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_13.BackgroundTransparency = 1.000
-TextLabel_13.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_13.BorderSizePixel = 0
-TextLabel_13.Position = UDim2.new(0, 0, 0.475, 0)
-TextLabel_13.Size = UDim2.new(0, 421, 0, 32)
-TextLabel_13.ZIndex = 2
-TextLabel_13.Font = Enum.Font.SourceSansBold
-TextLabel_13.Text = "Designed, Scripted by Diet Coke"
-TextLabel_13.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_13.TextSize = 20.000
-TextLabel_13.TextWrapped = true
-UICorner_16.Parent = TextLabel_13
-TextLabel_14.Parent = Credits_2
-TextLabel_14.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_14.BackgroundTransparency = 1.000
-TextLabel_14.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_14.BorderSizePixel = 0
-TextLabel_14.Position = UDim2.new(0, 0, 0.575, 0)
-TextLabel_14.Size = UDim2.new(0, 421, 0, 32)
-TextLabel_14.ZIndex = 2
-TextLabel_14.Font = Enum.Font.SourceSansBold
-TextLabel_14.Text = "Main Dev: Diet Coke"
-TextLabel_14.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_14.TextSize = 20.000
-TextLabel_14.TextWrapped = true
-TextLabel_UIUX = Instance.new("TextLabel")
-TextLabel_UIUX.Parent = Credits_2
-TextLabel_UIUX.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_UIUX.BackgroundTransparency = 1  
-TextLabel_UIUX.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_UIUX.BorderSizePixel = 0
-TextLabel_UIUX.Position = UDim2.new(0, 0, 0.675, 0)
-TextLabel_UIUX.Size = UDim2.new(0, 421, 0, 32)
-TextLabel_UIUX.Font = Enum.Font.SourceSansBold
-TextLabel_UIUX.Text = "UI/UX: #codertoolroblox"
-TextLabel_UIUX.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_UIUX.TextSize = 20.000
-TextLabel_UIUX.TextWrapped = true
-UICorner_17.Parent = TextLabel_14
+AI_2.Name = "AI"
+AI_2.Parent = Main
+AI_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+AI_2.BackgroundTransparency = 0.600
+AI_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+AI_2.BorderSizePixel = 0
+AI_2.Position = UDim2.new(0.101138234, 0, 0.171977416, 0)
+AI_2.Size = UDim2.new(0, 433, 0, 237)
+AI_2.Visible = false
+local UICorner_13 = Instance.new("UICorner")
+UICorner_13.Parent = AI_2
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Parent = AI_2
+scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
+scrollingFrame.ScrollBarThickness = 4
+scrollingFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+local UICorner_Scroll = Instance.new("UICorner")
+UICorner_Scroll.Parent = scrollingFrame
+local Text_Welcome = Instance.new("TextLabel")
+Text_Welcome.Parent = AI_2
+Text_Welcome.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Text_Welcome.BackgroundTransparency = 1
+Text_Welcome.Position = UDim2.new(0.5, -100 + (0.45 * 200), 0.15, 0)
+Text_Welcome.Size = UDim2.new(0, 200, 0, 50)
+Text_Welcome.Text = "Welcome to FrostWare AI Chat"
+Text_Welcome.TextColor3 = Color3.fromRGB(255, 255, 255)
+Text_Welcome.TextSize = 18
+Text_Welcome.Font = Enum.Font.SourceSansBold
+Text_Welcome.AnchorPoint = Vector2.new(0.5, 0)
+local Image_Circular = Instance.new("ImageLabel")
+Image_Circular.Parent = AI_2
+Image_Circular.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Image_Circular.BackgroundTransparency = 1
+Image_Circular.Position = UDim2.new(0.5, -40, 0, 0)
+Image_Circular.Size = UDim2.new(0, 60, 0, 60)
+Image_Circular.Image = "rbxassetid://114936734174789"
+Image_Circular.ScaleType = Enum.ScaleType.Fit
+local TextBox_EnterContent = Instance.new("TextBox")
+TextBox_EnterContent.Parent = AI_2
+TextBox_EnterContent.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TextBox_EnterContent.BackgroundTransparency = 0.5
+TextBox_EnterContent.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextBox_EnterContent.BorderSizePixel = 0
+TextBox_EnterContent.Position = UDim2.new(0, 0, 0.9, 0)
+TextBox_EnterContent.Size = UDim2.new(0.85, 0, 0.1, 0)
+TextBox_EnterContent.Font = Enum.Font.SourceSansBold
+TextBox_EnterContent.Text = "Enter Content..."
+TextBox_EnterContent.PlaceholderText = "Enter Content..."
+TextBox_EnterContent.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
+TextBox_EnterContent.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox_EnterContent.TextSize = 20
+TextBox_EnterContent.TextWrapped = true
+local UICorner_EnterContent = Instance.new("UICorner")
+UICorner_EnterContent.Parent = TextBox_EnterContent
+local Button_Send = Instance.new("ImageButton")
+Button_Send.Parent = AI_2
+Button_Send.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Button_Send.BackgroundTransparency = 0.5
+Button_Send.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Button_Send.BorderSizePixel = 0
+Button_Send.Position = UDim2.new(0.85, 0, 0.9, 0)
+Button_Send.Size = UDim2.new(0.15, 0, 0.1, 0)
+Button_Send.Image = "rbxassetid://125594054578785"
+Button_Send.ScaleType = Enum.ScaleType.Fit
+local UICorner_Send = Instance.new("UICorner")
+UICorner_Send.Parent = Button_Send
+local Button_Clear = Instance.new("ImageButton")
+Button_Clear.Parent = AI_2
+Button_Clear.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Button_Clear.BackgroundTransparency = 0.5
+Button_Clear.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Button_Clear.BorderSizePixel = 0
+Button_Clear.Position = UDim2.new(0.70, 0, 0.9, 0) 
+Button_Clear.Size = UDim2.new(0.15, 0, 0.1, 0)
+Button_Clear.Image = "rbxassetid://113359299487062" 
+Button_Clear.ScaleType = Enum.ScaleType.Fit
+local UICorner_Clear = Instance.new("UICorner")
+UICorner_Clear.Parent = Button_Clear
+local replyPositionY = 0.15
+local maxWidth = 400
+scrollingFrame:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
+    if scrollingFrame.CanvasPosition.Y > 0 then
+        Image_Circular.Visible = false
+        Text_Welcome.Visible = false
+    else
+        Image_Circular.Visible = true
+        Text_Welcome.Visible = true
+    end
+end)
+Button_Send.MouseButton1Click:Connect(function()
+    local message = TextBox_EnterContent.Text
+    message = message:gsub("%s+", "")
+    if message == "" or message == "Enter Content..." then return end
+    local httpService = game:GetService("HttpService")
+    local url = "http://fi4.bot-hosting.net:22869/TestHubChatgptV4?msg=" .. message
+    local success, response = pcall(function()
+        return request({ Url = url, Method = "GET" })
+    end)
+    if success then
+        if response.Success then
+            local data = httpService:JSONDecode(response.Body)
+            local reply = data.chat or "No response from server"
+            local Text_Reply = Instance.new("TextLabel")
+            Text_Reply.Parent = scrollingFrame
+            Text_Reply.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            Text_Reply.BackgroundTransparency = 1
+            Text_Reply.Position = UDim2.new(0, 0, replyPositionY, 0)
+            Text_Reply.Size = UDim2.new(0, maxWidth, 0, 50)
+            Text_Reply.Text = reply
+            Text_Reply.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Text_Reply.TextSize = 18
+            Text_Reply.Font = Enum.Font.SourceSansBold
+            Text_Reply.AnchorPoint = Vector2.new(0, 0)
+            Text_Reply.TextXAlignment = Enum.TextXAlignment.Left
+            Text_Reply.TextWrapped = true
+            replyPositionY = replyPositionY + 0.1
+            TextBox_EnterContent.Text = ""
+        end
+    end
+end)
+Button_Clear.MouseButton1Click:Connect(function()
+    TextBox_EnterContent.Text = "" 
+    for _, child in pairs(scrollingFrame:GetChildren()) do
+        if child:IsA("TextLabel") then
+            child:Destroy() 
+        end
+    end
+    replyPositionY = 0.15
+end)
 local function NVXVLM() 
 	local script = Instance.new('LocalScript', Executor)
 	script.Parent.MouseButton1Click:Connect(function()
-		script.Parent.Parent.Parent.Credits.Visible = false
+		script.Parent.Parent.Parent.AI.Visible = false
 		script.Parent.Parent.Parent.Executor.Visible = true
 		script.Parent.Parent.Parent.Home.Visible = false
 		script.Parent.Parent.Parent.Console.Visible = false
@@ -1021,10 +1048,11 @@ coroutine.wrap(NVXVLM)()
 local function JRLI() 
 	local script = Instance.new('LocalScript', Search)
 	script.Parent.MouseButton1Click:Connect(function()
-		script.Parent.Parent.Parent.Credits.Visible = false
+		script.Parent.Parent.Parent.AI.Visible = false
 		script.Parent.Parent.Parent.Executor.Visible = false
 		script.Parent.Parent.Parent.Home.Visible = false
 		script.Parent.Parent.Parent.Search.Visible = true
+		script.Parent.Parent.Parent.Console.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = false
 	end)
 end
@@ -1032,7 +1060,7 @@ coroutine.wrap(JRLI)()
 local function ZRKA() 
 	local script = Instance.new('LocalScript', home)
 	script.Parent.MouseButton1Click:Connect(function()
-		script.Parent.Parent.Parent.Credits.Visible = false
+		script.Parent.Parent.Parent.AI.Visible = false
 		script.Parent.Parent.Parent.Executor.Visible = false
 		script.Parent.Parent.Parent.Home.Visible = true
 		script.Parent.Parent.Parent.Console.Visible = false
@@ -1044,7 +1072,7 @@ coroutine.wrap(ZRKA)()
 local function JRWL() 
 	local script = Instance.new('LocalScript', Console)
 	script.Parent.MouseButton1Click:Connect(function()
-		script.Parent.Parent.Parent.Credits.Visible = false
+		script.Parent.Parent.Parent.AI.Visible = false
 		script.Parent.Parent.Parent.Executor.Visible = false
 		script.Parent.Parent.Parent.Home.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = false
@@ -1056,18 +1084,19 @@ coroutine.wrap(JRWL)()
 local function JRL() 
 	local script = Instance.new('LocalScript', Settings)
 	script.Parent.MouseButton1Click:Connect(function()
-		script.Parent.Parent.Parent.Credits.Visible = false
+		script.Parent.Parent.Parent.AI.Visible = false
 		script.Parent.Parent.Parent.Executor.Visible = false
 		script.Parent.Parent.Parent.Home.Visible = false
+		script.Parent.Parent.Parent.Console.Visible = false
 		script.Parent.Parent.Parent.Search.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = true
 	end)
 end
 coroutine.wrap(JRL)()
 local function MXDI() 
-	local script = Instance.new('LocalScript', Credits)
+	local script = Instance.new('LocalScript', AI)
 	script.Parent.MouseButton1Click:Connect(function()
-		script.Parent.Parent.Parent.Credits.Visible = true
+		script.Parent.Parent.Parent.AI.Visible = true
 		script.Parent.Parent.Parent.Executor.Visible = false
 		script.Parent.Parent.Parent.Home.Visible = false
 		script.Parent.Parent.Parent.Console.Visible = false
@@ -1135,12 +1164,12 @@ local function PMROOSA()
     end)
 end
 coroutine.wrap(PMROOSA)()
-local function UITBIOF() 
-	local script = Instance.new('LocalScript', OpenButton)
-	script.Parent.MouseButton1Click:Connect(function()
-		script.Parent.Parent.Main.Visible = true
-		script.Parent.Parent["Open Button"].Visible = false
-	end)
+local function UITBIOF()
+    local script = Instance.new('LocalScript', OpenButton)
+    script.Parent.MouseButton1Click:Connect(function()
+        local main = script.Parent.Parent.Main
+        main.Visible = not main.Visible
+    end)
 end
 coroutine.wrap(UITBIOF)()
 local function XXTZ() 
@@ -1194,5 +1223,5 @@ while true do
         TextLabel_7.Text = "FPS: " .. fps  
         previousTime = currentTime  
     end
-    wait(0.1)  
+    wait()  
 end
