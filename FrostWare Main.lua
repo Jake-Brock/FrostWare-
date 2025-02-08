@@ -73,7 +73,7 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 Main.Name = "Main"
 Main.Parent = ScreenGui
 Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
-Main.BackgroundTransparency = 0.15
+Main.BackgroundTransparency = 0
 Main.BorderSizePixel = 0
 Main.Position = UDim2.new(0.205, 0, -0.5, 0)
 Main.Size = UDim2.new(0, 492, 0, 295)
@@ -83,33 +83,39 @@ UICorner.Parent = Main
 Side.Name = "Side"
 Side.Parent = Main
 Side.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
-Side.BackgroundTransparency = 1
+Side.BackgroundTransparency = 0
 Side.Size = UDim2.new(0, 50, 1, -40)
 Side.Position = UDim2.new(0, 5, 0, 35)
 local UICorner_2 = Instance.new("UICorner")
 UICorner_2.CornerRadius = UDim.new(0, 8)
 UICorner_2.Parent = Side
+local Line = Instance.new("Frame")
+Line.Parent = Side
+Line.BackgroundColor3 = Color3.fromRGB(255, 255, 255) 
+Line.BackgroundTransparency = 0 
+Line.Size = UDim2.new(0, 2, 1, 4) 
+Line.Position = UDim2.new(0.7, 0, 0, 0) 
 home.Name = "home"
 home.Parent = Side
 home.BackgroundTransparency = 1
 home.Size = UDim2.new(0, 30, 0, 30)
-home.Position = UDim2.new(0.1, 0, 0.05, 0)
-home.Image = "rbxassetid://119897226376123"
+home.Position = UDim2.new(0.02, 0, 0.05, 0)
+home.Image = "rbxassetid://139464910792916"
 Executor = home:Clone()
 Executor.Name = "Executor"
 Executor.Parent = Side
-Executor.Position = UDim2.new(0.1, 0, 0.2, 0)
-Executor.Image = "rbxassetid://110565107095653"
+Executor.Position = UDim2.new(0.02, 0, 0.2, 0)
+Executor.Image = "rbxassetid://78025028516956"
 Console = home:Clone()
 Console.Name = "Console"
 Console.Parent = Side
-Console.Position = UDim2.new(0.1, 0, 0.35, 0)
-Console.Image = "http://www.roblox.com/asset/?id=119011453171150"
+Console.Position = UDim2.new(0.02, 0, 0.35, 0)
+Console.Image = "http://www.roblox.com/asset/?id=140658747982482"
 AI = home:Clone()
 AI.Name = "AI"
 AI.Parent = Side
-AI.Position = UDim2.new(0.1, 0, 0.5, 0)
-AI.Image = "rbxassetid://85267769704392"
+AI.Position = UDim2.new(0.02, 0, 0.5, 0)
+AI.Image = "rbxassetid://83810327168827"
 Settings_2.Name = "Settings"
 Settings_2.Parent = Main
 Settings_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -236,9 +242,9 @@ Settings.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 Settings.BackgroundTransparency = 1.000
 Settings.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Settings.BorderSizePixel = 0
-Settings.Position = UDim2.new(0.1, 0, 0.65, 0)  
+Settings.Position = UDim2.new(0.02, 0, 0.65, 0)  
 Settings.Size = UDim2.new(0, 28, 0, 28)
-Settings.Image = "http://www.roblox.com/asset/?id=17257771808"
+Settings.Image = "http://www.roblox.com/asset/?id=97917672712867"
 Top.Name = "Top"
 Top.Parent = Main
 Top.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
@@ -264,6 +270,12 @@ ImageLabel.BackgroundTransparency = 1
 ImageLabel.Position = UDim2.new(0, -5, 0, -5)
 ImageLabel.Size = UDim2.new(0, 45, 0, 45)
 ImageLabel.Image = "rbxassetid://114936734174789"
+local Line = Instance.new("Frame")
+Line.Parent = Top
+Line.BackgroundColor3 = Color3.fromRGB(255, 255, 255) 
+Line.BackgroundTransparency = 0 
+Line.Size = UDim2.new(1, 8, 0, 2) 
+Line.Position = UDim2.new(0, -4, 1, 0) 
 Home.Name = "Home"
 Home.Parent = Main
 Home.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -273,21 +285,27 @@ Home.Position = UDim2.new(0, 55, 0, 40)
 local UICorner_4 = Instance.new("UICorner")
 UICorner_4.CornerRadius = UDim.new(0, 10)
 UICorner_4.Parent = Home
-local goalPosition = UDim2.new(0.205163598, 0, 0.0687371343, 0)
-local startPosition = UDim2.new(0.205163598, 0, 1, 0)
-local tweenInfo = TweenInfo.new(0.8, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out) 
-local tween = TweenService:Create(Main, tweenInfo, {Position = goalPosition})
-Main.Position = startPosition
-tween:Play()
+local mainStartPosition = UDim2.new(0.205163598, 0, 1, 0)
+local sideStartPosition = UDim2.new(-0.2, 0, 0, 35)
+local mainGoalPosition = UDim2.new(0.205163598, 0, 0.0687371343, 0)
+local sideGoalPosition = UDim2.new(0, 5, 0, 35)
+Main.Position = mainStartPosition
+Side.Position = sideStartPosition
+local tweenInfo = TweenInfo.new(0.8, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+local mainTween = TweenService:Create(Main, tweenInfo, {Position = mainGoalPosition})
+local sideTween = TweenService:Create(Side, tweenInfo, {Position = sideGoalPosition})
+mainTween:Play()
+task.wait(0.2) 
+sideTween:Play()
 Search.Name = "Search"
 Search.Parent = Side
 Search.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Search.BackgroundTransparency = 1.000
 Search.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Search.BorderSizePixel = 0
-Search.Position = UDim2.new(0.1, 0, 0.80, 0)
+Search.Position = UDim2.new(0.02, 0, 0.80, 0)
 Search.Size = UDim2.new(0, 28, 0, 28)
-Search.Image = "http://www.roblox.com/asset/?id=79275007433546"
+Search.Image = "http://www.roblox.com/asset/?id=100225435871664"
 local function createUICorner(parent, radius)
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, radius)
@@ -354,33 +372,29 @@ SearchBox.FocusLost:Connect(function(enterPressed)
             ScriptBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
             ScriptBox.BorderSizePixel = 0
             createUICorner(ScriptBox, 6)
-            local CopyButton = Instance.new("TextButton")
+            local CopyButton = Instance.new("ImageButton")
             CopyButton.Parent = ScriptBox
             CopyButton.Size = UDim2.new(0.12, 0, 0.7, 0)
             CopyButton.Position = UDim2.new(0.70, 0, 0.15, 0)
-            CopyButton.Text = "📋"
-            CopyButton.TextSize = 10
-            CopyButton.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
-            CopyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-            CopyButton.Font = Enum.Font.SourceSansBold
+            CopyButton.Image = "rbxassetid://72822546519104"
+            CopyButton.BackgroundTransparency = 1
+            CopyButton.ScaleType = Enum.ScaleType.Fit
             createUICorner(CopyButton, 6)
             CopyButton.MouseButton1Click:Connect(function() setclipboard(script.script) end)
-            local ExecuteButton = Instance.new("TextButton")
+            local ExecuteButton = Instance.new("ImageButton")
             ExecuteButton.Parent = ScriptBox
             ExecuteButton.Size = UDim2.new(0.12, 0, 0.7, 0)
             ExecuteButton.Position = UDim2.new(0.85, 0, 0.15, 0)
-            ExecuteButton.Text = "▶"
-            ExecuteButton.TextSize = 10
-            ExecuteButton.BackgroundColor3 = Color3.fromRGB(34, 139, 34)
-            ExecuteButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-            ExecuteButton.Font = Enum.Font.SourceSansBold
+            ExecuteButton.Image = "rbxassetid://125594054578785"
+            ExecuteButton.BackgroundTransparency = 1
+            ExecuteButton.ScaleType = Enum.ScaleType.Fit
             createUICorner(ExecuteButton, 6)
             ExecuteButton.MouseButton1Click:Connect(function() loadstring(script.script)() end)
             local ScriptName = Instance.new("TextLabel")
             ScriptName.Parent = ScriptBox
             ScriptName.Size = UDim2.new(0.65, -5, 1, 0)
             ScriptName.Position = UDim2.new(0, 5, 0, 0)
-            ScriptName.Text = "📜 " .. script.title
+            ScriptName.Text = script.title
             ScriptName.TextSize = 12
             ScriptName.Font = Enum.Font.SourceSansBold
             ScriptName.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -479,7 +493,7 @@ end
 createTextLabel(Frame2, UDim2.new(0.02, 0, 0.062 * 1.3 * 2.60, 0), UDim2.new(0, 116, 0, 50), "Features:", 15)
 createTextLabel(Frame2, UDim2.new(0.02, 0, 0.232 * 1.3 * 1.30, 0), UDim2.new(0, 208, 0, 28), "Executor with 100% UNC", 15)
 createTextLabel(Frame2, UDim2.new(0.02, 0, 0.38 * 1.3 * 1.03 * 1.05, 0), UDim2.new(0, 208, 0, 28), "User friendly interface", 15)
-createTextLabel(Frame2, UDim2.new(0.02, 0, 0.547 * 1.3 * 1.03, 0), UDim2.new(0, 208, 0, 28), "Smooth UI", 15)
+createTextLabel(Frame2, UDim2.new(0.02, 0, 0.547 * 1.3 * 1.03, 0), UDim2.new(0, 208, 0, 28), "Smooth UI:", 15)
 local FPSLabel = createTextLabel(Frame2, UDim2.new(0.02, 0, 0.698 * 1.3 * 0.90 * 1.05, 0), UDim2.new(0, 208, 0, 28), "FPS: ", 15)
 local TimeLabel = createTextLabel(Frame2, UDim2.new(0.02, 0, 0.8 * 1.3 * 0.97 * 0.97, 0), UDim2.new(0, 208, 0, 28), "TIME: ", 15)
 local RunService = game:GetService("RunService")
@@ -681,28 +695,34 @@ local buttons = {}
 local buttonWidth = 0.14  
 local spacing = 0.03  
 local totalWidth = 6 * buttonWidth + 5 * spacing  
-local function createButton(name, text, posX)
-    local button = Instance.new("TextButton")
+local function createButton(name, content, posX, isImage)
+    local button = Instance.new(isImage and "ImageButton" or "TextButton")
     button.Parent = Console_2
-    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     button.BorderColor3 = Color3.fromRGB(0, 0, 0)
     button.BorderSizePixel = 0
-    button.Position = UDim2.new(posX / totalWidth, 0, 0.85, 0)  
-    button.Size = UDim2.new(buttonWidth / 0.9, 0, 0.12, 0)  
-    button.Font = Enum.Font.SourceSans
-    button.Text = text
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.TextSize = 16
+    button.Position = UDim2.new(posX / totalWidth, 0, 0.85, 0)
+    button.Size = UDim2.new(buttonWidth / 0.9, 0, 0.12, 0)
     local UICorner = Instance.new("UICorner")
     UICorner.Parent = button
+    if isImage then
+        button.Image = "rbxassetid://" .. content
+        button.ScaleType = Enum.ScaleType.Fit
+        button.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+    else
+        button.Text = content
+        button.Font = Enum.Font.SourceSans
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.TextSize = 16
+        button.BackgroundColor3 = Color3.fromRGB(50, 50, 50) 
+    end
     buttons[name] = button
 end
-createButton("Warn", "Warn", 0)
-createButton("Error", "Error", 1 * (buttonWidth + spacing))
-createButton("Output", "Output", 2 * (buttonWidth + spacing))
-createButton("All", "All", 3 * (buttonWidth + spacing))
-createButton("Copy", "Copy", 4 * (buttonWidth + spacing))
-createButton("Clear", "Clear", 5 * (buttonWidth + spacing) + 0.006)  
+createButton("Warn", "79250343381203", 0, true)
+createButton("Error", "112299375360792", 1 * (buttonWidth + spacing), true)
+createButton("Output", "86588352038712", 2 * (buttonWidth + spacing), true)
+createButton("All", "All", 3 * (buttonWidth + spacing), false) 
+createButton("Copy", "129383309091174", 4 * (buttonWidth + spacing), true)
+createButton("Clear", "113359299487062", 5 * (buttonWidth + spacing) + 0.006, true)
 local logs = {}
 local filterType = "All"
 local function updateConsole()
@@ -882,14 +902,37 @@ local buttonWidth = 65
 local buttonSpacing = 8
 local buttonHeight = 25
 local numButtons = 6
+local function createButton(name, position, content, parent, isImage)
+    local button = Instance.new(isImage and "ImageButton" or "TextButton")
+    button.Name = name
+    button.Parent = parent
+    button.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    button.BorderSizePixel = 0
+    button.Position = position
+    button.Size = UDim2.new(0, 65, 0, 25)
+    local UICorner = Instance.new("UICorner")
+    UICorner.Parent = button
+    if isImage then
+        button.Image = "rbxassetid://" .. content
+        button.ScaleType = Enum.ScaleType.Fit
+        button.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+    else
+        button.Text = content
+        button.Font = Enum.Font.SourceSans
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.TextSize = 12
+        button.BackgroundColor3 = Color3.fromRGB(50, 50, 50) 
+    end
+    return button
+end
 local totalWidth = buttonWidth * numButtons + buttonSpacing * (numButtons - 1)
 local startX = (Executor_2.Size.X.Offset - totalWidth) / 2
-local Clear = createButton("Clear", UDim2.new(0, startX, 0.85, 0), "Clear", Executor_2)
-local Execute = createButton("Execute", UDim2.new(0, startX + buttonWidth + buttonSpacing, 0.85, 0), "Execute", Executor_2)
-local Paste = createButton("Paste", UDim2.new(0, startX + (buttonWidth + buttonSpacing) * 2, 0.85, 0), "Paste", Executor_2)
-local ExecuteClipboard = createButton("ExecuteClipboard", UDim2.new(0, startX + (buttonWidth + buttonSpacing) * 3, 0.85, 0), "Exe Clipboard", Executor_2)
-local AutoExe = createButton("Auto Exe", UDim2.new(0, startX + (buttonWidth + buttonSpacing) * 4, 0.85, 0), "Auto Exe", Executor_2)
-local DeleteAutoExe = createButton("Delete Auto Exe", UDim2.new(0, startX + (buttonWidth + buttonSpacing) * 5, 0.85, 0), "Delete Auto Exe", Executor_2)
+local Clear = createButton("Clear", UDim2.new(0, startX, 0.85, 0), "113359299487062", Executor_2, true)
+local Execute = createButton("Execute", UDim2.new(0, startX + buttonWidth + buttonSpacing, 0.85, 0), "125594054578785", Executor_2, true)
+local Paste = createButton("Paste", UDim2.new(0, startX + (buttonWidth + buttonSpacing) * 2, 0.85, 0), "129383309091174", Executor_2, true)
+local ExecuteClipboard = createButton("ExecuteClipboard", UDim2.new(0, startX + (buttonWidth + buttonSpacing) * 3, 0.85, 0), "72822546519104", Executor_2, true)
+local AutoExe = createButton("Auto Exe", UDim2.new(0, startX + (buttonWidth + buttonSpacing) * 4, 0.85, 0), "Auto Exe", Executor_2, false)
+local DeleteAutoExe = createButton("Delete Auto Exe", UDim2.new(0, startX + (buttonWidth + buttonSpacing) * 5, 0.85, 0), "Delete Auto Exe", Executor_2, false)
 ExecuteClipboard.MouseButton1Click:Connect(function()
     local clipboardContent = getclipboard()
     loadstring(clipboardContent)()
