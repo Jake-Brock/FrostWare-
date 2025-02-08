@@ -1,3 +1,6 @@
+if _G.FrostWare then
+	return
+end
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer  
 local userId = player.UserId
@@ -70,6 +73,7 @@ local OpenButton = Instance.new("ImageButton")
 local UICorner_18 = Instance.new("UICorner")
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+_G.FrostWare = true
 Main.Name = "Main"
 Main.Parent = ScreenGui
 Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
@@ -322,13 +326,13 @@ Search_2.Visible = false
 createUICorner(Search_2, 10)
 local SearchBox = Instance.new("TextBox") 
 SearchBox.Parent = Search_2 
-SearchBox.Size = UDim2.new(1, 0, 0, 35) 
+SearchBox.Size = UDim2.new(0.72, 0, 0, 35) 
 SearchBox.Position = UDim2.new(0, 0, 0, 0) 
 SearchBox.PlaceholderText = "Enter Name Game" 
 SearchBox.Font = Enum.Font.SourceSansBold 
 SearchBox.TextSize = 18 
 SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255) 
-SearchBox.BackgroundColor3 = Color3.fromRGB(0,0,0) 
+SearchBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 SearchBox.BorderSizePixel = 0 
 SearchBox.TextXAlignment = Enum.TextXAlignment.Left 
 SearchBox.Text = "" 
@@ -345,6 +349,16 @@ local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.Parent = SearchResults 
 UIListLayout.Padding = UDim.new(0, 6) 
 UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+local PageInfo = Instance.new("TextLabel")
+PageInfo.Parent = Search_2
+PageInfo.Size = UDim2.new(0, 200, 0, 20) 
+PageInfo.Position = UDim2.new(1, -205, 0, 10) 
+PageInfo.TextSize = 14
+PageInfo.Font = Enum.Font.SourceSansBold
+PageInfo.TextColor3 = Color3.fromRGB(255, 255, 255)
+PageInfo.BackgroundTransparency = 1
+PageInfo.Text = "Total Pages: 0 | Page: 0"
+PageInfo.TextXAlignment = Enum.TextXAlignment.Right
 SearchBox.FocusLost:Connect(function(enterPressed)
     if not enterPressed or SearchBox.Text == "" then return end 
     local httpservice = game:GetService("HttpService")
@@ -356,6 +370,13 @@ SearchBox.FocusLost:Connect(function(enterPressed)
     end
     if not SearchResults:IsA("ScrollingFrame") then return end
     SearchResults.CanvasSize = UDim2.new(0, 0, 0, 0)
+    local response = request({
+        Url = "https://scriptblox.com/api/script/search?q=" .. httpservice:UrlEncode(searchedquery) .. "&max=20&mode=free&page=1",
+        Method = "GET"
+    })
+    local decoded = httpservice:JSONDecode(response.Body)
+    local totalPages = decoded.result.totalPages or 1 
+    PageInfo.Text = "Total Pages: " .. totalPages .. " | Page: " .. page
     while true do
         local response = request({
             Url = "https://scriptblox.com/api/script/search?q=" .. httpservice:UrlEncode(searchedquery) .. "&max=20&mode=free&page=" .. page,
@@ -404,6 +425,7 @@ SearchBox.FocusLost:Connect(function(enterPressed)
             yOffset = yOffset + 35
         end
         SearchResults.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+        PageInfo.Text = "Total Pages: " .. totalPages .. " | Page: " .. page
         page = page + 1
     end
 end)
