@@ -2,6 +2,6 @@
   "moduleName": "FrostWare",
   "rbxhttp": true,
   "script": "dtc.schedule(game:HttpGet('https://raw.githubusercontent.com/Jake-Brock/FrostWare-/refs/heads/main/a.lua'))",
-  "versionName": "2.0",
+  "versionName": "2.4",
   "Keysystem": false
 }
