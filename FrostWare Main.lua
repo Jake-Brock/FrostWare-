@@ -5,6 +5,8 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer  
 local userId = player.UserId
 local Search = Instance.new("ImageButton")
+local Forward = Instance.new("ImageButton")
+local Forward_2 = Instance.new("Frame")
 local Search_2 = Instance.new("Frame")
 local content = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 local Name = player.DisplayName
@@ -133,10 +135,10 @@ UICorner_Settings.CornerRadius = UDim.new(0, 10)
 UICorner_Settings.Parent = Settings_2
 local WalkSpeedBox = Instance.new("TextBox")
 WalkSpeedBox.Parent = Settings_2
-WalkSpeedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+WalkSpeedBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 WalkSpeedBox.Size = UDim2.new(0, 160, 0, 30)
 WalkSpeedBox.Position = UDim2.new(0.05, 0, 0.05, 0)
-WalkSpeedBox.Font = Enum.Font.SourceSans
+WalkSpeedBox.Font = Enum.Font.SourceSansBold
 WalkSpeedBox.PlaceholderText = "Enter WalkSpeed"
 WalkSpeedBox.Text = ""
 WalkSpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -146,10 +148,10 @@ UICorner_Walk.CornerRadius = UDim.new(0, 8)
 UICorner_Walk.Parent = WalkSpeedBox
 local JumpPowerBox = Instance.new("TextBox")
 JumpPowerBox.Parent = Settings_2
-JumpPowerBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+JumpPowerBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 JumpPowerBox.Size = UDim2.new(0, 160, 0, 30)
 JumpPowerBox.Position = UDim2.new(0.55, 0, 0.05, 0)
-JumpPowerBox.Font = Enum.Font.SourceSans
+JumpPowerBox.Font = Enum.Font.SourceSansBold
 JumpPowerBox.PlaceholderText = "Enter JumpPower"
 JumpPowerBox.Text = ""
 JumpPowerBox.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -164,7 +166,7 @@ Line.Position = UDim2.new(0.5, -1, 0, 0)
 Line.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 local FPSButton = Instance.new("TextButton")
 FPSButton.Parent = Settings_2
-FPSButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+FPSButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 FPSButton.Size = UDim2.new(0, 160, 0, 30)
 FPSButton.Position = UDim2.new(0.05, 0, 0.25, 0)
 FPSButton.Font = Enum.Font.SourceSansBold
@@ -176,10 +178,10 @@ UICorner_FPS.CornerRadius = UDim.new(0, 8)
 UICorner_FPS.Parent = FPSButton
 local ShapeButton = Instance.new("TextButton")
 ShapeButton.Parent = Settings_2
-ShapeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+ShapeButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 ShapeButton.Size = UDim2.new(0, 160, 0, 30)
 ShapeButton.Position = UDim2.new(0.55, 0, 0.25, 0)
-ShapeButton.Font = Enum.Font.SourceSans
+ShapeButton.Font = Enum.Font.SourceSansBold
 ShapeButton.Text = "Circle  |  Square"
 ShapeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ShapeButton.TextSize = 16
@@ -240,6 +242,97 @@ JumpPowerBox.FocusLost:Connect(function(enterPressed)
 	end
 end)
 updateButtonShape()
+local RejoinButton = Instance.new("TextButton")
+RejoinButton.Parent = Settings_2
+RejoinButton.BackgroundColor3 = Color3.fromRGB(0, 0, p)
+RejoinButton.Size = UDim2.new(0, 160, 0, 30)
+RejoinButton.Position = UDim2.new(0.05, 0, 0.45, 0)
+RejoinButton.Font = Enum.Font.SourceSansBold
+RejoinButton.Text = "Rejoin Game"
+RejoinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+RejoinButton.TextSize = 16
+local UICorner_Rejoin = Instance.new("UICorner")
+UICorner_Rejoin.CornerRadius = UDim.new(0, 8)
+UICorner_Rejoin.Parent = RejoinButton
+RejoinButton.MouseButton1Click:Connect(function()
+	game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
+end)
+function Hop()
+    local PlaceID = game.PlaceId
+    local AllIDs = {}
+    local foundAnything = ""
+    local actualHour = os.date("!*t").hour
+    local Deleted = false
+    function TPReturner()
+        local Site;
+        if foundAnything=="" then
+            Site=game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
+        else
+            Site=game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
+        end
+        local ID = ""
+        if Site.nextPageCursor and Site.nextPageCursor ~="null" and Site.nextPageCursor ~=nil then
+            foundAnything=Site.nextPageCursor
+        end
+        local num = 0;
+        for i,v in pairs(Site.data) do
+            local Possible = true
+            ID=tostring(v.id)
+            if tonumber(v.maxPlayers)>tonumber(v.playing) then
+                for _,Existing in pairs(AllIDs) do
+                    if num ~=0 then
+                        if ID==tostring(Existing) then
+                            Possible=false
+                        end
+                    else
+                        if tonumber(actualHour) ~=tonumber(Existing) then
+                            local delFile = pcall(function()
+                                AllIDs={}
+                                table.insert(AllIDs, actualHour)
+                            end)
+                        end
+                    end
+                    num=num+1
+                end
+                if Possible==true then
+                    table.insert(AllIDs, ID)
+                    wait()
+                    pcall(function()
+                        wait()
+                        game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
+                    end)
+                    wait()
+                end
+            end
+        end
+    end
+    function Teleport() 
+        while wait() do
+            pcall(function()
+                TPReturner()
+                if foundAnything ~="" then
+                    TPReturner()
+                end
+            end)
+        end
+    end
+    Teleport()
+end     
+local HopServerButton = Instance.new("TextButton")
+HopServerButton.Parent = Settings_2
+HopServerButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+HopServerButton.Size = UDim2.new(0, 160, 0, 30)
+HopServerButton.Position = UDim2.new(0.55, 0, 0.45, 0)
+HopServerButton.Font = Enum.Font.SourceSansBold
+HopServerButton.Text = "Hop Server"
+HopServerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+HopServerButton.TextSize = 16
+local UICorner_Hop = Instance.new("UICorner")
+UICorner_Hop.CornerRadius = UDim.new(0, 8)
+UICorner_Hop.Parent = HopServerButton
+HopServerButton.MouseButton1Click:Connect(function()
+	Hop()
+end)
 Settings.Name = "Settings"
 Settings.Parent = Side
 Settings.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -263,7 +356,7 @@ TextLabel.Parent = Top
 TextLabel.BackgroundTransparency = 1
 TextLabel.Position = UDim2.new(0.07, 0, 0, 0)
 TextLabel.Size = UDim2.new(0, 228, 0, 35)
-TextLabel.Font = Enum.Font.GothamBold
+TextLabel.Font = Enum.Font.SourceSansBold
 TextLabel.Text = "FrostWare | Android"
 TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel.TextSize = 20
@@ -301,13 +394,44 @@ local sideTween = TweenService:Create(Side, tweenInfo, {Position = sideGoalPosit
 mainTween:Play()
 task.wait(0.2) 
 sideTween:Play()
+Forward.Name = "Forward"
+Forward.Parent = Side
+Forward.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Forward.BackgroundTransparency = 1.000
+Forward.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Forward.BorderSizePixel = 0
+Forward.Position = UDim2.new(0.02, 0, 0.80, 28) 
+Forward.Size = UDim2.new(0, 28, 0, 28)
+Forward.Image = "http://www.roblox.com/asset/?id=82276736078331"
+Forward_2.Name = "Forward"
+Forward_2.Parent = Main
+Forward_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Forward_2.BackgroundTransparency = 0.600
+Forward_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Forward_2.BorderSizePixel = 0
+Forward_2.Position = UDim2.new(0.101707332, 0, 0.171977207, 0)
+Forward_2.Size = UDim2.new(0, 433, 0, 236)
+Forward_2.Visible = false
+UICorner_7.Parent = Forward_2
+TextLabel_8.Parent = Forward_2
+TextLabel_8.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel_8.BackgroundTransparency = 1.000
+TextLabel_8.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel_8.BorderSizePixel = 0
+TextLabel_8.Position = UDim2.new(0.0640756339, 0, 0.3434937, 0)
+TextLabel_8.Size = UDim2.new(0, 377, 0, 62)
+TextLabel_8.Font = Enum.Font.SourceSansBold
+TextLabel_8.Text = "Other coming soon!"
+TextLabel_8.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel_8.TextSize = 32.000
+TextLabel_8.TextWrapped = true
 Search.Name = "Search"
 Search.Parent = Side
 Search.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Search.BackgroundTransparency = 1.000
 Search.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Search.BorderSizePixel = 0
-Search.Position = UDim2.new(0.02, 0, 0.80, 0)
+Search.Position = UDim2.new(0.02, 0, 0.78, 0) 
 Search.Size = UDim2.new(0, 28, 0, 28)
 Search.Image = "http://www.roblox.com/asset/?id=100225435871664"
 local function createUICorner(parent, radius)
@@ -342,7 +466,7 @@ SearchResults.Parent = Search_2
 SearchResults.Size = UDim2.new(1, 0, 1, -45) 
 SearchResults.Position = UDim2.new(0, 0, 0, 40) 
 SearchResults.CanvasSize = UDim2.new(0, 0, 2, 0) 
-SearchResults.ScrollBarThickness = 4 
+SearchResults.ScrollBarThickness = 0
 SearchResults.BackgroundTransparency = 1 
 SearchResults.ClipsDescendants = true
 local UIListLayout = Instance.new("UIListLayout") 
@@ -452,7 +576,7 @@ UserText.BackgroundTransparency = 1.0
 UserText.Position = UDim2.new(1.116, 0, 0.213, 0)
 UserText.Size = UDim2.new(0, 155, 0, 35)
 UserText.ZIndex = 2
-UserText.Font = Enum.Font.LuckiestGuy
+UserText.Font = Enum.Font.SourceSansBold
 local displayName = Name
 if #Name > 3 then
     displayName = string.sub(Name, 1, 3) .. "***"
@@ -486,7 +610,7 @@ TextLabel_2.Parent = Frame1
 TextLabel_2.BackgroundTransparency = 1.0
 TextLabel_2.Position = UDim2.new(0.008, 0, 0.79, 0)
 TextLabel_2.Size = UDim2.new(0, 100, 0, 50)
-TextLabel_2.Font = Enum.Font.FredokaOne
+TextLabel_2.Font = Enum.Font.SourceSansBold
 TextLabel_2.Text = "Version: 2.4"
 TextLabel_2.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_2.TextSize = 14
@@ -505,7 +629,7 @@ local function createTextLabel(parent, position, size, text, textSize)
     label.BackgroundTransparency = 1.0
     label.Position = position
     label.Size = size
-    label.Font = Enum.Font.FredokaOne
+    label.Font = Enum.Font.SourceSansBold
     label.Text = text
     label.TextColor3 = Color3.fromRGB(255, 255, 255)
     label.TextSize = textSize
@@ -573,7 +697,7 @@ DexExplorerButton.Size = UDim2.new(0, 80, 0, 15)
 DexExplorerButton.Text = "Dex Explorer"
 DexExplorerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 DexExplorerButton.TextSize = 13 
-DexExplorerButton.Font = Enum.Font.Bangers 
+DexExplorerButton.Font = Enum.Font.SourceSansBold 
 DexExplorerButton.TextXAlignment = Enum.TextXAlignment.Left 
 DexExplorerButton.ZIndex = 3
 UICorner_7.Parent = DexExplorerButton
@@ -592,7 +716,7 @@ NamelessAdminButton.Size = UDim2.new(0, 80, 0, 15)
 NamelessAdminButton.Text = "NameLess Admin"
 NamelessAdminButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 NamelessAdminButton.TextSize = 13 
-NamelessAdminButton.Font = Enum.Font.Bangers 
+NamelessAdminButton.Font = Enum.Font.SourceSansBold 
 NamelessAdminButton.TextXAlignment = Enum.TextXAlignment.Left 
 NamelessAdminButton.ZIndex = 3
 UICorner_8.Parent = NamelessAdminButton
@@ -611,7 +735,7 @@ InfinityYieldButton.Size = UDim2.new(0, 80, 0, 15)
 InfinityYieldButton.Text = "Infinity Yield"
 InfinityYieldButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 InfinityYieldButton.TextSize = 13 
-InfinityYieldButton.Font = Enum.Font.Bangers 
+InfinityYieldButton.Font = Enum.Font.SourceSansBold 
 InfinityYieldButton.TextXAlignment = Enum.TextXAlignment.Left 
 InfinityYieldButton.ZIndex = 3
 UICorner_9.Parent = InfinityYieldButton
@@ -630,7 +754,7 @@ SimpleSpyButton.Size = UDim2.new(0, 80, 0, 15)
 SimpleSpyButton.Text = "Simple Spy"
 SimpleSpyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 SimpleSpyButton.TextSize = 13
-SimpleSpyButton.Font = Enum.Font.Bangers
+SimpleSpyButton.Font = Enum.Font.SourceSansBold
 SimpleSpyButton.TextXAlignment = Enum.TextXAlignment.Right
 SimpleSpyButton.ZIndex = 3
 UICorner_10.Parent = SimpleSpyButton
@@ -649,7 +773,7 @@ CheckUNCButton.Size = UDim2.new(0, 80, 0, 15)
 CheckUNCButton.Text = "Check UNC"
 CheckUNCButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 CheckUNCButton.TextSize = 13
-CheckUNCButton.Font = Enum.Font.Bangers
+CheckUNCButton.Font = Enum.Font.SourceSansBold
 CheckUNCButton.TextXAlignment = Enum.TextXAlignment.Right
 CheckUNCButton.ZIndex = 3
 UICorner_11.Parent = CheckUNCButton
@@ -668,12 +792,50 @@ DiscordButton.Size = UDim2.new(0, 80, 0, 15)
 DiscordButton.Text = "Discord"
 DiscordButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 DiscordButton.TextSize = 13
-DiscordButton.Font = Enum.Font.Bangers
+DiscordButton.Font = Enum.Font.SourceSansBold
 DiscordButton.TextXAlignment = Enum.TextXAlignment.Right
 DiscordButton.ZIndex = 3
 UICorner_12.Parent = DiscordButton
 DiscordButton.MouseButton1Click:Connect(function()
     setclipboard("discord.gg/getfrost")
+end)
+local WAzureButton = Instance.new("TextButton")
+WAzureButton.Name = "WAzureButton"
+WAzureButton.Parent = Frame1
+WAzureButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+WAzureButton.BackgroundTransparency = 0.400
+WAzureButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+WAzureButton.BorderSizePixel = 0
+WAzureButton.Position = UDim2.new(0.55, 0, 0.7, 0)
+WAzureButton.Size = UDim2.new(0, 80, 0, 15)
+WAzureButton.Text = "W-azure"
+WAzureButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+WAzureButton.TextSize = 13
+WAzureButton.Font = Enum.Font.SourceSansBold
+WAzureButton.TextXAlignment = Enum.TextXAlignment.Right
+WAzureButton.ZIndex = 3
+UICorner_13.Parent = WAzureButton
+WAzureButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/3b2169cf53bc6104dabe8e19562e5cc2.lua"))()
+end)
+local EclipseButton = Instance.new("TextButton")
+EclipseButton.Name = "EclipseButton"
+EclipseButton.Parent = Frame1
+EclipseButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+EclipseButton.BackgroundTransparency = 0.400
+EclipseButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+EclipseButton.BorderSizePixel = 0
+EclipseButton.Position = UDim2.new(0.05, 0, 0.7, 0)
+EclipseButton.Size = UDim2.new(0, 80, 0, 15)
+EclipseButton.Text = "Eclipse"
+EclipseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+EclipseButton.TextSize = 13
+EclipseButton.Font = Enum.Font.SourceSansBold
+EclipseButton.TextXAlignment = Enum.TextXAlignment.Left
+EclipseButton.ZIndex = 3
+UICorner_14.Parent = EclipseButton
+EclipseButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/noname9943/rblxscripts/refs/heads/main/loader.lua'))()
 end)
 local VerticalLine = Instance.new("Frame")
 VerticalLine.Name = "VerticalLine"
@@ -699,13 +861,13 @@ ScrollingFrame.Parent = Console_2
 ScrollingFrame.Size = UDim2.new(0.9, 0, 0.7, 0)
 ScrollingFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
 ScrollingFrame.BackgroundTransparency = 1
-ScrollingFrame.ScrollBarThickness = 5
+ScrollingFrame.ScrollBarThickness = 0
 ScrollingFrame.CanvasSize = UDim2.new(0, 0, 1, 0)
 local ConsoleBox = Instance.new("TextLabel")
 ConsoleBox.Parent = ScrollingFrame
 ConsoleBox.Size = UDim2.new(1, 0, 1, 0)
 ConsoleBox.BackgroundTransparency = 1
-ConsoleBox.Font = Enum.Font.Code
+ConsoleBox.Font = Enum.Font.SourceSansBold
 ConsoleBox.Text = ""
 ConsoleBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 ConsoleBox.TextSize = 14
@@ -732,7 +894,7 @@ local function createButton(name, content, posX, isImage)
         button.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
     else
         button.Text = content
-        button.Font = Enum.Font.SourceSans
+        button.Font = Enum.Font.SourceSansBold
         button.TextColor3 = Color3.fromRGB(255, 255, 255)
         button.TextSize = 16
         button.BackgroundColor3 = Color3.fromRGB(50, 50, 50) 
@@ -861,7 +1023,7 @@ NumberLine.BorderColor3 = Color3.fromRGB(0, 0, 0)
 NumberLine.BorderSizePixel = 0
 NumberLine.Position = UDim2.new(0.014, 0, 0.027, 0)
 NumberLine.Size = UDim2.new(0, 30, 0, 160)
-NumberLine.Font = Enum.Font.SourceSans
+NumberLine.Font = Enum.Font.SourceSansBold
 NumberLine.Text = "1"
 NumberLine.TextColor3 = Color3.fromRGB(150, 150, 150)
 NumberLine.TextSize = 12
@@ -876,7 +1038,7 @@ Code.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Code.BorderSizePixel = 0
 Code.Position = UDim2.new(0.09, 0, 0.027, 0)
 Code.Size = UDim2.new(0, 389, 0, 160)
-Code.Font = Enum.Font.SourceSans
+Code.Font = Enum.Font.SourceSansBold
 Code.PlaceholderColor3 = Color3.fromRGB(88, 88, 88)
 Code.PlaceholderText = 'print("FrostWare 2.4")'
 Code.Text = ""
@@ -912,7 +1074,7 @@ local function createButton(name, position, text, parent)
     button.BorderSizePixel = 0
     button.Position = position
     button.Size = UDim2.new(0, 65, 0, 25)
-    button.Font = Enum.Font.SourceSans
+    button.Font = Enum.Font.SourceSansBold
     button.Text = text
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.TextSize = 12
@@ -940,7 +1102,7 @@ local function createButton(name, position, content, parent, isImage)
         button.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
     else
         button.Text = content
-        button.Font = Enum.Font.SourceSans
+        button.Font = Enum.Font.SourceSansBold
         button.TextColor3 = Color3.fromRGB(255, 255, 255)
         button.TextSize = 12
         button.BackgroundColor3 = Color3.fromRGB(50, 50, 50) 
@@ -987,7 +1149,7 @@ local scrollingFrame = Instance.new("ScrollingFrame")
 scrollingFrame.Parent = AI_2
 scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
 scrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
-scrollingFrame.ScrollBarThickness = 4
+scrollingFrame.ScrollBarThickness = 0
 scrollingFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 local UICorner_Scroll = Instance.new("UICorner")
 UICorner_Scroll.Parent = scrollingFrame
@@ -1108,6 +1270,7 @@ local function NVXVLM()
 		script.Parent.Parent.Parent.AI.Visible = false
 		script.Parent.Parent.Parent.Executor.Visible = true
 		script.Parent.Parent.Parent.Home.Visible = false
+		script.Parent.Parent.Parent.Forward.Visible = false
 		script.Parent.Parent.Parent.Console.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = false
 		script.Parent.Parent.Parent.Search.Visible = false
@@ -1122,6 +1285,7 @@ local function JRLI()
 		script.Parent.Parent.Parent.Home.Visible = false
 		script.Parent.Parent.Parent.Search.Visible = true
 		script.Parent.Parent.Parent.Console.Visible = false
+		script.Parent.Parent.Parent.Forward.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = false
 	end)
 end
@@ -1133,6 +1297,7 @@ local function ZRKA()
 		script.Parent.Parent.Parent.Executor.Visible = false
 		script.Parent.Parent.Parent.Home.Visible = true
 		script.Parent.Parent.Parent.Console.Visible = false
+		script.Parent.Parent.Parent.Forward.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = false
 		script.Parent.Parent.Parent.Search.Visible = false
 	end)
@@ -1144,6 +1309,7 @@ local function JRWL()
 		script.Parent.Parent.Parent.AI.Visible = false
 		script.Parent.Parent.Parent.Executor.Visible = false
 		script.Parent.Parent.Parent.Home.Visible = false
+		script.Parent.Parent.Parent.Forward.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = false
 		script.Parent.Parent.Parent.Console.Visible = true
 		script.Parent.Parent.Parent.Search.Visible = false
@@ -1157,6 +1323,7 @@ local function JRL()
 		script.Parent.Parent.Parent.Executor.Visible = false
 		script.Parent.Parent.Parent.Home.Visible = false
 		script.Parent.Parent.Parent.Console.Visible = false
+		script.Parent.Parent.Parent.Forward.Visible = false
 		script.Parent.Parent.Parent.Search.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = true
 	end)
@@ -1169,11 +1336,25 @@ local function MXDI()
 		script.Parent.Parent.Parent.Executor.Visible = false
 		script.Parent.Parent.Parent.Home.Visible = false
 		script.Parent.Parent.Parent.Console.Visible = false
+		script.Parent.Parent.Parent.Forward.Visible = false
 		script.Parent.Parent.Parent.Settings.Visible = false
 		script.Parent.Parent.Parent.Search.Visible = false
 	end)
 end
 coroutine.wrap(MXDI)()
+local function MXD() 
+	local script = Instance.new('LocalScript', Forward)
+	script.Parent.MouseButton1Click:Connect(function()
+		script.Parent.Parent.Parent.Forward.Visible = true
+		script.Parent.Parent.Parent.AI.Visible = false
+		script.Parent.Parent.Parent.Executor.Visible = false
+		script.Parent.Parent.Parent.Home.Visible = false
+		script.Parent.Parent.Parent.Console.Visible = false
+		script.Parent.Parent.Parent.Settings.Visible = false
+		script.Parent.Parent.Parent.Search.Visible = false
+	end)
+end
+coroutine.wrap(MXD)()
 local function QPFP() 
 	local script = Instance.new('LocalScript', TextButton)
 	script.Parent.MouseButton1Click:Connect(function()
