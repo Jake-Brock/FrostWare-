@@ -1,6 +1,3 @@
-if _G.FrostWare then
-	return
-end
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer  
 local userId = player.UserId
@@ -78,7 +75,7 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 _G.FrostWare = true
 Main.Name = "Main"
 Main.Parent = ScreenGui
-Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+Main.BackgroundColor3 = Color3.fromRGB(37, 37, 37) 
 Main.BackgroundTransparency = 0
 Main.BorderSizePixel = 0
 Main.Position = UDim2.new(0.205, 0, -0.5, 0)
@@ -88,7 +85,7 @@ UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = Main
 Side.Name = "Side"
 Side.Parent = Main
-Side.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+Side.BackgroundColor3 = Color3.fromRGB(37, 37, 37) 
 Side.BackgroundTransparency = 0
 Side.Size = UDim2.new(0, 50, 1, -40)
 Side.Position = UDim2.new(0, 5, 0, 35)
@@ -106,17 +103,17 @@ home.Parent = Side
 home.BackgroundTransparency = 1
 home.Size = UDim2.new(0, 30, 0, 30)
 home.Position = UDim2.new(0.02, 0, 0.05, 0)
-home.Image = "rbxassetid://139464910792916"
+home.Image = "rbxassetid://114457199722982"
 Executor = home:Clone()
 Executor.Name = "Executor"
 Executor.Parent = Side
 Executor.Position = UDim2.new(0.02, 0, 0.2, 0)
-Executor.Image = "rbxassetid://78025028516956"
+Executor.Image = "rbxassetid://76362668697878"
 Console = home:Clone()
 Console.Name = "Console"
 Console.Parent = Side
 Console.Position = UDim2.new(0.02, 0, 0.35, 0)
-Console.Image = "http://www.roblox.com/asset/?id=140658747982482"
+Console.Image = "http://www.roblox.com/asset/?id=119228307566101"
 AI = home:Clone()
 AI.Name = "AI"
 AI.Parent = Side
@@ -124,7 +121,7 @@ AI.Position = UDim2.new(0.02, 0, 0.5, 0)
 AI.Image = "rbxassetid://83810327168827"
 Settings_2.Name = "Settings"
 Settings_2.Parent = Main
-Settings_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Settings_2.BackgroundColor3 = Color3.fromRGB(37, 37, 37)
 Settings_2.BackgroundTransparency = 0.6
 Settings_2.BorderSizePixel = 0
 Settings_2.Position = UDim2.new(0.101, 0, 0.172, 0)
@@ -135,7 +132,7 @@ UICorner_Settings.CornerRadius = UDim.new(0, 10)
 UICorner_Settings.Parent = Settings_2
 local WalkSpeedBox = Instance.new("TextBox")
 WalkSpeedBox.Parent = Settings_2
-WalkSpeedBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+WalkSpeedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 WalkSpeedBox.Size = UDim2.new(0, 160, 0, 30)
 WalkSpeedBox.Position = UDim2.new(0.05, 0, 0.05, 0)
 WalkSpeedBox.Font = Enum.Font.SourceSansBold
@@ -148,7 +145,7 @@ UICorner_Walk.CornerRadius = UDim.new(0, 8)
 UICorner_Walk.Parent = WalkSpeedBox
 local JumpPowerBox = Instance.new("TextBox")
 JumpPowerBox.Parent = Settings_2
-JumpPowerBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+JumpPowerBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 JumpPowerBox.Size = UDim2.new(0, 160, 0, 30)
 JumpPowerBox.Position = UDim2.new(0.55, 0, 0.05, 0)
 JumpPowerBox.Font = Enum.Font.SourceSansBold
@@ -166,7 +163,7 @@ Line.Position = UDim2.new(0.5, -1, 0, 0)
 Line.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 local FPSButton = Instance.new("TextButton")
 FPSButton.Parent = Settings_2
-FPSButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+FPSButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 FPSButton.Size = UDim2.new(0, 160, 0, 30)
 FPSButton.Position = UDim2.new(0.05, 0, 0.25, 0)
 FPSButton.Font = Enum.Font.SourceSansBold
@@ -178,7 +175,7 @@ UICorner_FPS.CornerRadius = UDim.new(0, 8)
 UICorner_FPS.Parent = FPSButton
 local ShapeButton = Instance.new("TextButton")
 ShapeButton.Parent = Settings_2
-ShapeButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ShapeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 ShapeButton.Size = UDim2.new(0, 160, 0, 30)
 ShapeButton.Position = UDim2.new(0.55, 0, 0.25, 0)
 ShapeButton.Font = Enum.Font.SourceSansBold
@@ -190,7 +187,7 @@ UICorner_Shape.CornerRadius = UDim.new(0, 8)
 UICorner_Shape.Parent = ShapeButton
 OpenButton.Name = "Open Button"
 OpenButton.Parent = ScreenGui
-OpenButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+OpenButton.BackgroundColor3 = Color3.fromRGB(37, 37, 37)
 OpenButton.BorderSizePixel = 0
 OpenButton.Position = UDim2.new(0.472801805, 0, 0.0164237954 - 0.14, 0)
 OpenButton.Size = UDim2.new(0, 50, 0, 50)
@@ -198,53 +195,66 @@ OpenButton.Image = "rbxassetid://114936734174789"
 local UICorner_Open = Instance.new("UICorner")
 UICorner_Open.Parent = OpenButton
 local shapeSelection = "Circle"
+local CIRCLE_IMAGE_ID = "rbxassetid://114936734174789"
+local SQUARE_CORNER_RADIUS = UDim.new(0, 10)
+local CIRCLE_CORNER_RADIUS = UDim.new(1, 0)
 local function updateButtonShape()
-	if shapeSelection == "Circle" then
-		UICorner_Open.CornerRadius = UDim.new(1, 0)
-		OpenButton.Image = "rbxassetid://114936734174789"
-	else
-		UICorner_Open.CornerRadius = UDim.new(0, 10)
-		OpenButton.Image = "rbxassetid://114936734174789"
-	end
+    if shapeSelection == "Circle" then
+        UICorner_Open.CornerRadius = CIRCLE_CORNER_RADIUS
+    else
+        UICorner_Open.CornerRadius = SQUARE_CORNER_RADIUS
+    end
+    OpenButton.Image = CIRCLE_IMAGE_ID
 end
+
 ShapeButton.MouseButton1Click:Connect(function()
-	if shapeSelection == "Circle" then
-		shapeSelection = "Square"
-		ShapeButton.Text = "Square  |  Circle"
-	else
-		shapeSelection = "Circle"
-		ShapeButton.Text = "Circle  |  Square"
-	end
-	updateButtonShape()
+    shapeSelection = (shapeSelection == "Circle") and "Square" or "Circle"
+    ShapeButton.Text = shapeSelection .. "  |  " .. (shapeSelection == "Circle" and "Square" or "Circle")
+    updateButtonShape()
 end)
+
 local fpsEnabled = false
 local function setFPSCap(state)
-	if state then
-		settings().Rendering.QualityLevel = "Level01"
-	else
-		settings().Rendering.QualityLevel = "Level10"
-	end
+    settings().Rendering.QualityLevel = state and "Level01" or "Level10"
 end
+
 FPSButton.MouseButton1Click:Connect(function()
-	fpsEnabled = not fpsEnabled
-	FPSButton.Text = fpsEnabled and "FPS: ON" or "FPS: OFF"
-	setFPSCap(fpsEnabled)
+    fpsEnabled = not fpsEnabled
+    FPSButton.Text = fpsEnabled and "FPS: ON" or "FPS: OFF"
+    setFPSCap(fpsEnabled)
 end)
+
+local function updateHumanoidProperty(property, value)
+    local humanoid = game.Players.LocalPlayer.Character.Humanoid
+    if property == "WalkSpeed" then
+        humanoid.WalkSpeed = value
+    elseif property == "JumpPower" then
+        humanoid.UseJumpPower = true
+        humanoid.JumpPower = value
+    end
+end
+
 WalkSpeedBox.FocusLost:Connect(function(enterPressed)
-	if enterPressed and tonumber(WalkSpeedBox.Text) then
-		game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = tonumber(WalkSpeedBox.Text)
-	end
+    if enterPressed then
+        local speed = tonumber(WalkSpeedBox.Text)
+        if speed then
+            updateHumanoidProperty("WalkSpeed", speed)
+        end
+    end
 end)
+
 JumpPowerBox.FocusLost:Connect(function(enterPressed)
-	if enterPressed and tonumber(JumpPowerBox.Text) then
-		game.Players.LocalPlayer.Character.Humanoid.UseJumpPower = true
-		game.Players.LocalPlayer.Character.Humanoid.JumpPower = tonumber(JumpPowerBox.Text)
-	end
+    if enterPressed then
+        local jumpPower = tonumber(JumpPowerBox.Text)
+        if jumpPower then
+            updateHumanoidProperty("JumpPower", jumpPower)
+        end
+    end
 end)
 updateButtonShape()
 local RejoinButton = Instance.new("TextButton")
 RejoinButton.Parent = Settings_2
-RejoinButton.BackgroundColor3 = Color3.fromRGB(0, 0, p)
+RejoinButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 RejoinButton.Size = UDim2.new(0, 160, 0, 30)
 RejoinButton.Position = UDim2.new(0.05, 0, 0.45, 0)
 RejoinButton.Font = Enum.Font.SourceSansBold
@@ -260,67 +270,55 @@ end)
 function Hop()
     local PlaceID = game.PlaceId
     local AllIDs = {}
-    local foundAnything = ""
-    local actualHour = os.date("!*t").hour
-    local Deleted = false
-    function TPReturner()
-        local Site;
-        if foundAnything=="" then
-            Site=game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
-        else
-            Site=game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
+    local foundCursor = ""
+    local currentHour = os.date("!*t").hour
+
+    -- Function to fetch server data
+    local function fetchServerData(cursor)
+        local url = 'https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'
+        if cursor and cursor ~= "" then
+            url = url .. '&cursor=' .. cursor
         end
-        local ID = ""
-        if Site.nextPageCursor and Site.nextPageCursor ~="null" and Site.nextPageCursor ~=nil then
-            foundAnything=Site.nextPageCursor
+        return game.HttpService:JSONDecode(game:HttpGet(url))
+    end
+
+    -- Function to teleport to a server
+    local function teleportToServer(serverID)
+        pcall(function()
+            game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, serverID, game.Players.LocalPlayer)
+        end)
+    end
+
+    -- Main function to handle teleportation logic
+    local function TPReturner()
+        local Site = fetchServerData(foundCursor)
+
+        if Site.nextPageCursor and Site.nextPageCursor ~= "null" then
+            foundCursor = Site.nextPageCursor
         end
-        local num = 0;
-        for i,v in pairs(Site.data) do
-            local Possible = true
-            ID=tostring(v.id)
-            if tonumber(v.maxPlayers)>tonumber(v.playing) then
-                for _,Existing in pairs(AllIDs) do
-                    if num ~=0 then
-                        if ID==tostring(Existing) then
-                            Possible=false
-                        end
-                    else
-                        if tonumber(actualHour) ~=tonumber(Existing) then
-                            local delFile = pcall(function()
-                                AllIDs={}
-                                table.insert(AllIDs, actualHour)
-                            end)
-                        end
-                    end
-                    num=num+1
-                end
-                if Possible==true then
-                    table.insert(AllIDs, ID)
-                    wait()
-                    pcall(function()
-                        wait()
-                        game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
-                    end)
-                    wait()
-                end
+
+        for _, server in pairs(Site.data) do
+            local serverID = tostring(server.id)
+            if tonumber(server.maxPlayers) > tonumber(server.playing) and not AllIDs[serverID] then
+                AllIDs[serverID] = true
+                teleportToServer(serverID)
+                wait() -- Consider reducing wait time or removing it if not necessary
             end
         end
     end
-    function Teleport() 
+
+    -- Function to continuously attempt teleportation
+    local function Teleport()
         while wait() do
-            pcall(function()
-                TPReturner()
-                if foundAnything ~="" then
-                    TPReturner()
-                end
-            end)
+            pcall(TPReturner)
         end
     end
+
     Teleport()
 end     
 local HopServerButton = Instance.new("TextButton")
 HopServerButton.Parent = Settings_2
-HopServerButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+HopServerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 HopServerButton.Size = UDim2.new(0, 160, 0, 30)
 HopServerButton.Position = UDim2.new(0.55, 0, 0.45, 0)
 HopServerButton.Font = Enum.Font.SourceSansBold
@@ -341,7 +339,7 @@ Settings.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Settings.BorderSizePixel = 0
 Settings.Position = UDim2.new(0.02, 0, 0.65, 0)  
 Settings.Size = UDim2.new(0, 28, 0, 28)
-Settings.Image = "http://www.roblox.com/asset/?id=97917672712867"
+Settings.Image = "http://www.roblox.com/asset/?id=137960102925991"
 Top.Name = "Top"
 Top.Parent = Main
 Top.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
@@ -375,7 +373,7 @@ Line.Size = UDim2.new(1, 8, 0, 2)
 Line.Position = UDim2.new(0, -4, 1, 0) 
 Home.Name = "Home"
 Home.Parent = Main
-Home.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Home.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Home.BackgroundTransparency = 0.5
 Home.Size = UDim2.new(1, -60, 1, -50)
 Home.Position = UDim2.new(0, 55, 0, 40)
@@ -396,7 +394,7 @@ task.wait(0.2)
 sideTween:Play()
 Forward.Name = "Forward"
 Forward.Parent = Side
-Forward.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Forward.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Forward.BackgroundTransparency = 1.000
 Forward.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Forward.BorderSizePixel = 0
@@ -405,7 +403,7 @@ Forward.Size = UDim2.new(0, 28, 0, 28)
 Forward.Image = "http://www.roblox.com/asset/?id=82276736078331"
 Forward_2.Name = "Forward"
 Forward_2.Parent = Main
-Forward_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Forward_2.BackgroundColor3 = Color3.fromRGB(37, 37, 37)
 Forward_2.BackgroundTransparency = 0.600
 Forward_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Forward_2.BorderSizePixel = 0
@@ -427,13 +425,13 @@ TextLabel_8.TextSize = 32.000
 TextLabel_8.TextWrapped = true
 Search.Name = "Search"
 Search.Parent = Side
-Search.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Search.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Search.BackgroundTransparency = 1.000
 Search.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Search.BorderSizePixel = 0
 Search.Position = UDim2.new(0.02, 0, 0.78, 0) 
 Search.Size = UDim2.new(0, 28, 0, 28)
-Search.Image = "http://www.roblox.com/asset/?id=100225435871664"
+Search.Image = "http://www.roblox.com/asset/?id=130532588416160"
 local function createUICorner(parent, radius)
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, radius)
@@ -441,7 +439,7 @@ local function createUICorner(parent, radius)
 end
 Search_2.Name = "Search" 
 Search_2.Parent = Main 
-Search_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+Search_2.BackgroundColor3 = Color3.fromRGB(37, 37, 37) 
 Search_2.BackgroundTransparency = 0.2 
 Search_2.BorderSizePixel = 0 
 Search_2.Position = UDim2.new(0.101707332, 0, 0.171977207, 0)
@@ -456,7 +454,7 @@ SearchBox.PlaceholderText = "Enter Name Game"
 SearchBox.Font = Enum.Font.SourceSansBold 
 SearchBox.TextSize = 18 
 SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255) 
-SearchBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+SearchBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 SearchBox.BorderSizePixel = 0 
 SearchBox.TextXAlignment = Enum.TextXAlignment.Left 
 SearchBox.Text = "" 
@@ -483,79 +481,94 @@ PageInfo.TextColor3 = Color3.fromRGB(255, 255, 255)
 PageInfo.BackgroundTransparency = 1
 PageInfo.Text = "Total Pages: 0 | Page: 0"
 PageInfo.TextXAlignment = Enum.TextXAlignment.Right
+local httpservice = game:GetService("HttpService")
+local function createScriptBox(script, yOffset)
+    local ScriptBox = Instance.new("Frame")
+    ScriptBox.Parent = SearchResults
+    ScriptBox.Size = UDim2.new(1, -10, 0, 30)
+    ScriptBox.Position = UDim2.new(0, 0, 0, yOffset)
+    ScriptBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    ScriptBox.BorderSizePixel = 0
+    createUICorner(ScriptBox, 6)
+
+    local CopyButton = Instance.new("ImageButton")
+    CopyButton.Parent = ScriptBox
+    CopyButton.Size = UDim2.new(0.12, 0, 0.7, 0)
+    CopyButton.Position = UDim2.new(0.70, 0, 0.15, 0)
+    CopyButton.Image = "rbxassetid://108686613665180"
+    CopyButton.BackgroundTransparency = 1
+    CopyButton.ScaleType = Enum.ScaleType.Fit
+    createUICorner(CopyButton, 6)
+    CopyButton.MouseButton1Click:Connect(function() setclipboard(script.script) end)
+
+    local ExecuteButton = Instance.new("ImageButton")
+    ExecuteButton.Parent = ScriptBox
+    ExecuteButton.Size = UDim2.new(0.12, 0, 0.7, 0)
+    ExecuteButton.Position = UDim2.new(0.85, 0, 0.15, 0)
+    ExecuteButton.Image = "rbxassetid://83882793400706"
+    ExecuteButton.BackgroundTransparency = 1
+    ExecuteButton.ScaleType = Enum.ScaleType.Fit
+    createUICorner(ExecuteButton, 6)
+    ExecuteButton.MouseButton1Click:Connect(function() loadstring(script.script)() end)
+
+    local ScriptName = Instance.new("TextLabel")
+    ScriptName.Parent = ScriptBox
+    ScriptName.Size = UDim2.new(0.65, -5, 1, 0)
+    ScriptName.Position = UDim2.new(0, 5, 0, 0)
+    ScriptName.Text = script.title
+    ScriptName.TextSize = 12
+    ScriptName.Font = Enum.Font.SourceSansBold
+    ScriptName.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ScriptName.BackgroundTransparency = 1
+    ScriptName.TextXAlignment = Enum.TextXAlignment.Left
+    ScriptName.TextTruncate = Enum.TextTruncate.AtEnd
+
+    return ScriptBox
+end
+
 SearchBox.FocusLost:Connect(function(enterPressed)
     if not enterPressed or SearchBox.Text == "" then return end 
-    local httpservice = game:GetService("HttpService")
     local searchedquery = SearchBox.Text
     local page = 1
     local yOffset = 0
+
     for _, v in pairs(SearchResults:GetChildren()) do
         if v:IsA("Frame") then v:Destroy() end
     end
+
     if not SearchResults:IsA("ScrollingFrame") then return end
     SearchResults.CanvasSize = UDim2.new(0, 0, 0, 0)
-    local response = request({
-        Url = "https://scriptblox.com/api/script/search?q=" .. httpservice:UrlEncode(searchedquery) .. "&max=20&mode=free&page=1",
-        Method = "GET"
-    })
-    local decoded = httpservice:JSONDecode(response.Body)
-    local totalPages = decoded.result.totalPages or 1 
-    PageInfo.Text = "Total Pages: " .. totalPages .. " | Page: " .. page
-    while true do
+
+    local function fetchScripts(page)
         local response = request({
             Url = "https://scriptblox.com/api/script/search?q=" .. httpservice:UrlEncode(searchedquery) .. "&max=20&mode=free&page=" .. page,
             Method = "GET"
         })
-        local decoded = httpservice:JSONDecode(response.Body)
-        local scripts = decoded.result.scripts
-        if #scripts == 0 then break end
+        return httpservice:JSONDecode(response.Body)
+    end
+
+    local initialResponse = fetchScripts(page)
+    local totalPages = initialResponse.result.totalPages or 1 
+    local scripts = initialResponse.result.scripts
+
+    PageInfo.Text = "Total Pages: " .. totalPages .. " | Page: " .. page
+
+    while true do
         for _, script in pairs(scripts) do
-            local ScriptBox = Instance.new("Frame")
-            ScriptBox.Parent = SearchResults
-            ScriptBox.Size = UDim2.new(1, -10, 0, 30)
-            ScriptBox.Position = UDim2.new(0, 0, 0, yOffset)
-            ScriptBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            ScriptBox.BorderSizePixel = 0
-            createUICorner(ScriptBox, 6)
-            local CopyButton = Instance.new("ImageButton")
-            CopyButton.Parent = ScriptBox
-            CopyButton.Size = UDim2.new(0.12, 0, 0.7, 0)
-            CopyButton.Position = UDim2.new(0.70, 0, 0.15, 0)
-            CopyButton.Image = "rbxassetid://72822546519104"
-            CopyButton.BackgroundTransparency = 1
-            CopyButton.ScaleType = Enum.ScaleType.Fit
-            createUICorner(CopyButton, 6)
-            CopyButton.MouseButton1Click:Connect(function() setclipboard(script.script) end)
-            local ExecuteButton = Instance.new("ImageButton")
-            ExecuteButton.Parent = ScriptBox
-            ExecuteButton.Size = UDim2.new(0.12, 0, 0.7, 0)
-            ExecuteButton.Position = UDim2.new(0.85, 0, 0.15, 0)
-            ExecuteButton.Image = "rbxassetid://125594054578785"
-            ExecuteButton.BackgroundTransparency = 1
-            ExecuteButton.ScaleType = Enum.ScaleType.Fit
-            createUICorner(ExecuteButton, 6)
-            ExecuteButton.MouseButton1Click:Connect(function() loadstring(script.script)() end)
-            local ScriptName = Instance.new("TextLabel")
-            ScriptName.Parent = ScriptBox
-            ScriptName.Size = UDim2.new(0.65, -5, 1, 0)
-            ScriptName.Position = UDim2.new(0, 5, 0, 0)
-            ScriptName.Text = script.title
-            ScriptName.TextSize = 12
-            ScriptName.Font = Enum.Font.SourceSansBold
-            ScriptName.TextColor3 = Color3.fromRGB(255, 255, 255)
-            ScriptName.BackgroundTransparency = 1
-            ScriptName.TextXAlignment = Enum.TextXAlignment.Left
-            ScriptName.TextTruncate = Enum.TextTruncate.AtEnd
+            local ScriptBox = createScriptBox(script, yOffset)
             yOffset = yOffset + 35
         end
         SearchResults.CanvasSize = UDim2.new(0, 0, 0, yOffset)
-        PageInfo.Text = "Total Pages: " .. totalPages .. " | Page: " .. page
         page = page + 1
+        if page > totalPages then break end
+        local response = fetchScripts(page)
+        scripts = response.result.scripts
+        if #scripts == 0 then break end
     end
 end)
 user.Name = "user"
 user.Parent = Home
-user.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+user.BackgroundColor3 = Color3.fromRGB(37, 37, 37)
 user.BackgroundTransparency = 0.6
 user.BorderSizePixel = 0
 user.Position = UDim2.new(-0.0002, 0, -0.0026, 0)
@@ -566,7 +579,7 @@ User.Name = "User"
 User.Parent = user
 User.BackgroundTransparency = 1.0
 User.Position = UDim2.new(0.058, 0, 0.094, 0)
-User.Size = UDim2.new(0, 47, 0, 59)
+User.Size = UDim2.new(0, 47, 0, 47)
 User.ZIndex = 2
 User.Image = content
 local UserText = Instance.new("TextLabel")
@@ -590,7 +603,7 @@ local UICorner_5 = Instance.new("UICorner")
 UICorner_5.Parent = User
 local Frame = Instance.new("Frame")
 Frame.Parent = user
-Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(37, 37, 37)
 Frame.BackgroundTransparency = 0.4
 Frame.Position = UDim2.new(0.014, 0, 0.05, 0)
 Frame.Size = UDim2.new(0, 67, 0, 67)
@@ -599,7 +612,7 @@ UICorner_6.CornerRadius = UDim.new(1, 0)
 UICorner_6.Parent = Frame
 Frame1.Name = "Frame1"
 Frame1.Parent = Home
-Frame1.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Frame1.BackgroundColor3 = Color3.fromRGB(37, 37, 37)
 Frame1.BackgroundTransparency = 0.6
 Frame1.BorderSizePixel = 0
 Frame1.Position = UDim2.new(-0.0002, 0, 0.313, 0)
@@ -617,7 +630,7 @@ TextLabel_2.TextSize = 14
 local Frame2 = Instance.new("Frame")
 Frame2.Name = "Frame2"
 Frame2.Parent = Home
-Frame2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Frame2.BackgroundColor3 = Color3.fromRGB(37, 37, 37)
 Frame2.BackgroundTransparency = 0.6
 Frame2.BorderSizePixel = 0
 Frame2.Position = UDim2.new(0.509, 0, -0.0026, 0)
@@ -642,10 +655,12 @@ createTextLabel(Frame2, UDim2.new(0.02, 0, 0.38 * 1.3 * 1.03 * 1.05, 0), UDim2.n
 createTextLabel(Frame2, UDim2.new(0.02, 0, 0.547 * 1.3 * 1.03, 0), UDim2.new(0, 208, 0, 28), "Smooth UI:", 15)
 local FPSLabel = createTextLabel(Frame2, UDim2.new(0.02, 0, 0.698 * 1.3 * 0.90 * 1.05, 0), UDim2.new(0, 208, 0, 28), "FPS: ", 15)
 local TimeLabel = createTextLabel(Frame2, UDim2.new(0.02, 0, 0.8 * 1.3 * 0.97 * 0.97, 0), UDim2.new(0, 208, 0, 28), "TIME: ", 15)
-local RunService = game:GetService("RunService")
+
 local lastTick = tick()
 local frameCount = 0
-RunService.RenderStepped:Connect(function()
+
+-- Update FPS every frame
+game:GetService("RunService").RenderStepped:Connect(function()
     frameCount = frameCount + 1
     local currentTick = tick()
     if currentTick - lastTick >= 1 then
@@ -654,28 +669,31 @@ RunService.RenderStepped:Connect(function()
         lastTick = currentTick
     end
 end)
+
+-- Function to update local time and date
 local function UpdateLocalTime()
     local date = os.date("*t")
     local hour = date.hour % 24
     local ampm = hour < 12 and "AM" or "PM"
     local formattedTime = string.format("%02i:%02i:%02i %s", ((hour - 1) % 12) + 1, date.min, date.sec, ampm)
     local formattedDate = string.format("%02d/%02d/%04d", date.day, date.month, date.year)
-    local LocalizationService = game:GetService("LocalizationService")
-    local Players = game:GetService("Players")
-    local player = Players.LocalPlayer
+
     local regionCode = "Unknown"
     local success, code = pcall(function()
-        return LocalizationService:GetCountryRegionForPlayerAsync(player)
+        return game:GetService("LocalizationService"):GetCountryRegionForPlayerAsync(Players.LocalPlayer)
     end)
     if success then
         regionCode = code
     end
+
     TimeLabel.Text = formattedDate .. " - " .. formattedTime .. " [ " .. regionCode .. " ]"
 end
+
+-- Update local time every second
 spawn(function()
     while true do
         UpdateLocalTime()
-        game:GetService("RunService").RenderStepped:Wait()
+        wait(1)  -- Wait for 1 second before updating again
     end
 end)
 local line = Instance.new("Frame")
@@ -688,7 +706,7 @@ line.ZIndex = 2
 local DexExplorerButton = Instance.new("TextButton")
 DexExplorerButton.Name = "DexExplorerButton"
 DexExplorerButton.Parent = Frame1
-DexExplorerButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+DexExplorerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50) 
 DexExplorerButton.BackgroundTransparency = 0.400
 DexExplorerButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 DexExplorerButton.BorderSizePixel = 0
@@ -707,7 +725,7 @@ end)
 local NamelessAdminButton = Instance.new("TextButton")
 NamelessAdminButton.Name = "NamelessAdminButton"
 NamelessAdminButton.Parent = Frame1
-NamelessAdminButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+NamelessAdminButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50) 
 NamelessAdminButton.BackgroundTransparency = 0.400
 NamelessAdminButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 NamelessAdminButton.BorderSizePixel = 0
@@ -726,7 +744,7 @@ end)
 local InfinityYieldButton = Instance.new("TextButton")
 InfinityYieldButton.Name = "InfinityYieldButton"
 InfinityYieldButton.Parent = Frame1
-InfinityYieldButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+InfinityYieldButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50) 
 InfinityYieldButton.BackgroundTransparency = 0.400
 InfinityYieldButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 InfinityYieldButton.BorderSizePixel = 0
@@ -745,7 +763,7 @@ end)
 local SimpleSpyButton = Instance.new("TextButton")
 SimpleSpyButton.Name = "SimpleSpyButton"
 SimpleSpyButton.Parent = Frame1
-SimpleSpyButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+SimpleSpyButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 SimpleSpyButton.BackgroundTransparency = 0.400
 SimpleSpyButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 SimpleSpyButton.BorderSizePixel = 0
@@ -764,7 +782,7 @@ end)
 local CheckUNCButton = Instance.new("TextButton")
 CheckUNCButton.Name = "CheckUNCButton"
 CheckUNCButton.Parent = Frame1
-CheckUNCButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+CheckUNCButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 CheckUNCButton.BackgroundTransparency = 0.400
 CheckUNCButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 CheckUNCButton.BorderSizePixel = 0
@@ -783,7 +801,7 @@ end)
 local DiscordButton = Instance.new("TextButton")
 DiscordButton.Name = "DiscordButton"
 DiscordButton.Parent = Frame1
-DiscordButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+DiscordButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 DiscordButton.BackgroundTransparency = 0.400
 DiscordButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 DiscordButton.BorderSizePixel = 0
@@ -802,7 +820,7 @@ end)
 local WAzureButton = Instance.new("TextButton")
 WAzureButton.Name = "WAzureButton"
 WAzureButton.Parent = Frame1
-WAzureButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+WAzureButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 WAzureButton.BackgroundTransparency = 0.400
 WAzureButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 WAzureButton.BorderSizePixel = 0
@@ -821,7 +839,7 @@ end)
 local EclipseButton = Instance.new("TextButton")
 EclipseButton.Name = "EclipseButton"
 EclipseButton.Parent = Frame1
-EclipseButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+EclipseButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 EclipseButton.BackgroundTransparency = 0.400
 EclipseButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 EclipseButton.BorderSizePixel = 0
@@ -847,7 +865,7 @@ VerticalLine.ZIndex = 2
 local Console_2 = Instance.new("Frame")
 Console_2.Name = "Console"
 Console_2.Parent = Main
-Console_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Console_2.BackgroundColor3 = Color3.fromRGB(37, 37, 37)
 Console_2.BackgroundTransparency = 0.6
 Console_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Console_2.BorderSizePixel = 0
@@ -891,7 +909,7 @@ local function createButton(name, content, posX, isImage)
     if isImage then
         button.Image = "rbxassetid://" .. content
         button.ScaleType = Enum.ScaleType.Fit
-        button.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+        button.BackgroundColor3 = Color3.fromRGB(50, 50, 50) 
     else
         button.Text = content
         button.Font = Enum.Font.SourceSansBold
@@ -1005,7 +1023,7 @@ end
 local Executor_2 = Instance.new("Frame")
 Executor_2.Name = "Executor"
 Executor_2.Parent = Main
-Executor_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Executor_2.BackgroundColor3 = Color3.fromRGB(37, 37, 37)
 Executor_2.BackgroundTransparency = 0.600
 Executor_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Executor_2.BorderSizePixel = 0
@@ -1033,7 +1051,7 @@ NumberLine.TextWrapped = false
 local Code = Instance.new("TextBox")
 Code.Name = "Code"
 Code.Parent = Executor_2
-Code.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Code.BackgroundColor3 = Color3.fromRGB(37, 37, 37)
 Code.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Code.BorderSizePixel = 0
 Code.Position = UDim2.new(0.09, 0, 0.027, 0)
@@ -1099,7 +1117,7 @@ local function createButton(name, position, content, parent, isImage)
     if isImage then
         button.Image = "rbxassetid://" .. content
         button.ScaleType = Enum.ScaleType.Fit
-        button.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+        button.BackgroundColor3 = Color3.fromRGB(50, 50, 50) 
     else
         button.Text = content
         button.Font = Enum.Font.SourceSansBold
@@ -1136,7 +1154,7 @@ if savedFile and savedFile ~= "" and not hasExecuted then
 end
 AI_2.Name = "AI"
 AI_2.Parent = Main
-AI_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+AI_2.BackgroundColor3 = Color3.fromRGB(37, 37, 37)
 AI_2.BackgroundTransparency = 0.600
 AI_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 AI_2.BorderSizePixel = 0
@@ -1150,7 +1168,7 @@ scrollingFrame.Parent = AI_2
 scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
 scrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
 scrollingFrame.ScrollBarThickness = 0
-scrollingFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+scrollingFrame.BackgroundColor3 = Color3.fromRGB(37, 37, 37)
 local UICorner_Scroll = Instance.new("UICorner")
 UICorner_Scroll.Parent = scrollingFrame
 local Text_Welcome = Instance.new("TextLabel")
@@ -1174,7 +1192,7 @@ Image_Circular.Image = "rbxassetid://114936734174789"
 Image_Circular.ScaleType = Enum.ScaleType.Fit
 local TextBox_EnterContent = Instance.new("TextBox")
 TextBox_EnterContent.Parent = AI_2
-TextBox_EnterContent.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TextBox_EnterContent.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 TextBox_EnterContent.BackgroundTransparency = 0.5
 TextBox_EnterContent.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextBox_EnterContent.BorderSizePixel = 0
@@ -1191,19 +1209,19 @@ local UICorner_EnterContent = Instance.new("UICorner")
 UICorner_EnterContent.Parent = TextBox_EnterContent
 local Button_Send = Instance.new("ImageButton")
 Button_Send.Parent = AI_2
-Button_Send.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Button_Send.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Button_Send.BackgroundTransparency = 0.5
 Button_Send.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Button_Send.BorderSizePixel = 0
 Button_Send.Position = UDim2.new(0.85, 0, 0.9, 0)
 Button_Send.Size = UDim2.new(0.15, 0, 0.1, 0)
-Button_Send.Image = "rbxassetid://125594054578785"
+Button_Send.Image = "rbxassetid://83882793400706"
 Button_Send.ScaleType = Enum.ScaleType.Fit
 local UICorner_Send = Instance.new("UICorner")
 UICorner_Send.Parent = Button_Send
 local Button_Clear = Instance.new("ImageButton")
 Button_Clear.Parent = AI_2
-Button_Clear.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Button_Clear.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Button_Clear.BackgroundTransparency = 0.5
 Button_Clear.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Button_Clear.BorderSizePixel = 0
@@ -1224,37 +1242,77 @@ scrollingFrame:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
         Text_Welcome.Visible = true
     end
 end)
+local HttpService = game:GetService("HttpService")
+
+local function generateContent(prompt)
+    local GEMINI_API_KEY = "AIzaSyCbuEphUuP6Hl2emXU3YZLfnJfargqNwOE" -- Replace with your actual API key
+    local url = string.format("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-preview-02-05:generateContent?key=%s", GEMINI_API_KEY)
+    
+    local headers = {
+        ["Content-Type"] = "application/json"
+    }
+    
+    local data = {
+        contents = {
+            {
+                parts = {
+                    {
+                        text = prompt
+                    }
+                }
+            }
+        }
+    }
+
+    -- Make the POST request
+    local success, response = pcall(function()
+        return HttpService:PostAsync(url, HttpService:JSONEncode(data), Enum.HttpContentType.ApplicationJson, false, headers)
+    end)
+
+    if success then
+        local decodedResponse = HttpService:JSONDecode(response)
+        -- Check if the response contains the expected structure
+        if decodedResponse.candidates and decodedResponse.candidates[1] and decodedResponse.candidates[1].content and decodedResponse.candidates[1].content.parts[1] then
+            return decodedResponse.candidates[1].content.parts[1].text
+        else
+            return "Error: Unexpected response format."
+        end
+    else
+        return "Error: " .. tostring(response)
+    end
+end
+
+-- Assuming this is inside your button click event
 Button_Send.MouseButton1Click:Connect(function()
     local message = TextBox_EnterContent.Text
-    message = message:gsub("%s+", "")
+    message = message:gsub("%s+", "") -- Remove whitespace
     if message == "" or message == "Enter Content..." then return end
-    local httpService = game:GetService("HttpService")
-    local url = "http://fi4.bot-hosting.net:22869/TestHubChatgptV4?msg=" .. message
-    local success, response = pcall(function()
-        return request({ Url = url, Method = "GET" })
-    end)
-    if success then
-        if response.Success then
-            local data = httpService:JSONDecode(response.Body)
-            local reply = data.chat or "No response from server"
-            local Text_Reply = Instance.new("TextLabel")
-            Text_Reply.Parent = scrollingFrame
-            Text_Reply.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            Text_Reply.BackgroundTransparency = 1
-            Text_Reply.Position = UDim2.new(0, 0, replyPositionY, 0)
-            Text_Reply.Size = UDim2.new(0, maxWidth, 0, 50)
-            Text_Reply.Text = reply
-            Text_Reply.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Text_Reply.TextSize = 18
-            Text_Reply.Font = Enum.Font.SourceSansBold
-            Text_Reply.AnchorPoint = Vector2.new(0, 0)
-            Text_Reply.TextXAlignment = Enum.TextXAlignment.Left
-            Text_Reply.TextWrapped = true
-            replyPositionY = replyPositionY + 0.1
-            TextBox_EnterContent.Text = ""
-        end
-    end
+
+    -- Call the Gemini AI function to get a response
+    local reply = generateContent(message)
+
+    -- Create and configure the reply TextLabel
+    local Text_Reply = Instance.new("TextLabel")
+    Text_Reply.Parent = scrollingFrame
+    Text_Reply.BackgroundColor3 = Color3.fromRGB(37, 37, 37)
+    Text_Reply.BackgroundTransparency = 1
+    Text_Reply.Position = UDim2.new(0, 0, replyPositionY, 0)
+    Text_Reply.Size = UDim2.new(0, maxWidth, 0, 50)
+    Text_Reply.Text = reply
+    Text_Reply.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Text_Reply.TextSize = 18
+    Text_Reply.Font = Enum.Font.SourceSansBold
+    Text_Reply.AnchorPoint = Vector2.new(0, 0)
+    Text_Reply.TextXAlignment = Enum.TextXAlignment.Left
+    Text_Reply.TextWrapped = true
+
+    -- Update the reply position for the next message
+    replyPositionY = replyPositionY + 0.1
+
+    -- Clear the input box
+    TextBox_EnterContent.Text = ""
 end)
+
 Button_Clear.MouseButton1Click:Connect(function()
     TextBox_EnterContent.Text = "" 
     for _, child in pairs(scrollingFrame:GetChildren()) do
@@ -1463,15 +1521,21 @@ end
 Paste.MouseButton1Click:Connect(function()
 	Code.Text = getclipboard()
 end)
-local previousTime = tick()  
-local fps = 0  
+local previousTime = tick()
+local frameCount = 0
+local fps = 0
 while true do
-    local currentTime = tick()  
-    local deltaTime = currentTime - previousTime  
-    if deltaTime >= 1 then  
-        fps = math.floor(1 / wait())  
-        TextLabel_7.Text = "FPS: " .. fps  
-        previousTime = currentTime  
+    local currentTime = tick()
+    frameCount = frameCount + 1
+
+    -- Check if one second has passed
+    if currentTime - previousTime >= 1 then
+        fps = frameCount
+        TextLabel_7.Text = "FPS: " .. fps
+        
+        -- Reset for the next second
+        previousTime = currentTime
+        frameCount = 0
     end
-    wait()  
+    wait(0) -- Yield to allow other processes to run
 end
