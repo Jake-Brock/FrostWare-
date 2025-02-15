@@ -5,10 +5,11 @@
 local UI = {}
 
 -- // StarterGui.FrostWareUI \\ --
-UI["1"] = Instance.new("ScreenGui", game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"))
+UI["1"] = Instance.new("ScreenGui", game:GetService("CoreGui"))
 UI["1"]["IgnoreGuiInset"] = true
 UI["1"]["ScreenInsets"] = Enum.ScreenInsets.None
 UI["1"]["Name"] = [[FrostWareUI]]
+UI["1"]["ResetOnSpawn"] = false
 
 -- // StarterGui.FrostWareUI.EditorFrame \\ --
 UI["2"] = Instance.new("Frame", UI["1"])
@@ -546,326 +547,344 @@ UI["44"] = Instance.new("LocalScript", UI["3f"])
 
 -- // StarterGui.FrostWareUI.EditorFrame.EditorFunctions \\ --
 local function SCRIPT_5()
-local script = UI["5"]
-	local SyntaxEditor = script.Parent:WaitForChild("Frame"):WaitForChild("ScrollingFrame"):WaitForChild("SyntaxEditor")
-	
-	local function RemoveRichText(input)
-		return input:gsub("<[^>]->", "")
-	end
-	
-	local function RunExecute(v)
-		if dtc and dtc.schedule then
-			return clonefunction(dtc.schedule)(v)
-		else
-			return loadstring(v)()
-		end
-	end
-	
-	script.Parent:WaitForChild("ExecuteButton").MouseButton1Click:Connect(function()
-		RunExecute(RemoveRichText(SyntaxEditor.Text))
-	end)
-	
-	script.Parent:WaitForChild("ClearButton").MouseButton1Click:Connect(function()
-		SyntaxEditor.Text = ""
-	end)
-	
-	script.Parent:WaitForChild("PasteButton").MouseButton1Click:Connect(function()
-		SyntaxEditor.Text = (getclipboard or function() end)()
-	end)
-	
-	
+    local script = UI["5"]
+    local SyntaxEditor = script.Parent:WaitForChild("Frame"):WaitForChild("ScrollingFrame"):WaitForChild("SyntaxEditor")
+    
+    local function RemoveRichText(input)
+        return input:gsub("<[^>]->", "")
+    end
+    
+    local function RunExecute(v)
+        if dtc and dtc.schedule then
+            return clonefunction(dtc.schedule)(v)
+        else
+            return loadstring(v)()
+        end
+    end
+    
+    script.Parent:WaitForChild("ExecuteButton").MouseButton1Click:Connect(function()
+        RunExecute(RemoveRichText(SyntaxEditor.Text))
+    end)
+    
+    script.Parent:WaitForChild("ClearButton").MouseButton1Click:Connect(function()
+        SyntaxEditor.Text = ""
+    end)
+    
+    script.Parent:WaitForChild("PasteButton").MouseButton1Click:Connect(function()
+        SyntaxEditor.Text = (getclipboard or function() end)()
+    end)
 end
 task.spawn(SCRIPT_5)
+
 -- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.Line.Line Number.LocalScript \\ --
 local function SCRIPT_b()
-local script = UI["b"]
-	script.Parent.Parent.Parent.SyntaxEditor:GetPropertyChangedSignal("Text"):Connect(function()
-		local Lines = #script.Parent.Parent.Parent.SyntaxEditor.Text:split("\n")
-		
-		local Num = ""
-		
-		for i = 1, Lines do
-			Num = Num .. tostring(i) .. "\n"
-		end
-		
-		script.Parent.Text = Num
-	end)
+    local script = UI["b"]
+    script.Parent.Parent.Parent.SyntaxEditor:GetPropertyChangedSignal("Text"):Connect(function()
+        local Lines = #script.Parent.Parent.Parent.SyntaxEditor.Text:split("\n")
+        local Num = ""
+        for i = 1, Lines do
+            Num = Num .. tostring(i) .. "\n"
+        end
+        script.Parent.Text = Num
+    end)
 end
 task.spawn(SCRIPT_b)
+
 -- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.SyntaxEditor.SyntaxScript \\ --
 local function SCRIPT_d()
-local script = UI["d"]
-	SyntaxEditor = script.Parent 
-	
-	isfile = isfile or function(...)end
-	readfile = readfile or function(...)end
-	writefile = writefile or function(...)end
-	
-	ListCode = {
-		["local"] = "rgb(173, 216, 230)",
-		["function"] = "rgb(70, 130, 180)",
-		["end"] = "rgb(70, 130, 180)",
-		["if"] = "rgb(100, 149, 237)",
-		["then"] = "rgb(100, 149, 237)",
-		["else"] = "rgb(100, 149, 237)",
-		["elseif"] = "rgb(100, 149, 237)",
-		["return"] = "rgb(65, 105, 225)",
-		["while"] = "rgb(70, 130, 180)",
-		["for"] = "rgb(70, 130, 180)",
-		["do"] = "rgb(70, 130, 180)",
-		["break"] = "rgb(65, 105, 225)",
-		["continue"] = "rgb(65, 105, 225)",
-		["and"] = "rgb(70, 130, 180)",
-		["or"] = "rgb(70, 130, 180)",
-		["not"] = "rgb(70, 130, 180)",
-		["repeat"] = "rgb(135, 206, 235)",
-		["until"] = "rgb(135, 206, 235)",
-		["%d+%.?%d*"] = "rgb(0, 0, 255)",
-		['"[^"]*"'] = "rgb(176, 224, 230)",
-		["'[^']*'"] = "rgb(176, 224, 230)",
-		["[%+%-%*/%%%^#=<>~]"] = "rgb(70, 130, 180)",
-		["[%(%)]"] = "rgb(70, 130, 180)",
-		["[%[%]]"] = "rgb(70, 130, 180)",
-		["[%{%}]"] = "rgb(70, 130, 180)",
-		["%."] = "rgb(30, 144, 255)",
-		[":"] = "rgb(30, 144, 255)",
-		["game"] = "rgb(0, 191, 255)",
-		["workspace"] = "rgb(0, 191, 255)",
-		["script"] = "rgb(0, 191, 255)",
-		["math"] = "rgb(0, 191, 255)",
-		["string"] = "rgb(0, 191, 255)",
-		["table"] = "rgb(0, 191, 255)",
-		["pairs"] = "rgb(0, 191, 255)",
-		["ipairs"] = "rgb(0, 191, 255)",
-		["print"] = "rgb(0, 191, 255)",
-		["wait"] = "rgb(0, 191, 255)",
-		["loadstring"] = "rgb(0, 0, 139)"
-	}
-	
-	
-	
-	function SetSyntax(Str)
-		for i, v in pairs(ListCode) do
-			Str = Str:gsub("%f[%a]" .. i .. "%f[%A]", '<font color="' .. v .. '">' .. i .. '</font>')
-		end
-	
-		return Str
-	end
-	
-	task.spawn(function()
-		if isfile("Editor.txt") and readfile("Editor.txt") ~= "" and readfile("Editor.txt") ~= nil then
-			SyntaxEditor.Text = SetSyntax(readfile("Editor.txt"):gsub("<[^>]+>", ""))
-		end
-	
-		SyntaxEditor.Focused:Connect(function()
-			SyntaxEditor.Text = SyntaxEditor.Text:gsub("<[^>]+>", "")
-		end)
-	
-		SyntaxEditor.FocusLost:Connect(function()
-			SyntaxEditor.Text = SetSyntax(SyntaxEditor.Text:gsub("<[^>]+>", ""))
-		end)
-	
-		if SyntaxEditor.Text ~= "" then
-			SyntaxEditor.Text = SetSyntax(SyntaxEditor.Text:gsub("<[^>]+>", ""))
-		end
-	
-		SyntaxEditor:GetPropertyChangedSignal("Text"):Connect(function()
-			if SyntaxEditor.Text ~= "" then
-				writefile("Editor.txt", SyntaxEditor.Text)
-			end
-		end)
-	end)
+    local script = UI["d"]
+    local SyntaxEditor = script.Parent 
+    
+    -- These functions are assumed to be defined already:
+    isfile = isfile or function(...) end
+    readfile = readfile or function(...) end
+    writefile = writefile or function(...) end
+    
+    ListCode = {
+        ["local"] = "rgb(173, 216, 230)",
+        ["function"] = "rgb(70, 130, 180)",
+        ["end"] = "rgb(70, 130, 180)",
+        ["if"] = "rgb(100, 149, 237)",
+        ["then"] = "rgb(100, 149, 237)",
+        ["else"] = "rgb(100, 149, 237)",
+        ["elseif"] = "rgb(100, 149, 237)",
+        ["return"] = "rgb(65, 105, 225)",
+        ["while"] = "rgb(70, 130, 180)",
+        ["for"] = "rgb(70, 130, 180)",
+        ["do"] = "rgb(70, 130, 180)",
+        ["break"] = "rgb(65, 105, 225)",
+        ["continue"] = "rgb(65, 105, 225)",
+        ["and"] = "rgb(70, 130, 180)",
+        ["or"] = "rgb(70, 130, 180)",
+        ["not"] = "rgb(70, 130, 180)",
+        ["repeat"] = "rgb(135, 206, 235)",
+        ["until"] = "rgb(135, 206, 235)",
+        ["%d+%.?%d*"] = "rgb(0, 0, 255)",
+        ['"[^"]*"'] = "rgb(176, 224, 230)",
+        ["'[^']*'"] = "rgb(176, 224, 230)",
+        ["[%+%-%*/%%%^#=<>~]"] = "rgb(70, 130, 180)",
+        ["[%(%)]"] = "rgb(70, 130, 180)",
+        ["[%[%]]"] = "rgb(70, 130, 180)",
+        ["[%{%}]"] = "rgb(70, 130, 180)",
+        ["%."] = "rgb(30, 144, 255)",
+        [":"] = "rgb(30, 144, 255)",
+        ["game"] = "rgb(0, 191, 255)",
+        ["workspace"] = "rgb(0, 191, 255)",
+        ["script"] = "rgb(0, 191, 255)",
+        ["math"] = "rgb(0, 191, 255)",
+        ["string"] = "rgb(0, 191, 255)",
+        ["table"] = "rgb(0, 191, 255)",
+        ["pairs"] = "rgb(0, 191, 255)",
+        ["ipairs"] = "rgb(0, 191, 255)",
+        ["print"] = "rgb(0, 191, 255)",
+        ["wait"] = "rgb(0, 191, 255)",
+        ["loadstring"] = "rgb(0, 0, 139)"
+    }
+    
+    -- Helper to escape non-alphanumeric characters for simple keywords.
+    local function escapePattern(text)
+        return text:gsub("([^%w])", "%%%1")
+    end
+
+    function SetSyntax(Str)
+        for keyword, color in pairs(ListCode) do
+            -- If the keyword is only alphanumeric, escape it; otherwise assume it's a complex pattern.
+            local pattern = ("%f[%a]" .. (keyword:match("^%w+$") and escapePattern(keyword) or keyword) .. "%f[%A]")
+            Str = Str:gsub(pattern, '<font color="' .. color .. '">' .. keyword .. '</font>')
+        end
+        return Str
+    end
+    
+    task.spawn(function()
+        if isfile("Editor.txt") and readfile("Editor.txt") ~= "" and readfile("Editor.txt") ~= nil then
+            SyntaxEditor.Text = SetSyntax(readfile("Editor.txt"):gsub("<[^>]+>", ""))
+        end
+    
+        SyntaxEditor.Focused:Connect(function()
+            SyntaxEditor.Text = SyntaxEditor.Text:gsub("<[^>]+>", "")
+        end)
+    
+        SyntaxEditor.FocusLost:Connect(function()
+            SyntaxEditor.Text = SetSyntax(SyntaxEditor.Text:gsub("<[^>]+>", ""))
+        end)
+    
+        if SyntaxEditor.Text ~= "" then
+            SyntaxEditor.Text = SetSyntax(SyntaxEditor.Text:gsub("<[^>]+>", ""))
+        end
+    
+        SyntaxEditor:GetPropertyChangedSignal("Text"):Connect(function()
+            if SyntaxEditor.Text ~= "" then
+                writefile("Editor.txt", SyntaxEditor.Text)
+            end
+        end)
+    end)
 end
 task.spawn(SCRIPT_d)
+
 -- // StarterGui.FrostWareUI.EditorFrame.SearchButton.LocalScript \\ --
 local function SCRIPT_25()
-local script = UI["25"]
-	local button = script.Parent
-	local editorFrame = button.Parent
-	local screenGui = editorFrame.Parent
-	local searchFrame = screenGui:FindFirstChild("SearchFrame")
-	if searchFrame then
-		button.MouseButton1Click:Connect(function()
-			editorFrame.Visible = false
-			searchFrame.Visible = true
-		end)
-	end
+    local script = UI["25"]
+    local button = script.Parent
+    local editorFrame = button.Parent
+    local screenGui = editorFrame.Parent
+    local searchFrame = screenGui:FindFirstChild("SearchFrame")
+    if searchFrame then
+        button.MouseButton1Click:Connect(function()
+            editorFrame.Visible = false
+            searchFrame.Visible = true
+        end)
+    end
 end
 task.spawn(SCRIPT_25)
--- // StarterGui.FrostWareUI.FWButton.LocalScript \\ --
+
+-- // StarterGui.FrostWareUI.FWButton.LocalScript (2b) \\ --
 local function SCRIPT_2b()
-local script = UI["2b"]
-	local button = script.Parent
-	local editorFrame = button.Parent:FindFirstChild("EditorFrame")
-	local screenGui = button.Parent
-	local searchFrame = screenGui:FindFirstChild("SearchFrame")
-	if editorFrame then
-		button.MouseButton1Click:Connect(function()
-			editorFrame.Visible = not editorFrame.Visible
-			if searchFrame then
-				searchFrame.Visible = false
-			end
-		end)
-	end
+    local script = UI["2b"]
+    local button = script.Parent
+    local editorFrame = button.Parent:FindFirstChild("EditorFrame")
+    local screenGui = button.Parent
+    local searchFrame = screenGui:FindFirstChild("SearchFrame")
+    if editorFrame then
+        button.MouseButton1Click:Connect(function()
+            editorFrame.Visible = not editorFrame.Visible
+            if searchFrame then
+                searchFrame.Visible = false
+            end
+        end)
+    end
 end
 task.spawn(SCRIPT_2b)
--- // StarterGui.FrostWareUI.FWButton.LocalScript \\ --
+
+-- // StarterGui.FrostWareUI.FWButton.LocalScript (2c) \\ --
 local function SCRIPT_2c()
-local script = UI["2c"]
-	local UserInputService = game:GetService("UserInputService")
-	local runService = (game:GetService("RunService"));
-	
-	local gui = script.Parent
-	
-	local dragging
-	local dragInput
-	local dragStart
-	local startPos
-	
-	function Lerp(a, b, m)
-		return a + (b - a) * m
-	end;
-	
-	local lastMousePos
-	local lastGoalPos
-	local DRAG_SPEED = (8); -- // The speed of the UI darg.
-	function Update(dt)
-		if not (startPos) then return end;
-		if not (dragging) and (lastGoalPos) then
-			gui.Position = UDim2.new(startPos.X.Scale, Lerp(gui.Position.X.Offset, lastGoalPos.X.Offset, dt * DRAG_SPEED), startPos.Y.Scale, Lerp(gui.Position.Y.Offset, lastGoalPos.Y.Offset, dt * DRAG_SPEED))
-			return 
-		end;
-	
-		local delta = (lastMousePos - UserInputService:GetMouseLocation())
-		local xGoal = (startPos.X.Offset - delta.X);
-		local yGoal = (startPos.Y.Offset - delta.Y);
-		lastGoalPos = UDim2.new(startPos.X.Scale, xGoal, startPos.Y.Scale, yGoal)
-		gui.Position = UDim2.new(startPos.X.Scale, Lerp(gui.Position.X.Offset, xGoal, dt * DRAG_SPEED), startPos.Y.Scale, Lerp(gui.Position.Y.Offset, yGoal, dt * DRAG_SPEED))
-	end;
-	
-	gui.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPos = gui.Position
-			lastMousePos = UserInputService:GetMouseLocation()
-	
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
-				end
-			end)
-		end
-	end)
-	
-	gui.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
-	
-	runService.Heartbeat:Connect(Update)
+    local script = UI["2c"]
+    local UserInputService = game:GetService("UserInputService")
+    local runService = game:GetService("RunService")
+    
+    local gui = script.Parent
+    local dragging = false
+    local dragInput, dragStart, initialPos, lastMousePos, lastGoalPos
+    local DRAG_SPEED = 8  -- The speed of the UI drag.
+    
+    local function Lerp(a, b, m)
+        return a + (b - a) * m
+    end
+
+    local function Update(dt)
+        if not initialPos then return end
+        
+        if not dragging and lastGoalPos then
+            gui.Position = UDim2.new(
+                initialPos.X.Scale, Lerp(gui.Position.X.Offset, lastGoalPos.X.Offset, dt * DRAG_SPEED),
+                initialPos.Y.Scale, Lerp(gui.Position.Y.Offset, lastGoalPos.Y.Offset, dt * DRAG_SPEED)
+            )
+            return 
+        end
+
+        local currentMousePos = UserInputService:GetMouseLocation()
+        local delta = lastMousePos - currentMousePos
+        local newX = initialPos.X.Offset - delta.X
+        local newY = initialPos.Y.Offset - delta.Y
+        lastGoalPos = UDim2.new(initialPos.X.Scale, newX, initialPos.Y.Scale, newY)
+        gui.Position = UDim2.new(
+            initialPos.X.Scale, Lerp(gui.Position.X.Offset, newX, dt * DRAG_SPEED),
+            initialPos.Y.Scale, Lerp(gui.Position.Y.Offset, newY, dt * DRAG_SPEED)
+        )
+    end
+
+    gui.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            initialPos = gui.Position
+            lastMousePos = UserInputService:GetMouseLocation()
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    gui.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    runService.Heartbeat:Connect(Update)
 end
 task.spawn(SCRIPT_2c)
+
 -- // StarterGui.FrostWareUI.SearchFrame.CloudAPI \\ --
 local function SCRIPT_30()
-local script = UI["30"]
-	local Scripts = script.Parent
-	local SearchButton = Scripts:WaitForChild("SearchButton")
-	local SearchTextBox = Scripts:WaitForChild("SearchBar")
-	local HttpService = game:GetService("HttpService")
-	
-	local function RunExecute(v)
-		if dtc and dtc.schedule then
-			return clonefunction(dtc.schedule)(v)
-		else
-			return loadstring(v)()
-		end
-	end
-	
-	local setclipboard = setclipboard or function(_)end
-	
-	local function Add_Tab(GameName, NameScript, ScriptCode, ImageCode)
-		local ScriptFrame = Scripts:WaitForChild("ScrollingFrame"):FindFirstChild("ScriptFrame")
-		local New = ScriptFrame:Clone()
-	
-		local Button = New:FindFirstChild("ImageButton")
-	
-		Button.Image = ImageCode or "rbxassetid://72797583317405"
-		Button.GameLabel.Text = GameName or "Unknown Game"
-		Button.NameLabel.Text = NameScript or "Unknown Script"
-	
-		New.Visible = true
-		New.Parent = Scripts:WaitForChild("ScrollingFrame")
-	
-		Button.MouseButton1Click:Connect(function()
-			RunExecute(ScriptCode)
-		end)
-	end
-	
-	local function StartAPI()
-		for _, v in ipairs(Scripts:WaitForChild("ScrollingFrame"):GetChildren()) do
-			if v:IsA("Frame") and v.Name == "ScriptFrame" and v.Visible then
-				v:Destroy()
-			end
-		end
-	
-		local API = "https://scriptblox.com/api/script/search?q=" .. HttpService:UrlEncode(SearchTextBox.Text)
-		local s, r = pcall(function()
-			return HttpService:JSONDecode(game:HttpGetAsync(API))
-		end)
-	
-		if s then
-			for _, v in ipairs(r.result.scripts or {}) do
-				if not v.isPatched then
-					Add_Tab(
-						v.game and v.game.name or "Unknown Game", 
-						v.title or "Untitled",
-						v.script or "",
-						v.isUniversal == true and "rbxassetid://111973669155622" or "https://assetgame.roblox.com/Game/Tools/ThumbnailAsset.ashx?aid=" .. v.game.gameId .. "&fmt=png&wd=420&ht=420" or "rbxassetid://72797583317405"
-					)
-					task.wait(0.3)
-				end
-			end
-		end
-	end
-	
-	SearchButton.MouseButton1Click:Connect(StartAPI)
-	SearchTextBox.FocusLost:Connect(StartAPI)
-	
+    local script = UI["30"]
+    local Scripts = script.Parent
+    local SearchButton = Scripts:WaitForChild("SearchButton")
+    local SearchTextBox = Scripts:WaitForChild("SearchBar")
+    local HttpService = game:GetService("HttpService")
+    
+    local function RunExecute(v)
+        if dtc and dtc.schedule then
+            return clonefunction(dtc.schedule)(v)
+        else
+            return loadstring(v)()
+        end
+    end
+    
+    local setclipboard = setclipboard or function(_) end
+    
+    local function Add_Tab(GameName, NameScript, ScriptCode, ImageCode)
+        local ScriptFrame = Scripts:WaitForChild("ScrollingFrame"):FindFirstChild("ScriptFrame")
+        local New = ScriptFrame:Clone()
+    
+        local Button = New:FindFirstChild("ImageButton")
+    
+        Button.Image = ImageCode or "rbxassetid://72797583317405"
+        Button.GameLabel.Text = GameName or "Unknown Game"
+        Button.NameLabel.Text = NameScript or "Unknown Script"
+    
+        New.Visible = true
+        New.Parent = Scripts:WaitForChild("ScrollingFrame")
+    
+        Button.MouseButton1Click:Connect(function()
+            RunExecute(ScriptCode)
+        end)
+    end
+    
+    local function StartAPI()
+        for _, v in ipairs(Scripts:WaitForChild("ScrollingFrame"):GetChildren()) do
+            if v:IsA("Frame") and v.Name == "ScriptFrame" and v.Visible then
+                v:Destroy()
+            end
+        end
+        
+        local API = "https://scriptblox.com/api/script/search?q=" .. HttpService:UrlEncode(SearchTextBox.Text)
+        local s, r = pcall(function()
+            return HttpService:JSONDecode(game:HttpGetAsync(API))
+        end)
+        
+        if s and r and r.result and r.result.scripts then
+            for _, v in ipairs(r.result.scripts) do
+                if not v.isPatched then
+                    local gameName = (v.game and v.game.name) or "Unknown Game"
+                    local scriptName = v.title or "Untitled"
+                    local scriptCode = v.script or ""
+                    local image
+                    if v.isUniversal == true then
+                        image = "rbxassetid://111973669155622"
+                    elseif v.game and v.game.gameId then
+                        image = "https://assetgame.roblox.com/Game/Tools/ThumbnailAsset.ashx?aid=" .. v.game.gameId .. "&fmt=png&wd=420&ht=420"
+                    else
+                        image = "rbxassetid://72797583317405"
+                    end
+                    Add_Tab(gameName, scriptName, scriptCode, image)
+                    task.wait(0.3)
+                end
+            end
+        end
+    end
+    
+    SearchButton.MouseButton1Click:Connect(StartAPI)
+    SearchTextBox.FocusLost:Connect(StartAPI)
 end
 task.spawn(SCRIPT_30)
+
 -- // StarterGui.FrostWareUI.SearchFrame.ScrollingFrame.ScriptFrame.ImageButton.NameLabel.LocalScript \\ --
 local function SCRIPT_36()
-local script = UI["36"]
-	script.Parent.Font = Enum.Font.GothamBold
+    local script = UI["36"]
+    script.Parent.Font = Enum.Font.GothamBold
 end
 task.spawn(SCRIPT_36)
+
 -- // StarterGui.FrostWareUI.SearchFrame.ScrollingFrame.ScriptFrame.ImageButton.GameLabel.LocalScript \\ --
 local function SCRIPT_38()
-local script = UI["38"]
-	script.Parent.Font = Enum.Font.GothamBold
+    local script = UI["38"]
+    script.Parent.Font = Enum.Font.GothamBold
 end
 task.spawn(SCRIPT_38)
+
 -- // StarterGui.FrostWareUI.SearchFrame.SearchBar.FontScript \\ --
 local function SCRIPT_3d()
-local script = UI["3d"]
-	script.Parent.Font = Enum.Font.GothamBold
+    local script = UI["3d"]
+    script.Parent.Font = Enum.Font.GothamBold
 end
 task.spawn(SCRIPT_3d)
+
 -- // StarterGui.FrostWareUI.SearchFrame.ExecuteButton.LocalScript \\ --
 local function SCRIPT_44()
-local script = UI["44"]
-	local button = script.Parent
-	local searchFrame = button.Parent
-	local screenGui = searchFrame.Parent
-	local editorFrame = screenGui:FindFirstChild("EditorFrame")
-	if editorFrame then
-		button.MouseButton1Click:Connect(function()
-			searchFrame.Visible = false
-			editorFrame.Visible = true
-		end)
-	end
+    local script = UI["44"]
+    local button = script.Parent
+    local searchFrame = button.Parent
+    local screenGui = searchFrame.Parent
+    local editorFrame = screenGui:FindFirstChild("EditorFrame")
+    if editorFrame then
+        button.MouseButton1Click:Connect(function()
+            searchFrame.Visible = false
+            editorFrame.Visible = true
+        end)
+    end
 end
 task.spawn(SCRIPT_44)
 
