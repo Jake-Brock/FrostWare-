@@ -1015,28 +1015,107 @@ UI["BackScript"] = Instance.new("LocalScript", UI["Back"])
 ----------------------------------
 -- BUTTON FUNCTIONALITY EXAMPLE --
 ----------------------------------
-UI["NewButton"].MouseButton1Click:Connect(function()
-    -- Toggle visibility of the NewSectionFrame when the button is clicked
-    UI["NewSectionFrame"].Visible = not UI["NewSectionFrame"].Visible
-    UI["2"].Visible = not UI["2"].Visible
+
+
+local TweenService = game:GetService("TweenService")
+local button = UI["NewButton"]
+local bbutton = UI["Back"]
+local editorFrame = UI["6"]
+local sectionFrame = UI["NewSectionFrame"]
+
+-- Table to store each button's original size
+local originalSizes = {}
+
+button.MouseButton1Click:Connect(function()
+    -- Tween info for smooth animation (duration: 0.5 seconds)
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     
+    -- Animate editorFrame's Y-size to 0, then hide its container
+    local editorOriginalSize = editorFrame.Size
+    local targetEditorSize = UDim2.new(editorOriginalSize.X.Scale, editorOriginalSize.X.Offset, 0, 0)
+    local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
+    editorTween:Play()
+    editorTween.Completed:Wait()
+    
+    -- Reset editorFrame size and hide its parent
+    editorFrame.Size = editorOriginalSize
+    UI["NewSectionFrame"].Visible = true
+    editorFrame.Parent.Visible = false
+
+    -- Iterate over all children of sectionFrame
+    for _, child in ipairs(sectionFrame:GetChildren()) do
+        if child:IsA("TextButton") and child ~= bbutton then
+            -- Store the button's original size if not already stored
+            if not originalSizes[child] then
+                originalSizes[child] = child.Size
+            end
+
+            -- Start with a zero width while preserving the original height
+            child.Size = UDim2.new(0, 0, originalSizes[child].Y.Scale, originalSizes[child].Y.Offset)
+            child.Visible = true
+
+            -- Tween the button's size back to its original size
+            local btnTween = TweenService:Create(child, tweenInfo, {Size = originalSizes[child]})
+            btnTween:Play()
+        end
+    end
 end)
 
-local function SCRIPT_Back()
-    local script = UI["BackScript"]
-    local button = script.Parent
-    local backFrame = button.Parent
-    -- Instead of using searchFrame.Parent (which is nil), reference the EditorFrame directly.
-    local editorFrame = UI["2"]
-    if editorFrame then
-        button.MouseButton1Click:Connect(function()
-            backFrame.Visible = false
-            editorFrame.Visible = true
-        end)
-    end
-end
-task.spawn(SCRIPT_Back)
+UI["Back"].MouseButton1Click:Connect(function()
+    -- Tween info for smooth animation (duration: 0.5 seconds)
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
+    -- Collect all the buttons (except bbutton) from sectionFrame to animate first
+    local animatingButtons = {}
+    for _, child in ipairs(sectionFrame:GetChildren()) do
+        if child:IsA("TextButton") and child ~= bbutton then
+            table.insert(animatingButtons, child)
+        end
+    end
+
+    local animationsComplete = 0
+    local totalButtons = #animatingButtons
+
+    -- Function to check if all button animations have finished
+    local function checkAnimationsComplete()
+        animationsComplete = animationsComplete + 1
+        if animationsComplete >= totalButtons then
+            -- Once all button animations are done, hide the NewSectionFrame
+            UI["NewSectionFrame"].Visible = false
+
+            -- Make the Editor frame visible and animate its Y-size from 0 to target
+            editorFrame.Parent.Visible = true
+            local targetEditorSize = editorFrame.Size
+            -- Start with a zero height (keeping X-size intact)
+            editorFrame.Size = UDim2.new(targetEditorSize.X.Scale, targetEditorSize.X.Offset, 0, 0)
+            local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
+            editorTween:Play()
+        end
+    end
+
+    -- If there are no buttons to animate, proceed immediately.
+    if totalButtons == 0 then
+        checkAnimationsComplete()
+    else
+        for _, button in ipairs(animatingButtons) do
+            -- Store original size if not already stored
+            if not originalSizes[button] then
+                originalSizes[button] = button.Size
+            end
+
+            -- Animate the button's width to zero while keeping its height intact
+            local btnTween = TweenService:Create(button, tweenInfo, {
+                Size = UDim2.new(0, 0, originalSizes[button].Y.Scale, originalSizes[button].Y.Offset)
+            })
+            btnTween:Play()
+
+            btnTween.Completed:Connect(function()
+                button.Visible = false
+                checkAnimationsComplete()
+            end)
+        end
+    end
+end)
 ------------------ SCRIPTS & BUTTONS -----------------
 
 UI["IY_B"] = UI["20"]:Clone()           -- Clone UI["20"] and store it in UI["IY_B"]
