@@ -1380,7 +1380,7 @@ UI["ESP_B"].MouseButton1Click:Connect(function()
             if player ~= localPlayer then
                 applyHighlight(player)
                 createNametag(player)
-            end>
+            end
         end
     else
         for player, _ in pairs(customNametags) do
