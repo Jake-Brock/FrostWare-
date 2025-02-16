@@ -1065,172 +1065,214 @@ UI["ESP_B"].Text = "ESP"
 UI["ESP_B"].Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1.15 - originalPos.Y.Scale, originalPos.Y.Offset)
 
 -- Services  
-local Players = game:GetService("Players")  
-local RunService = game:GetService("RunService")  
-local Workspace = game:GetService("Workspace")  
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 
-local localPlayer = Players.LocalPlayer  
-local camera = Workspace.CurrentCamera  
+local localPlayer = Players.LocalPlayer
+local camera = Workspace.CurrentCamera
 
--- Table to hold nametag GUIs for players  
-local nametagGuis = {}  
+-- Table to hold custom nametag GUIs for players  
+local customNametags = {}
 
--- Create a ScreenGui to parent all our custom nametags  
-local screenGui = Instance.new("ScreenGui")  
-screenGui.Name = "CustomNametags"  
-screenGui.ResetOnSpawn = false  
-screenGui.Parent = game:GetService("CoreGui")
+-- ESP Toggle Variable  
+local ESP_Enabled = false
 
--- ESP Toggle Variable
-local ESP_Enabled = false  
-
----------------------------------------------------------  
+---------------------------------------------------------
+-- Helper: Invert a Color  
+---------------------------------------------------------
+function invertColor(color)
+    return Color3.new(1 - color.R, 1 - color.G, 1 - color.B)
+end
+---------------------------------------------------------
 -- Cleanup Nametag for a Player  
----------------------------------------------------------  
-local function cleanupNametag(player)  
-	if nametagGuis[player] then  
-		nametagGuis[player]:Destroy()  
-		nametagGuis[player] = nil  
-	end  
-end  
+---------------------------------------------------------
+local function cleanupNametag(player)
+    if customNametags[player] then
+        customNametags[player]:Destroy()
+        customNametags[player] = nil
+    end
+end
 
----------------------------------------------------------  
--- Create Custom Nametag for a Player  
----------------------------------------------------------  
-local function createNametag(player)  
-	if not ESP_Enabled then return end  -- Check if ESP is enabled  
-	if player == localPlayer then return end  
-	cleanupNametag(player)  
+---------------------------------------------------------
+-- Create Custom Nametag for a Player (using BillboardGui)
+---------------------------------------------------------
+local function createNametag(player)
+    if not ESP_Enabled then return end  -- Check if ESP is enabled  
+    if player == localPlayer then return end  
+    cleanupNametag(player)
+    
+    if not player.Character or not player.Character:FindFirstChild("Head") then return end
+    
+    local character = player.Character
+    local head = character:FindFirstChild("Head")
+    
+    -- Disable default nametag  
+    local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+    if humanoid then
+        humanoid.NameDisplayDistance = 0
+    end
+    
+    -- Create a BillboardGui attached to the player's Head  
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "CustomNametagBillboard"
+    billboard.Adornee = head
+    billboard.AlwaysOnTop = true
+    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.Parent = head
 
-	if not player.Character or not player.Character:FindFirstChild("Head") then return end  
+    -- Create a TextLabel inside the BillboardGui with your desired properties  
+    local label = Instance.new("TextLabel", billboard)
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = player.Name
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.TextStrokeTransparency = 0.5
+    label.Font = Enum.Font.Code
+    label.TextSize = 20
+    -- Set AnchorPoint so that the label's bottom center aligns with the BillboardGui
+    label.AnchorPoint = Vector2.new(0.5, 1)
+    label.Position = UDim2.new(0.5, 0, 1, 0)
 
-	local label = Instance.new("TextLabel")  
-	label.Name = "CustomNameTag"  
-	label.Text = player.Name  
-	label.BackgroundTransparency = 1  
-	label.BorderSizePixel = 0  
-	label.TextStrokeTransparency = 0.5  
-	label.Font = Enum.Font.SourceSansBold  
-	label.TextSize = 20  
-	label.TextColor3 = Color3.new(1,1,1)  
-	label.Size = UDim2.new(0, 100, 0, 25)  
-	label.AnchorPoint = Vector2.new(0.5, 0.5)  
-	label.Parent = screenGui  
+    -- Store the BillboardGui in our table using the player as the key  
+    customNametags[player] = billboard
+end
 
-	nametagGuis[player] = label  
-end  
-
----------------------------------------------------------  
+---------------------------------------------------------
 -- Set Up Highlight on Character  
----------------------------------------------------------  
-local function applyHighlight(player)  
-	if not ESP_Enabled then return end  -- Check if ESP is enabled  
-	if player == localPlayer then return end  
-	local character = player.Character  
-	if not character then return end  
+---------------------------------------------------------
+local function applyHighlight(player)
+    if not ESP_Enabled then return end  -- Check if ESP is enabled  
+    if player == localPlayer then return end  
+    local character = player.Character
+    if not character then return end
 
-	if character:FindFirstChild("ESP_Highlight") then  
-		character.ESP_Highlight:Destroy()  
-	end  
+    if character:FindFirstChild("ESP_Highlight") then
+        character.ESP_Highlight:Destroy()
+    end
 
-	local highlight = Instance.new("Highlight")  
-	highlight.Name = "ESP_Highlight"  
-	highlight.Adornee = character  
-	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop  
-	highlight.FillColor = player.TeamColor.Color  
-	highlight.FillTransparency = 0.5  
-	highlight.OutlineColor = player.TeamColor.Color  
-	highlight.OutlineTransparency = 0  
-	highlight.Parent = character  
-end  
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESP_Highlight"
+    highlight.Adornee = character
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.FillColor = player.TeamColor.Color
+    highlight.FillTransparency = 0.5
+    highlight.OutlineColor = player.TeamColor.Color
+    highlight.OutlineTransparency = 0
+    highlight.Parent = character
+end
 
----------------------------------------------------------  
+---------------------------------------------------------
 -- Handle Character Addition  
----------------------------------------------------------  
-local function onCharacterAdded(character, player)  
-	applyHighlight(player)  
-	local head = character:WaitForChild("Head", 5)  
-	if head then  
-		createNametag(player)  
-	end  
+---------------------------------------------------------
+local function onCharacterAdded(character, player)
+    applyHighlight(player)
+    local head = character:WaitForChild("Head", 5)
+    if head then
+        createNametag(player)
+    end
 
-	character.AncestryChanged:Connect(function(child, parent)  
-		if not parent then  
-			cleanupNametag(player)  
-		end  
-	end)  
-end  
+    character.AncestryChanged:Connect(function(child, parent)
+        if not parent then
+            cleanupNametag(player)
+        end
+    end)
+end
 
----------------------------------------------------------  
+---------------------------------------------------------
 -- Handle Player Addition  
----------------------------------------------------------  
-local function onPlayerAdded(player)  
-	player.AncestryChanged:Connect(function(child, parent)  
-		if not parent then  
-			cleanupNametag(player)  
-		end  
-	end)  
+---------------------------------------------------------
+local function onPlayerAdded(player)
+    player.AncestryChanged:Connect(function(child, parent)
+        if not parent then
+            cleanupNametag(player)
+        end
+    end)
 
-	player.CharacterAdded:Connect(function(character)  
-		onCharacterAdded(character, player)  
-	end)  
+    player.CharacterAdded:Connect(function(character)
+        onCharacterAdded(character, player)
+    end)
 
-	if player.Character then  
-		onCharacterAdded(player.Character, player)  
-	end  
-end  
+    if player.Character then
+        onCharacterAdded(player.Character, player)
+    end
+end
 
 -- Set up for existing players  
-for _, player in ipairs(Players:GetPlayers()) do  
-	onPlayerAdded(player)  
-end  
+for _, player in ipairs(Players:GetPlayers()) do
+    onPlayerAdded(player)
+end
 
-Players.PlayerAdded:Connect(onPlayerAdded)  
+Players.PlayerAdded:Connect(onPlayerAdded)
 
----------------------------------------------------------  
--- Update Nametags Each Render Step  
----------------------------------------------------------  
-RunService.RenderStepped:Connect(function()  
-	if not ESP_Enabled then return end  
+---------------------------------------------------------
+-- Update Routine  
+-- We update the color of the label each RenderStep based on 
+-- what object (if any) is occluding the player's head.
+---------------------------------------------------------
+RunService.RenderStepped:Connect(function()
+    if not ESP_Enabled then return end  
 
-	for player, label in pairs(nametagGuis) do  
-		if player and player.Character and player.Character:FindFirstChild("Head") then  
-			local head = player.Character.Head  
-			local headPos = head.Position + Vector3.new(0, 1.5, 0)  
+    for player, billboard in pairs(customNametags) do  
+        if player and player.Character then  
+            local head = player.Character:FindFirstChild("Head")  
+            if head then  
+                local headPos = head.Position + Vector3.new(0, 1.5, 0)  
+                local screenPos, onScreen = camera:WorldToViewportPoint(headPos)  
 
-			local screenPos, onScreen = camera:WorldToViewportPoint(headPos)  
-			label.Position = UDim2.new(0, screenPos.X, 0, screenPos.Y)  
-			label.Visible = onScreen  
-		else  
-			cleanupNametag(player)  
-		end  
-	end  
-end)  
+                local label = billboard:FindFirstChildOfClass("TextLabel")  
+                if label then  
+                    local origin = camera.CFrame.Position  
+                    local direction = (headPos - origin).Unit * (headPos - origin).Magnitude  
 
----------------------------------------------------------  
--- Button Click Event (Toggles ESP)  
----------------------------------------------------------  
-UI["ESP_B"].MouseButton1Click:Connect(function()  
-	ESP_Enabled = not ESP_Enabled  
+                    local raycastParams = RaycastParams.new()  
+                    raycastParams.FilterDescendantsInstances = {player.Character}  
+                    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist  
 
-	if ESP_Enabled then  
-		for _, player in ipairs(Players:GetPlayers()) do  
-			if player ~= localPlayer then  
-				applyHighlight(player)  
-				createNametag(player)  
-			end  
-		end  
-	else  
-		for _, player in pairs(nametagGuis) do  
-			cleanupNametag(player)  
-		end  
+                    local rayResult = Workspace:Raycast(origin, direction, raycastParams)
+                    if rayResult then  
+                        print("Ray hit:", rayResult.Instance:GetFullName(), "Color:", rayResult.Instance.Color)
+                        label.TextColor3 = invertColor(rayResult.Instance.Color)
+                    else  
+                        print("No object hit by ray.")
+                        label.TextColor3 = Color3.new(1, 1, 1) -- Default white  
+                    end  
+                end  
 
-		for _, player in ipairs(Players:GetPlayers()) do  
-			if player.Character and player.Character:FindFirstChild("ESP_Highlight") then  
-				player.Character.ESP_Highlight:Destroy()  
-			end  
-		end  
-	end  
+                billboard.Enabled = onScreen  
+            else  
+                cleanupNametag(player)  
+            end  
+        end  
+    end  
+end)
+
+---------------------------------------------------------
+-- Button Click Event (Toggles ESP)
+---------------------------------------------------------
+
+UI["ESP_B"].MouseButton1Click:Connect(function()
+    ESP_Enabled = not ESP_Enabled
+
+    if ESP_Enabled then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= localPlayer then
+                applyHighlight(player)
+                createNametag(player)
+            end
+        end
+    else
+        for player, _ in pairs(customNametags) do
+            cleanupNametag(player)
+        end
+
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("ESP_Highlight") then
+                player.Character.ESP_Highlight:Destroy()
+            end
+        end
+    end
 end)
 
 return UI["1"], require;
