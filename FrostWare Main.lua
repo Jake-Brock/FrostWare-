@@ -1009,6 +1009,13 @@ UI["IY_B"].MouseButton1Click:Connect(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
 end)
 
+UI["RJ_B"] = UI["IY_B"]:Clone()
+UI["RJ_B"].Parent = UI["NewSectionFrame"]
+UI["RJ_B"].Text = "Rejoin"
+UI["RJ_B"].Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1.3 - originalPos.Y.Scale, originalPos.Y.Offset)
+UI["RJ_B"].MouseButton1Click:Connect(function()
+    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game:GetService("Players").LocalPlayer)
+end)
 
 UI["ESP_B"] = UI["IY_B"]:Clone()
 UI["ESP_B"].Parent = UI["NewSectionFrame"]
@@ -1182,14 +1189,6 @@ UI["ESP_B"].MouseButton1Click:Connect(function()
 			end  
 		end  
 	end  
-end)
-
-UI["RJ_B"] = UI["IY_B"]:Clone()
-UI["RJ_B"].Parent = UI["NewSectionFrame"]
-UI["RJ_B"].Text = "Rejoin"
-UI["RJ_B"].Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1.3 - originalPos.Y.Scale, originalPos.Y.Offset)
-UI["RJ_B"].MouseButton1Click:Connect(function()
-    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game:GetService("Players").LocalPlayer)
 end)
 
 return UI["1"], require;
