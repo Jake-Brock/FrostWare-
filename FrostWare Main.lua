@@ -905,7 +905,7 @@ task.spawn(SCRIPT_44)
 -------------------------------
 
 -- Calculate the gap (using the gap between Execute and Paste buttons)
-local gap = 0.05  -- approximately 0.11844
+local gap = 0.0275  -- approximately 0.11844
 
 -- Get the SearchButton's position and size from UI["20"]
 local searchButtonPos = UI["20"].Position
@@ -923,7 +923,7 @@ UI["NewButton"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
 -- New X position = SearchButton.X + SearchButton.Width + gap
 UI["NewButton"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap, 0, searchButtonPos.Y.Scale, 0)
 UI["NewButton"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewButton"]["Text"] = [[SCRIPTS]]
+UI["NewButton"]["Text"] = [[📃]]
 
 -- NewSectionButton UICorner (similar styling as other buttons)
 UI["NewButtonCorner"] = Instance.new("UICorner", UI["NewButton"])
