@@ -710,6 +710,9 @@ local function SCRIPT_2b()
             if searchFrame then
                 searchFrame.Visible = false
             end
+            if UI["NewSectionFrame"] then
+                UI["NewSectionFrame"].Visible = false
+            end
         end)
     end
 end
@@ -887,5 +890,298 @@ local function SCRIPT_44()
     end
 end
 task.spawn(SCRIPT_44)
+
+
+
+
+------------------------- DEFUALT SCRIPT HUB SECTION STARTS HERE -------------------------
+
+
+
+
+
+-------------------------------
+-- NEW SECTION & BUTTON CODE --
+-------------------------------
+
+-- Calculate the gap (using the gap between Execute and Paste buttons)
+local gap = 0.05  -- approximately 0.11844
+
+-- Get the SearchButton's position and size from UI["20"]
+local searchButtonPos = UI["20"].Position
+local searchButtonSize = UI["20"].Size
+
+-- Create NewSectionButton, positioned to the right of the SearchButton using the same gap
+UI["NewButton"] = Instance.new("TextButton", UI["2"])
+UI["NewButton"]["Name"] = "NewSectionButton"
+UI["NewButton"]["BorderSizePixel"] = 0
+UI["NewButton"]["TextSize"] = 14
+UI["NewButton"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
+UI["NewButton"]["BackgroundColor3"] = Color3.fromRGB(254, 255, 255)
+UI["NewButton"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+UI["NewButton"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
+-- New X position = SearchButton.X + SearchButton.Width + gap
+UI["NewButton"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap, 0, searchButtonPos.Y.Scale, 0)
+UI["NewButton"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+UI["NewButton"]["Text"] = [[SCRIPTS]]
+
+-- NewSectionButton UICorner (similar styling as other buttons)
+UI["NewButtonCorner"] = Instance.new("UICorner", UI["NewButton"])
+UI["NewButtonCorner"]["CornerRadius"] = UDim.new(0, 16)
+
+-- NewSectionButton UIStroke
+UI["NewButtonStroke"] = Instance.new("UIStroke", UI["NewButton"])
+UI["NewButtonStroke"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
+UI["NewButtonStroke"]["Thickness"] = 2.5
+UI["NewButtonStroke"]["Color"] = Color3.fromRGB(44, 65, 88)
+
+-- NewSectionButton UIGradient
+UI["NewButtonGradient"] = Instance.new("UIGradient", UI["NewButton"])
+UI["NewButtonGradient"]["Rotation"] = -50
+UI["NewButtonGradient"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0, 0.6), NumberSequenceKeypoint.new(1, 0.6)}
+UI["NewButtonGradient"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 60, 95)), ColorSequenceKeypoint.new(1, Color3.fromRGB(51, 82, 121))}
+
+
+-- Create NewSectionFrame (similar to SearchFrame)
+UI["NewSectionFrame"] = Instance.new("Frame", UI["1"])
+UI["NewSectionFrame"]["Name"] = "NewSectionFrame"
+UI["NewSectionFrame"]["Visible"] = false  -- set to true if you want it visible by default
+UI["NewSectionFrame"]["BorderSizePixel"] = 0
+UI["NewSectionFrame"]["BackgroundColor3"] = Color3.fromRGB(57, 83, 117)
+UI["NewSectionFrame"]["Size"] = UDim2.new(0.38726, 0, 0.56496, 0)
+UI["NewSectionFrame"]["Position"] = UDim2.new(0.30594, 0, 0.21667, 0)
+UI["NewSectionFrame"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+UI["NewSectionFrame"]["BackgroundTransparency"] = 1
+
+-- NewSectionFrame UICorner
+UI["NewSectionFrameUICorner"] = Instance.new("UICorner", UI["NewSectionFrame"])
+UI["NewSectionFrameUICorner"]["CornerRadius"] = UDim.new(0, 28)
+
+-- NewSectionFrame UIStroke
+UI["NewSectionFrameUIStroke"] = Instance.new("UIStroke", UI["NewSectionFrame"])
+UI["NewSectionFrameUIStroke"]["Transparency"] = 0.8
+UI["NewSectionFrameUIStroke"]["Thickness"] = 2.5
+UI["NewSectionFrameUIStroke"]["Color"] = Color3.fromRGB(44, 65, 88)
+
+UI["Back"] = UI["11"]:Clone()
+UI["Back"]["Position"] = UDim2.new(0.03171, 0, 0.85311, 0)
+UI["Back"]["Parent"] = UI["NewSectionFrame"]
+
+-- (Optional) Add additional elements (such as a scrolling frame, inner content, etc.)
+-- For example, you might duplicate your SearchFrame's scrolling frame here.
+UI["BackScript"] = Instance.new("LocalScript", UI["Back"])
+----------------------------------
+-- BUTTON FUNCTIONALITY EXAMPLE --
+----------------------------------
+UI["NewButton"].MouseButton1Click:Connect(function()
+    -- Toggle visibility of the NewSectionFrame when the button is clicked
+    UI["NewSectionFrame"].Visible = not UI["NewSectionFrame"].Visible
+    UI["2"].Visible = not UI["2"].Visible
+    
+end)
+
+local function SCRIPT_Back()
+    local script = UI["BackScript"]
+    local button = script.Parent
+    local backFrame = button.Parent
+    -- Instead of using searchFrame.Parent (which is nil), reference the EditorFrame directly.
+    local editorFrame = UI["2"]
+    if editorFrame then
+        button.MouseButton1Click:Connect(function()
+            backFrame.Visible = false
+            editorFrame.Visible = true
+        end)
+    end
+end
+task.spawn(SCRIPT_Back)
+
+------------------ SCRIPTS & BUTTONS -----------------
+
+UI["IY_B"] = UI["20"]:Clone()           -- Clone UI["20"] and store it in UI["IY_B"]
+UI["IY_B"].Parent = UI["NewSectionFrame"] -- Set the clone's parent to UI["NewSectionFrame"]
+local originalSize = UI["20"].Size
+UI["IY_B"].Size = UDim2.new(originalSize.X.Scale*4, originalSize.X.Offset, originalSize.Y.Scale, originalSize.Y.Offset)
+local originalPos = UI["20"].Position
+UI["IY_B"].Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1 - originalPos.Y.Scale, originalPos.Y.Offset)
+UI["IY_B"].ImageLabel:Destroy()
+UI["IY_B"].Text = "Infinite Yield"
+UI["IY_B"].MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+end)
+
+
+UI["ESP_B"] = UI["IY_B"]:Clone()
+UI["ESP_B"].Parent = UI["NewSectionFrame"]
+UI["ESP_B"].Text = "ESP"
+UI["ESP_B"].Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1.15 - originalPos.Y.Scale, originalPos.Y.Offset)
+
+-- Services  
+local Players = game:GetService("Players")  
+local RunService = game:GetService("RunService")  
+local Workspace = game:GetService("Workspace")  
+
+local localPlayer = Players.LocalPlayer  
+local camera = Workspace.CurrentCamera  
+
+-- Table to hold nametag GUIs for players  
+local nametagGuis = {}  
+
+-- Create a ScreenGui to parent all our custom nametags  
+local screenGui = Instance.new("ScreenGui")  
+screenGui.Name = "CustomNametags"  
+screenGui.ResetOnSpawn = false  
+screenGui.Parent = localPlayer:WaitForChild("PlayerGui")  
+
+-- ESP Toggle Variable
+local ESP_Enabled = false  
+
+---------------------------------------------------------  
+-- Cleanup Nametag for a Player  
+---------------------------------------------------------  
+local function cleanupNametag(player)  
+	if nametagGuis[player] then  
+		nametagGuis[player]:Destroy()  
+		nametagGuis[player] = nil  
+	end  
+end  
+
+---------------------------------------------------------  
+-- Create Custom Nametag for a Player  
+---------------------------------------------------------  
+local function createNametag(player)  
+	if not ESP_Enabled then return end  -- Check if ESP is enabled  
+	if player == localPlayer then return end  
+	cleanupNametag(player)  
+
+	if not player.Character or not player.Character:FindFirstChild("Head") then return end  
+
+	local label = Instance.new("TextLabel")  
+	label.Name = "CustomNameTag"  
+	label.Text = player.Name  
+	label.BackgroundTransparency = 1  
+	label.BorderSizePixel = 0  
+	label.TextStrokeTransparency = 0.5  
+	label.Font = Enum.Font.SourceSansBold  
+	label.TextSize = 20  
+	label.TextColor3 = Color3.new(1,1,1)  
+	label.Size = UDim2.new(0, 100, 0, 25)  
+	label.AnchorPoint = Vector2.new(0.5, 0.5)  
+	label.Parent = screenGui  
+
+	nametagGuis[player] = label  
+end  
+
+---------------------------------------------------------  
+-- Set Up Highlight on Character  
+---------------------------------------------------------  
+local function applyHighlight(player)  
+	if not ESP_Enabled then return end  -- Check if ESP is enabled  
+	if player == localPlayer then return end  
+	local character = player.Character  
+	if not character then return end  
+
+	if character:FindFirstChild("ESP_Highlight") then  
+		character.ESP_Highlight:Destroy()  
+	end  
+
+	local highlight = Instance.new("Highlight")  
+	highlight.Name = "ESP_Highlight"  
+	highlight.Adornee = character  
+	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop  
+	highlight.FillColor = player.TeamColor.Color  
+	highlight.FillTransparency = 0.5  
+	highlight.OutlineColor = player.TeamColor.Color  
+	highlight.OutlineTransparency = 0  
+	highlight.Parent = character  
+end  
+
+---------------------------------------------------------  
+-- Handle Character Addition  
+---------------------------------------------------------  
+local function onCharacterAdded(character, player)  
+	applyHighlight(player)  
+	local head = character:WaitForChild("Head", 5)  
+	if head then  
+		createNametag(player)  
+	end  
+
+	character.AncestryChanged:Connect(function(child, parent)  
+		if not parent then  
+			cleanupNametag(player)  
+		end  
+	end)  
+end  
+
+---------------------------------------------------------  
+-- Handle Player Addition  
+---------------------------------------------------------  
+local function onPlayerAdded(player)  
+	player.AncestryChanged:Connect(function(child, parent)  
+		if not parent then  
+			cleanupNametag(player)  
+		end  
+	end)  
+
+	player.CharacterAdded:Connect(function(character)  
+		onCharacterAdded(character, player)  
+	end)  
+
+	if player.Character then  
+		onCharacterAdded(player.Character, player)  
+	end  
+end  
+
+-- Set up for existing players  
+for _, player in ipairs(Players:GetPlayers()) do  
+	onPlayerAdded(player)  
+end  
+
+Players.PlayerAdded:Connect(onPlayerAdded)  
+
+---------------------------------------------------------  
+-- Update Nametags Each Render Step  
+---------------------------------------------------------  
+RunService.RenderStepped:Connect(function()  
+	if not ESP_Enabled then return end  
+
+	for player, label in pairs(nametagGuis) do  
+		if player and player.Character and player.Character:FindFirstChild("Head") then  
+			local head = player.Character.Head  
+			local headPos = head.Position + Vector3.new(0, 1.5, 0)  
+
+			local screenPos, onScreen = camera:WorldToViewportPoint(headPos)  
+			label.Position = UDim2.new(0, screenPos.X, 0, screenPos.Y)  
+			label.Visible = onScreen  
+		else  
+			cleanupNametag(player)  
+		end  
+	end  
+end)  
+
+---------------------------------------------------------  
+-- Button Click Event (Toggles ESP)  
+---------------------------------------------------------  
+UI["ESP_B"].MouseButton1Click:Connect(function()  
+	ESP_Enabled = not ESP_Enabled  
+
+	if ESP_Enabled then  
+		for _, player in ipairs(Players:GetPlayers()) do  
+			if player ~= localPlayer then  
+				applyHighlight(player)  
+				createNametag(player)  
+			end  
+		end  
+	else  
+		for _, player in pairs(nametagGuis) do  
+			cleanupNametag(player)  
+		end  
+
+		for _, player in ipairs(Players:GetPlayers()) do  
+			if player.Character and player.Character:FindFirstChild("ESP_Highlight") then  
+				player.Character.ESP_Highlight:Destroy()  
+			end  
+		end  
+	end  
+end)
 
 return UI["1"], require;
