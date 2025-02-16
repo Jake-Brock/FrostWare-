@@ -544,6 +544,89 @@ UI["43"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fr
 -- // StarterGui.FrostWareUI.SearchFrame.ExecuteButton.LocalScript \\ --
 UI["44"] = Instance.new("LocalScript", UI["3f"])
 
+-------------------------------
+-- NEW SECTION & BUTTON CODE --
+-------------------------------
+
+-- Calculate the gap (using the gap between Execute and Paste buttons)
+local gap = 0.0275  -- approximately 0.11844
+
+-- Get the SearchButton's position and size from UI["20"]
+local searchButtonPos = UI["20"].Position
+local searchButtonSize = UI["20"].Size
+
+-- Create NewSectionButton, positioned to the right of the SearchButton using the same gap
+UI["NewButton"] = Instance.new("TextButton", UI["2"])
+UI["NewButton"]["Name"] = "NewSectionButton"
+UI["NewButton"]["BorderSizePixel"] = 0
+UI["NewButton"]["TextSize"] = 14
+UI["NewButton"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
+UI["NewButton"]["BackgroundColor3"] = Color3.fromRGB(254, 255, 255)
+UI["NewButton"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+UI["NewButton"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
+-- New X position = SearchButton.X + SearchButton.Width + gap
+UI["NewButton"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap, 0, searchButtonPos.Y.Scale, 0)
+UI["NewButton"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+UI["NewButton"]["Text"] = [[]]
+
+UI["NewButtonLabel"] = Instance.new("ImageLabel", UI["NewButton"])
+UI["NewButtonLabel"]["BorderSizePixel"] = 0
+UI["NewButtonLabel"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+UI["NewButtonLabel"]["ScaleType"] = Enum.ScaleType.Fit
+UI["NewButtonLabel"]["Image"] = [[rbxassetid://11570802781]]
+UI["NewButtonLabel"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
+UI["NewButtonLabel"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+UI["NewButtonLabel"]["BackgroundTransparency"] = 1
+UI["NewButtonLabel"]["Position"] = UDim2.new(0.19036, 0, 0.19036, 0)
+
+-- NewSectionButton UICorner (similar styling as other buttons)
+UI["NewButtonCorner"] = Instance.new("UICorner", UI["NewButton"])
+UI["NewButtonCorner"]["CornerRadius"] = UDim.new(0, 16)
+
+-- NewSectionButton UIStroke
+UI["NewButtonStroke"] = Instance.new("UIStroke", UI["NewButton"])
+UI["NewButtonStroke"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
+UI["NewButtonStroke"]["Thickness"] = 2.5
+UI["NewButtonStroke"]["Color"] = Color3.fromRGB(44, 65, 88)
+
+-- NewSectionButton UIGradient
+UI["NewButtonGradient"] = Instance.new("UIGradient", UI["NewButton"])
+UI["NewButtonGradient"]["Rotation"] = -50
+UI["NewButtonGradient"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0, 0.6), NumberSequenceKeypoint.new(1, 0.6)}
+UI["NewButtonGradient"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 60, 95)), ColorSequenceKeypoint.new(1, Color3.fromRGB(51, 82, 121))}
+
+
+-- Create NewSectionFrame (similar to SearchFrame)
+UI["NewSectionFrame"] = Instance.new("Frame", UI["1"])
+UI["NewSectionFrame"]["Name"] = "NewSectionFrame"
+UI["NewSectionFrame"]["Visible"] = false  -- set to true if you want it visible by default
+UI["NewSectionFrame"]["BorderSizePixel"] = 0
+UI["NewSectionFrame"]["BackgroundColor3"] = Color3.fromRGB(57, 83, 117)
+UI["NewSectionFrame"]["Size"] = UDim2.new(0.38726, 0, 0.56496, 0)
+UI["NewSectionFrame"]["Position"] = UDim2.new(0.30594, 0, 0.21667, 0)
+UI["NewSectionFrame"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+UI["NewSectionFrame"]["BackgroundTransparency"] = 1
+
+-- NewSectionFrame UICorner
+UI["NewSectionFrameUICorner"] = Instance.new("UICorner", UI["NewSectionFrame"])
+UI["NewSectionFrameUICorner"]["CornerRadius"] = UDim.new(0, 28)
+
+-- NewSectionFrame UIStroke
+UI["NewSectionFrameUIStroke"] = Instance.new("UIStroke", UI["NewSectionFrame"])
+UI["NewSectionFrameUIStroke"]["Transparency"] = 0.8
+UI["NewSectionFrameUIStroke"]["Thickness"] = 2.5
+UI["NewSectionFrameUIStroke"]["Color"] = Color3.fromRGB(44, 65, 88)
+
+UI["Back"] = UI["11"]:Clone()
+UI["Back"]["Position"] = UDim2.new(0.03171, 0, 0.85311, 0)
+UI["Back"]["Parent"] = UI["NewSectionFrame"]
+
+-- (Optional) Add additional elements (such as a scrolling frame, inner content, etc.)
+-- For example, you might duplicate your SearchFrame's scrolling frame here.
+UI["BackScript"] = Instance.new("LocalScript", UI["Back"])
+----------------------------------
+-- BUTTON FUNCTIONALITY EXAMPLE --
+----------------------------------
 
 -- // StarterGui.FrostWareUI.EditorFrame.EditorFunctions \\ --
 local function SCRIPT_5()
@@ -718,25 +801,56 @@ if searchFrame then
         searchTween.Completed:Wait()
     end)
 end
--- // StarterGui.FrostWareUI.FWButton.LocalScript (2b) \\ --
+
+-- // StarterGui.FrostWareUI.FWButton.LocalScript \\ --
 local function SCRIPT_2b()
-    local script = UI["2b"]
-    local button = script.Parent
-    local editorFrame = button.Parent:FindFirstChild("EditorFrame")
+    local scriptRef = UI["2b"]
+    local button = scriptRef.Parent
     local screenGui = button.Parent
-    local searchFrame = screenGui:FindFirstChild("SearchFrame")
-    if editorFrame then
-        button.MouseButton1Click:Connect(function()
-            editorFrame.Visible = not editorFrame.Visible
-            if searchFrame then
-                searchFrame.Visible = false
-            end
-            if UI["NewSectionFrame"] then
-                UI["NewSectionFrame"].Visible = false
-            end
-        end)
+    local tweenService = game:GetService("TweenService")
+    
+    local toggle = true
+    local originalProperties = {}
+
+    -- Cache the original position and size of each frame
+    for _, frame in ipairs(screenGui:GetChildren()) do
+        if frame:IsA("Frame") then
+            originalProperties[frame] = {
+                Position = frame.Position,
+                Size = frame.Size
+            }
+        end
     end
+
+    button.MouseButton1Click:Connect(function()
+        if toggle then
+            -- Tween all frames to center and shrink to (0,0,0)
+            for frame, props in pairs(originalProperties) do
+                local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                local goal = {
+                    Position = UDim2.new(0.5, 0, 0.5, 0),
+                    Size = UDim2.new(0, 0, 0, 0)
+                }
+                local tween = tweenService:Create(frame, tweenInfo, goal)
+                tween:Play()
+            end
+            toggle = false
+        else
+            -- Restore original properties
+            for frame, props in pairs(originalProperties) do
+                local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                local goal = {
+                    Position = props.Position,
+                    Size = props.Size
+                }
+                local tween = tweenService:Create(frame, tweenInfo, goal)
+                tween:Play()
+            end
+            toggle = true
+        end
+    end)
 end
+
 task.spawn(SCRIPT_2b)
 
 -- // StarterGui.FrostWareUI.FWButton.LocalScript (2c) \\ --
@@ -942,89 +1056,6 @@ end
 
 
 
--------------------------------
--- NEW SECTION & BUTTON CODE --
--------------------------------
-
--- Calculate the gap (using the gap between Execute and Paste buttons)
-local gap = 0.0275  -- approximately 0.11844
-
--- Get the SearchButton's position and size from UI["20"]
-local searchButtonPos = UI["20"].Position
-local searchButtonSize = UI["20"].Size
-
--- Create NewSectionButton, positioned to the right of the SearchButton using the same gap
-UI["NewButton"] = Instance.new("TextButton", UI["2"])
-UI["NewButton"]["Name"] = "NewSectionButton"
-UI["NewButton"]["BorderSizePixel"] = 0
-UI["NewButton"]["TextSize"] = 14
-UI["NewButton"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewButton"]["BackgroundColor3"] = Color3.fromRGB(254, 255, 255)
-UI["NewButton"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-UI["NewButton"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
--- New X position = SearchButton.X + SearchButton.Width + gap
-UI["NewButton"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap, 0, searchButtonPos.Y.Scale, 0)
-UI["NewButton"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewButton"]["Text"] = [[]]
-
-UI["NewButtonLabel"] = Instance.new("ImageLabel", UI["NewButton"])
-UI["NewButtonLabel"]["BorderSizePixel"] = 0
-UI["NewButtonLabel"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["NewButtonLabel"]["ScaleType"] = Enum.ScaleType.Fit
-UI["NewButtonLabel"]["Image"] = [[rbxassetid://11570802781]]
-UI["NewButtonLabel"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
-UI["NewButtonLabel"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewButtonLabel"]["BackgroundTransparency"] = 1
-UI["NewButtonLabel"]["Position"] = UDim2.new(0.19036, 0, 0.19036, 0)
-
--- NewSectionButton UICorner (similar styling as other buttons)
-UI["NewButtonCorner"] = Instance.new("UICorner", UI["NewButton"])
-UI["NewButtonCorner"]["CornerRadius"] = UDim.new(0, 16)
-
--- NewSectionButton UIStroke
-UI["NewButtonStroke"] = Instance.new("UIStroke", UI["NewButton"])
-UI["NewButtonStroke"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-UI["NewButtonStroke"]["Thickness"] = 2.5
-UI["NewButtonStroke"]["Color"] = Color3.fromRGB(44, 65, 88)
-
--- NewSectionButton UIGradient
-UI["NewButtonGradient"] = Instance.new("UIGradient", UI["NewButton"])
-UI["NewButtonGradient"]["Rotation"] = -50
-UI["NewButtonGradient"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0, 0.6), NumberSequenceKeypoint.new(1, 0.6)}
-UI["NewButtonGradient"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 60, 95)), ColorSequenceKeypoint.new(1, Color3.fromRGB(51, 82, 121))}
-
-
--- Create NewSectionFrame (similar to SearchFrame)
-UI["NewSectionFrame"] = Instance.new("Frame", UI["1"])
-UI["NewSectionFrame"]["Name"] = "NewSectionFrame"
-UI["NewSectionFrame"]["Visible"] = false  -- set to true if you want it visible by default
-UI["NewSectionFrame"]["BorderSizePixel"] = 0
-UI["NewSectionFrame"]["BackgroundColor3"] = Color3.fromRGB(57, 83, 117)
-UI["NewSectionFrame"]["Size"] = UDim2.new(0.38726, 0, 0.56496, 0)
-UI["NewSectionFrame"]["Position"] = UDim2.new(0.30594, 0, 0.21667, 0)
-UI["NewSectionFrame"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewSectionFrame"]["BackgroundTransparency"] = 1
-
--- NewSectionFrame UICorner
-UI["NewSectionFrameUICorner"] = Instance.new("UICorner", UI["NewSectionFrame"])
-UI["NewSectionFrameUICorner"]["CornerRadius"] = UDim.new(0, 28)
-
--- NewSectionFrame UIStroke
-UI["NewSectionFrameUIStroke"] = Instance.new("UIStroke", UI["NewSectionFrame"])
-UI["NewSectionFrameUIStroke"]["Transparency"] = 0.8
-UI["NewSectionFrameUIStroke"]["Thickness"] = 2.5
-UI["NewSectionFrameUIStroke"]["Color"] = Color3.fromRGB(44, 65, 88)
-
-UI["Back"] = UI["11"]:Clone()
-UI["Back"]["Position"] = UDim2.new(0.03171, 0, 0.85311, 0)
-UI["Back"]["Parent"] = UI["NewSectionFrame"]
-
--- (Optional) Add additional elements (such as a scrolling frame, inner content, etc.)
--- For example, you might duplicate your SearchFrame's scrolling frame here.
-UI["BackScript"] = Instance.new("LocalScript", UI["Back"])
-----------------------------------
--- BUTTON FUNCTIONALITY EXAMPLE --
-----------------------------------
 
 
 local TweenService = game:GetService("TweenService")
@@ -1349,7 +1380,7 @@ UI["ESP_B"].MouseButton1Click:Connect(function()
             if player ~= localPlayer then
                 applyHighlight(player)
                 createNametag(player)
-            end
+            end>
         end
     else
         for player, _ in pairs(customNametags) do
