@@ -916,14 +916,14 @@ UI["NewButton"] = Instance.new("TextButton", UI["2"])
 UI["NewButton"]["Name"] = "NewSectionButton"
 UI["NewButton"]["BorderSizePixel"] = 0
 UI["NewButton"]["TextSize"] = 14
-UI["NewButton"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+UI["NewButton"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
 UI["NewButton"]["BackgroundColor3"] = Color3.fromRGB(254, 255, 255)
 UI["NewButton"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 UI["NewButton"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
 -- New X position = SearchButton.X + SearchButton.Width + gap
 UI["NewButton"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap, 0, searchButtonPos.Y.Scale, 0)
 UI["NewButton"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewButton"]["Text"] = [[📃]]
+UI["NewButton"]["Text"] = [[SCRIPTS]]
 
 -- NewSectionButton UICorner (similar styling as other buttons)
 UI["NewButtonCorner"] = Instance.new("UICorner", UI["NewButton"])
@@ -1182,6 +1182,14 @@ UI["ESP_B"].MouseButton1Click:Connect(function()
 			end  
 		end  
 	end  
+end)
+
+UI["RJ_B"] = UI["IY_B"]:Clone()
+UI["RJ_B"].Parent = UI["NewSectionFrame"]
+UI["RJ_B"].Text = "Rejoin"
+UI["RJ_B"].Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1.3 - originalPos.Y.Scale, originalPos.Y.Offset)
+UI["RJ_B"].MouseButton1Click:Connect(function()
+    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game:GetService("Players").LocalPlayer)
 end)
 
 return UI["1"], require;
