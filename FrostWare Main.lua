@@ -965,7 +965,17 @@ UI["NewButton"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
 -- New X position = SearchButton.X + SearchButton.Width + gap
 UI["NewButton"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap, 0, searchButtonPos.Y.Scale, 0)
 UI["NewButton"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewButton"]["Text"] = [[SCRIPTS]]
+UI["NewButton"]["Text"] = [[]]
+
+UI["NewButtonLabel"] = Instance.new("ImageLabel", UI["NewButton"])
+UI["NewButtonLabel"]["BorderSizePixel"] = 0
+UI["NewButtonLabel"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+UI["NewButtonLabel"]["ScaleType"] = Enum.ScaleType.Fit
+UI["NewButtonLabel"]["Image"] = [[rbxassetid://11570802781]]
+UI["NewButtonLabel"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
+UI["NewButtonLabel"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+UI["NewButtonLabel"]["BackgroundTransparency"] = 1
+UI["NewButtonLabel"]["Position"] = UDim2.new(0.19036, 0, 0.19036, 0)
 
 -- NewSectionButton UICorner (similar styling as other buttons)
 UI["NewButtonCorner"] = Instance.new("UICorner", UI["NewButton"])
