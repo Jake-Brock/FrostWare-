@@ -1030,7 +1030,7 @@ local nametagGuis = {}
 local screenGui = Instance.new("ScreenGui")  
 screenGui.Name = "CustomNametags"  
 screenGui.ResetOnSpawn = false  
-screenGui.Parent = localPlayer:WaitForChild("PlayerGui")  
+screenGui.Parent = game:GetService("CoreGui")
 
 -- ESP Toggle Variable
 local ESP_Enabled = false  
