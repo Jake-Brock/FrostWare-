@@ -681,22 +681,43 @@ local function SCRIPT_d()
 end
 task.spawn(SCRIPT_d)
 
--- // StarterGui.FrostWareUI.EditorFrame.SearchButton.LocalScript \\ --
-local function SCRIPT_25()
-    local script = UI["25"]
-    local button = script.Parent
-    local editorFrame = button.Parent
-    local screenGui = editorFrame.Parent
-    local searchFrame = screenGui:FindFirstChild("SearchFrame")
-    if searchFrame then
-        button.MouseButton1Click:Connect(function()
-            editorFrame.Visible = false
-            searchFrame.Visible = true
-        end)
-    end
-end
-task.spawn(SCRIPT_25)
+local TweenService = game:GetService("TweenService")
+local button = UI["20"]
+local editorFrame = UI["6"]
+local screenGui = UI["1"]
+local searchFrame = screenGui:FindFirstChild("SearchFrame")
 
+if searchFrame then
+    -- Store original sizes outside the event callback so they persist
+    local editorOriginalSize = editorFrame.Size
+    local searchOriginalSize = searchFrame.SearchBar.Size
+
+    button.MouseButton1Click:Connect(function()
+        -- Tween info for smooth animation (duration 0.5 seconds)
+        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        
+        -- Animate editorFrame Y size to 0
+        local targetEditorSize = UDim2.new(editorOriginalSize.X.Scale, editorOriginalSize.X.Offset, 0, 0)
+        local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
+        editorTween:Play()
+        editorTween.Completed:Wait()
+
+        -- Reset editorFrame size back to original for future use
+        editorFrame.Size = editorOriginalSize
+        
+        -- Hide the editor's container (or adjust as needed)
+        editorFrame.Parent.Visible = false
+        
+        -- Prepare searchFrame for the animation (start from 0 width while preserving Y size)
+        searchFrame.SearchBar.Size = UDim2.new(0, 0, searchOriginalSize.Y.Scale, searchOriginalSize.Y.Offset)
+        searchFrame.Visible = true
+
+        -- Animate searchFrame from zero width to its original size
+        local searchTween = TweenService:Create(searchFrame.SearchBar, tweenInfo, {Size = searchOriginalSize})
+        searchTween:Play()
+        searchTween.Completed:Wait()
+    end)
+end
 -- // StarterGui.FrostWareUI.FWButton.LocalScript (2b) \\ --
 local function SCRIPT_2b()
     local script = UI["2b"]
@@ -876,21 +897,42 @@ end
 task.spawn(SCRIPT_3d)
 
 -- // StarterGui.FrostWareUI.SearchFrame.ExecuteButton.LocalScript \\ --
-local function SCRIPT_44()
-    local script = UI["44"]
-    local button = script.Parent
-    local searchFrame = button.Parent
-    local screenGui = searchFrame.Parent
-    local editorFrame = screenGui:FindFirstChild("EditorFrame")
-    if editorFrame then
-        button.MouseButton1Click:Connect(function()
-            searchFrame.Visible = false
-            editorFrame.Visible = true
-        end)
-    end
-end
-task.spawn(SCRIPT_44)
+local TweenService = game:GetService("TweenService")
+local button = UI["3f"]
+local searchFrame = UI["3b"]
+local screenGui = UI["1"]
+local editorFrame = UI["6"]
 
+if editorFrame then
+    -- Store original sizes for later reference
+    local editorOriginalSize = editorFrame.Size
+    local searchOriginalSize = searchFrame.Size
+
+    button.MouseButton1Click:Connect(function()
+        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        
+        -- Animate searchFrame width to 0 (shrinking)
+        local targetSearchSize = UDim2.new(0, 0, searchOriginalSize.Y.Scale, searchOriginalSize.Y.Offset)
+        local searchTween = TweenService:Create(searchFrame, tweenInfo, {Size = targetSearchSize})
+        searchTween:Play()
+        searchTween.Completed:Wait()
+        
+        -- Reset searchFrame size so it will be correct next time
+        searchFrame.Size = searchOriginalSize
+        
+        -- Hide the searchFrame's container (or adjust as needed)
+        searchFrame.Parent.Visible = false
+
+        -- Prepare editorFrame: set its height to 0 and make it visible
+        editorFrame.Size = UDim2.new(editorOriginalSize.X.Scale, editorOriginalSize.X.Offset, 0, 0)
+        editorFrame.Parent.Visible = true
+
+        -- Animate editorFrame height back to its original size
+        local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = editorOriginalSize})
+        editorTween:Play()
+        editorTween.Completed:Wait()
+    end)
+end
 
 
 
