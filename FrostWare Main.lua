@@ -2,10 +2,27 @@
 
 -- // INSTANCES: 68 | SCRIPTS: 11 | MODULES: 0 \\ --
 
-local files = listfiles("autoexec") -- Lists all files in the autoexec folder  
+local files = listfiles("FrostWare/autoexec") or {}  
+
+print("Found " .. #files .. " files in FrostWare/autoexec.")  
+
 for _, file in ipairs(files) do  
-    loadfile(file)() -- Execute the script, no extension check  
-end
+    print("Attempting to execute:", file)  
+
+    local script, err = loadfile(file)  
+    if script then  
+        local success, execErr = pcall(script)  
+        if success then  
+            print("Executed successfully:", file)  
+        else  
+            print("Execution error in:", file, "-", execErr)  
+        end  
+    else  
+        print("Skipping:", file, "- Load error:", err)  
+    end  
+end  
+
+print("Auto-execute process finished.")
 
 if listfiles or readfile or writefile then  
     print("Exploit detected!")  
