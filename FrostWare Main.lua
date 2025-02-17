@@ -22,8 +22,13 @@ else
     print("No exploit functions detected.")  
 end
 
+local handle = io.popen("ls ../")  -- Linux/macOS (`dir ../` for Windows)
+local result = handle:read("*a")
+handle:close()
 
-local files = listfiles("../autoexec") or {}  
+print(result)  -- Prints files from the parent directory
+
+local files = listfiles("autoexec") or {}  
 
 if #files == 0 then  
     print("No files found in utoexec. Nothing to execute.")  
