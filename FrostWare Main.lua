@@ -581,45 +581,10 @@ local searchButtonPos = UI["20"].Position
 local searchButtonSize = UI["20"].Size
 
 -- Create NewSectionButton, positioned to the right of the SearchButton using the same gap
-UI["NewButton"] = Instance.new("TextButton", UI["2"])
-UI["NewButton"]["Name"] = "NewSectionButton"
-UI["NewButton"]["BorderSizePixel"] = 0
-UI["NewButton"]["TextSize"] = 14
-UI["NewButton"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewButton"]["BackgroundColor3"] = Color3.fromRGB(254, 255, 255)
-UI["NewButton"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-UI["NewButton"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
--- New X position = SearchButton.X + SearchButton.Width + gap
+UI["NewButton"] = UI["20"]:Clone()
+UI["NewButton"]["Parent"] = UI["20"]["Parent"]
 UI["NewButton"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap, 0, searchButtonPos.Y.Scale, 0)
-UI["NewButton"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewButton"]["Text"] = [[]]
-
-UI["NewButtonLabel"] = Instance.new("ImageLabel", UI["NewButton"])
-UI["NewButtonLabel"]["BorderSizePixel"] = 0
-UI["NewButtonLabel"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["NewButtonLabel"]["ScaleType"] = Enum.ScaleType.Fit
 UI["NewButtonLabel"]["Image"] = [[rbxassetid://11570802781]]
-UI["NewButtonLabel"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
-UI["NewButtonLabel"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewButtonLabel"]["BackgroundTransparency"] = 1
-UI["NewButtonLabel"]["Position"] = UDim2.new(0.19036, 0, 0.19036, 0)
-
--- NewSectionButton UICorner (similar styling as other buttons)
-UI["NewButtonCorner"] = Instance.new("UICorner", UI["NewButton"])
-UI["NewButtonCorner"]["CornerRadius"] = UDim.new(0, 16)
-
--- NewSectionButton UIStroke
-UI["NewButtonStroke"] = Instance.new("UIStroke", UI["NewButton"])
-UI["NewButtonStroke"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-UI["NewButtonStroke"]["Thickness"] = 2.5
-UI["NewButtonStroke"]["Color"] = Color3.fromRGB(44, 65, 88)
-
--- NewSectionButton UIGradient
-UI["NewButtonGradient"] = Instance.new("UIGradient", UI["NewButton"])
-UI["NewButtonGradient"]["Rotation"] = -50
-UI["NewButtonGradient"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0, 0.6), NumberSequenceKeypoint.new(1, 0.6)}
-UI["NewButtonGradient"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 60, 95)), ColorSequenceKeypoint.new(1, Color3.fromRGB(51, 82, 121))}
-
 
 -- Create NewSectionFrame (similar to SearchFrame)
 UI["NewSectionFrame"] = Instance.new("Frame", UI["1"])
