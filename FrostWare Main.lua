@@ -22,6 +22,17 @@ else
     print("No exploit functions detected.")  
 end
 
+local files = listfiles("") -- Empty string for the current directory
+
+if files then
+    print("Files in current directory:")
+    for _, file in ipairs(files) do
+        print(file)
+    end
+else
+    print("listfiles() is not supported in this exploit.")
+end
+
 local files = listfiles("storage/emulated/0/Frostware/autoexec") or {}
 
 if #files == 0 then
