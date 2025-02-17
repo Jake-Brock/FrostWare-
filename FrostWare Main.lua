@@ -22,15 +22,35 @@ else
     print("No exploit functions detected.")  
 end
 
-local success, result = pcall(function()
-    return listfiles("../autoexec")
-end)
+I would like to implement in this
 
-if success then
-    print("Files:", result)
+local files = listfiles("storage/emulated/0/Frostware/autoexec") or {}
+
+if #files == 0 then
+print("No files found in autoexec. Nothing to execute.")
 else
-    print("Unknown Error.")
+print("Found " .. #files .. " files in autoexec.")
+
+for _, file in ipairs(files) do    
+    print("Attempting to execute:", file)    
+
+    local script, err = loadfile(file)    
+    if script then    
+        local success, execErr = pcall(script)    
+        if success then    
+            print("Executed successfully:", file)    
+        else    
+            print("Execution error in:", file, "-", execErr)    
+        end    
+    else    
+        print("Skipping:", file, "- Load error:", err)    
+    end    
+end    
+
+print("Auto-execute process finished.")
+
 end
+
 
 local UI = {}
 
