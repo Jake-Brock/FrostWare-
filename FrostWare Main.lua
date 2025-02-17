@@ -648,6 +648,55 @@ UI["Back"]["Parent"] = UI["NewSectionFrame"]
 -- (Optional) Add additional elements (such as a scrolling frame, inner content, etc.)
 -- For example, you might duplicate your SearchFrame's scrolling frame here.
 UI["BackScript"] = Instance.new("LocalScript", UI["Back"])
+
+
+
+
+-- Place this LocalScript as a child of your ScreenGui (e.g. UI["1"])
+local RunService = game:GetService("RunService")
+local screenGui = UI["1"]
+
+-- You can adjust these values to control the speed and gradient offset.
+local speed = 0.2      -- speed multiplier for the hue cycle
+local gradOffset = 0.1 -- hue offset for the second color in gradients
+
+-- The animation function iterates through all descendants and updates their color properties.
+local function animateUI()
+    -- Calculate the current hue (from 0 to 1)
+    local hue = (tick() * speed) % 1
+    local baseColor = Color3.fromHSV(hue, 1, 1)
+    local secondColor = Color3.fromHSV((hue + gradOffset) % 1, 1, 1)
+    
+    for _, object in ipairs(screenGui:GetDescendants()) do
+        -- For GuiObjects that have a BackgroundColor3 property
+        if object:IsA("GuiObject") then
+            -- If the object has a UIGradient child, update its Color sequence.
+            local gradient = object:FindFirstChildWhichIsA("UIGradient")
+            if gradient then
+                gradient.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, baseColor),
+                    ColorSequenceKeypoint.new(1, secondColor)
+                })
+            else
+                -- If no gradient exists, update the background color directly.
+                -- (This applies to Frames, TextButtons, TextBoxes, ScrollingFrames, etc.)
+                if object:IsA("Frame") or object:IsA("TextButton") or object:IsA("TextBox") or object:IsA("ScrollingFrame") then
+                    object.BackgroundColor3 = baseColor
+                end
+            end
+        end
+
+        -- Update UIStroke color if the object is a UIStroke.
+        if object:IsA("UIStroke") then
+            object.Color = baseColor
+        end
+    end
+end
+
+-- Use RenderStepped for smooth per-frame updates.
+RunService.RenderStepped:Connect(function()
+    animateUI()
+end)
 ----------------------------------
 -- BUTTON FUNCTIONALITY EXAMPLE --
 ----------------------------------
@@ -1085,27 +1134,27 @@ if searchFrameContainer and searchBar then
     button.MouseButton1Click:Connect(function()
         if _G.EditorAnimating then return end
         _G.EditorAnimating = true  -- start animating
-        
+
         local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        
+
         -- Tween the editorFrame’s Y-size to 0 (collapse vertically)
         local targetEditorSize = UDim2.new(editorOriginalSize.X.Scale, editorOriginalSize.X.Offset, 0, 0)
         local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
         editorTween:Play()
         editorTween.Completed:Wait()
-        
+
         editorFrame.Size = editorOriginalSize
         editorFrame.Parent.Visible = false
-        
+
         -- Prepare and show the search frame container and search bar
         searchBar.Size = UDim2.new(0, 0, searchBarOriginalSize.Y.Scale, searchBarOriginalSize.Y.Offset)
         searchFrameContainer.Visible = true
-        
+
         -- Tween the search bar back to its original size
         local searchTween = TweenService:Create(searchBar, tweenInfo, {Size = searchBarOriginalSize})
         searchTween:Play()
         searchTween.Completed:Wait()
-        
+
         _G.EditorAnimating = false  -- animation finished
     end)
 end
@@ -1152,7 +1201,7 @@ if editorFrame and searchFrameContainer and searchBar then
         _G.EditorAnimating = true
 
         local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        
+
         -- Tween the search bar's width to 0 (collapse horizontally)
         local targetSearchBarSize = UDim2.new(0, 0, searchBarOriginalSize.Y.Scale, searchBarOriginalSize.Y.Offset)
         print("Script2: Tweening searchBar to target size: ", targetSearchBarSize)
@@ -1160,23 +1209,23 @@ if editorFrame and searchFrameContainer and searchBar then
         searchTween:Play()
         searchTween.Completed:Wait()
         print("Script2: SearchBar tween completed.")
-        
+
         -- Reset searchBar size and hide its container
         searchBar.Size = searchBarOriginalSize
         searchFrameContainer.Visible = false
         print("Script2: SearchFrameContainer hidden.")
-        
+
         -- Prepare and show the editorFrame (start with 0 height)
         editorFrame.Size = UDim2.new(editorOriginalSize.X.Scale, editorOriginalSize.X.Offset, 0, 0)
         editorFrame.Parent.Visible = true
         print("Script2: Editor frame container shown. Tweening editorFrame back to original size: ", editorOriginalSize)
-        
+
         -- Tween the editorFrame back to its original size
         local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = editorOriginalSize})
         editorTween:Play()
         editorTween.Completed:Wait()
         print("Script2: EditorFrame tween completed.")
-        
+
         _G.EditorAnimating = false
         print("Script2: Animation complete, EditorAnimating reset.")
     end)
@@ -1258,7 +1307,7 @@ backButton.MouseButton1Click:Connect(function()
             local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
             editorTween:Play()
             editorTween.Completed:Wait()
-            
+
             _G.EditorAnimating = false
         end
     end
