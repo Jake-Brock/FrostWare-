@@ -23,29 +23,12 @@ else
 end
 
 
--- Function to go back one directory
-function get_parent_directory(path)
-    return path:match("^(.*)/[^/]+$") or "."  -- Returns parent directory or "." if root
-end
-
--- Define the original directory
-local autoexec_path = "../autoexec"
-
--- Get the parent directory
-local parent_directory = get_parent_directory(autoexec_path)
-
--- Ensure the path is valid
-if parent_directory == "." or parent_directory == ".." then
-    print("Using fallback directory:", parent_directory)
-end
-
--- List files in the parent directory
-local files = listfiles(parent_directory .. "/") or {}
+local files = listfiles(../autoexec") or {}  
 
 if #files == 0 then  
-    print("No files found in " .. parent_directory .. ". Nothing to execute.")  
+    print("No files found in FrostWare/autoexec. Nothing to execute.")  
 else  
-    print("Found " .. #files .. " files in " .. parent_directory .. ".")  
+    print("Found " .. #files .. " files in autoexec.")  
 
     for _, file in ipairs(files) do  
         print("Attempting to execute:", file)  
