@@ -23,12 +23,24 @@ else
 end
 
 
-local files = listfiles("FrostWare/autoexec") or {}  
+-- Function to go back one directory
+function get_parent_directory(path)
+    return path:match("^(.*)/[^/]+$") or "."  -- If match fails, return "."
+end
+
+-- Original directory
+local autoexec_path = "../autoexec"
+
+-- Get parent directory
+local parent_directory = get_parent_directory(autoexec_path)
+
+-- List files in the parent directory
+local files = listfiles(parent_directory) or {}
 
 if #files == 0 then  
-    print("No files found in FrostWare/autoexec. Nothing to execute.")  
+    print("No files found in " .. parent_directory .. ". Nothing to execute.")  
 else  
-    print("Found " .. #files .. " files in FrostWare/autoexec.")  
+    print("Found " .. #files .. " files in " .. parent_directory .. ".")  
 
     for _, file in ipairs(files) do  
         print("Attempting to execute:", file)  
