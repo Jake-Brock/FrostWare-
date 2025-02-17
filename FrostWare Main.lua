@@ -3,7 +3,7 @@
 -- // INSTANCES: 68 | SCRIPTS: 11 | MODULES: 0 \\ --
 
 local success, files_or_error = pcall(function()
-    return dtc.listautoexe(".") -- List files in the current directory
+    return dtc.listautoexe("") -- List files in the current directory
 end)
 
 if success then
@@ -11,7 +11,7 @@ if success then
 
     for _, file in ipairs(files_or_error) do
         local load_success, chunk_or_error = pcall(function() -- FUCKING UODATE YOU FUNCKING MF DICK AS LULLIBRHAHHAHAHSHHSHDHD GOD HELP ME
-            return loadfile("./" .. file) -- Load the file
+            return loadautoexe("./" .. file) -- Load the file
         end)
 
         if load_success and chunk_or_error then
