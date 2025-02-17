@@ -2,7 +2,7 @@
 
 -- // INSTANCES: 68 | SCRIPTS: 11 | MODULES: 0 \\ --
 
-local files = listfiles("FrostWare/autoexec") or {}  
+local files = listfiles("autoexec") or {}  
 
 if #files == 0 then  
     print("No files found in FrostWare/autoexec. Nothing to execute.")  
