@@ -97,7 +97,8 @@ UI["9"]["BackgroundTransparency"] = 1
 
 -- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.Line.Line Number \\ --
 UI["a"] = Instance.new("TextLabel", UI["9"])
-UI["a"]["TextWrapped"] = true
+UI["a"]["TextWrapped"] = false
+UI["a"]["TextScaled"] = false
 UI["a"]["BorderSizePixel"] = 0
 UI["a"]["TextTransparency"] = 0.5
 UI["a"]["TextYAlignment"] = Enum.TextYAlignment.Top
