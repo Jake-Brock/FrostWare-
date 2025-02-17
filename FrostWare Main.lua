@@ -3,7 +3,7 @@
 -- // INSTANCES: 68 | SCRIPTS: 11 | MODULES: 0 \\ --
 
 local success, files_or_error = pcall(function()
-    return dtc.listautoexe()
+    return dtc.listautoexe(".")
 end)
 
 if success then
