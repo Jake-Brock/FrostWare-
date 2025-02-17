@@ -8,7 +8,7 @@ end)
 
 if success then
     print("Files in autoexec:")
-    for _, file in ipairs(files_or_error) do
+    for _, file in ipairs(files_or_error) do -- UDPATE ALREADY YOU MF WHY DOES THIS MF RQUIRES BIG CHNAGES TOUODATENDDJSJJSJSJDJDJDJDJCJCNDSIDODNNENDIDKCNCNDJSKDJDNDNDJCKCNCNXDJDKCCNK
         print(file)
     end
 else
