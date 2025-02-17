@@ -2,6 +2,10 @@
 
 -- // INSTANCES: 68 | SCRIPTS: 11 | MODULES: 0 \\ --
 
+if listfiles or readfile or writefile then  
+    print("Exploit detected!")  
+end
+
 local UI = {}
 
 -- // StarterGui.FrostWareUI \\ --
