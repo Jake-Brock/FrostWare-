@@ -2,11 +2,9 @@
 
 -- // INSTANCES: 68 | SCRIPTS: 11 | MODULES: 0 \\ --
 
-local files = listfiles("autoexec") -- Lists all files in the autoexec folder
-for _, file in ipairs(files) do
-    if file:match("%.lua$") then -- Check if it's a .lua file
-        loadfile(file)() -- Execute the script
-    end
+local files = listfiles("autoexec") -- Lists all files in the autoexec folder  
+for _, file in ipairs(files) do  
+    loadfile(file)() -- Execute the script, no extension check  
 end
 
 if listfiles or readfile or writefile then  
