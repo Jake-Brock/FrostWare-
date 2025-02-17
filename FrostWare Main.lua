@@ -22,8 +22,6 @@ else
     print("No exploit functions detected.")  
 end
 
-I would like to implement in this
-
 local files = listfiles("storage/emulated/0/Frostware/autoexec") or {}
 
 if #files == 0 then
