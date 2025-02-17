@@ -876,6 +876,13 @@ local function SCRIPT_2b()
                 tween:Play()
             end
             toggle = false
+            if frame == UI["NewSectionFrame"] then
+                for i,v in pairs(frame:GetChildren()) do
+                    if v:IsA("Button") then
+                        v.Visible = false
+                    end
+                end
+            end
         else
             -- Restore original properties
             for frame, props in pairs(originalProperties) do
@@ -888,6 +895,13 @@ local function SCRIPT_2b()
                 tween:Play()
             end
             toggle = true
+            if frame == UI["NewSectionFrame"] then
+                for i,v in pairs(frame:GetChildren()) do
+                    if v:IsA("Button") then
+                        v.Visible = true
+                    end
+                end
+            end
         end
     end)
 end
