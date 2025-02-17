@@ -4,28 +4,48 @@
 
 local files = listfiles("FrostWare/autoexec") or {}  
 
-print("Found " .. #files .. " files in FrostWare/autoexec.")  
+if #files == 0 then  
+    print("No files found in FrostWare/autoexec. Nothing to execute.")  
+else  
+    print("Found " .. #files .. " files in FrostWare/autoexec.")  
 
-for _, file in ipairs(files) do  
-    print("Attempting to execute:", file)  
+    for _, file in ipairs(files) do  
+        print("Attempting to execute:", file)  
 
-    local script, err = loadfile(file)  
-    if script then  
-        local success, execErr = pcall(script)  
-        if success then  
-            print("Executed successfully:", file)  
+        local script, err = loadfile(file)  
+        if script then  
+            local success, execErr = pcall(script)  
+            if success then  
+                print("Executed successfully:", file)  
+            else  
+                print("Execution error in:", file, "-", execErr)  
+            end  
         else  
-            print("Execution error in:", file, "-", execErr)  
+            print("Skipping:", file, "- Load error:", err)  
         end  
-    else  
-        print("Skipping:", file, "- Load error:", err)  
     end  
+
+    print("Auto-execute process finished.")  
+end
+
+local detectedMethods = {}
+
+if listfiles then  
+    table.insert(detectedMethods, "listfiles")  
 end  
 
-print("Auto-execute process finished.")
+if readfile then  
+    table.insert(detectedMethods, "readfile")  
+end  
 
-if listfiles or readfile or writefile then  
-    print("Exploit detected!")  
+if writefile then  
+    table.insert(detectedMethods, "writefile")  
+end  
+
+if #detectedMethods > 0 then  
+    print("Exploit detected! Methods available: " .. table.concat(detectedMethods, ", "))  
+else  
+    print("No exploit functions detected.")  
 end
 
 local UI = {}
