@@ -1100,7 +1100,7 @@ end
 
 local TweenService = game:GetService("TweenService")
 local button = UI["3f"]              -- Ensure this is the correct button for closing the search bar.
-local searchFrameContainer = UI["3b"]  -- Ensure this is the correct container.
+local searchFrameContainer = UI["2d"]  -- Ensure this is the correct container.
 local screenGui = UI["1"]
 local editorFrame = UI["6"]
 
