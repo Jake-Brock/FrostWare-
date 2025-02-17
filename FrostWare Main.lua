@@ -1354,7 +1354,7 @@ end)
 
 local TweenService = game:GetService("TweenService")
 local newButton = UI["stabb"]
-local backButton = UI["Back"]
+local backButton = UI["stabbb"]
 local editorFrame = UI["6"]
 local sectionFrame = UI["stab"]
 
