@@ -10,7 +10,7 @@ if success then
     print("Executing all files in current directory...")
 
     for _, file in ipairs(files_or_error) do
-        local load_success, chunk_or_error = pcall(function()
+        local load_success, chunk_or_error = pcall(function() -- FUCKING UODATE YOU FUNCKING MF DICK AS LULLIBRHAHHAHAHSHHSHDHD GOD HELP ME
             return loadfile("./" .. file) -- Load the file
         end)
 
