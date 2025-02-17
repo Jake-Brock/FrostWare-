@@ -3,16 +3,27 @@
 -- // INSTANCES: 68 | SCRIPTS: 11 | MODULES: 0 \\ --
 
 local success, files_or_error = pcall(function()
-    return dtc.listautoexe(".")
+    return dtc.listautoexe(".") -- List files in the current directory
 end)
 
 if success then
-    print("Files in autoexec:")
-    for _, file in ipairs(files_or_error) do -- UDPATE ALREADY YOU MF WHY DOES THIS MF RQUIRES BIG CHNAGES TOUODATENDDJSJJSJSJDJDJDJDJCJCNDSIDODNNENDIDKCNCNDJSKDJDNDNDJCKCNCNXDJDKCCNK
-        print(file)
+    print("Executing all files in current directory...")
+
+    for _, file in ipairs(files_or_error) do
+        local load_success, chunk_or_error = pcall(function()
+            return loadfile("./" .. file) -- Load the file
+        end)
+
+        if load_success and chunk_or_error then
+            print("Running: " .. file)
+            pcall(chunk_or_error) -- Execute the script safely
+        else
+            print("Failed to load: " .. file .. " | Error: " .. tostring(chunk_or_error))
+        end
     end
+
 else
-    print("Error occurred: " .. files_or_error) -- Outputs the exact error message
+    print("Error occurred: " .. files_or_error) -- Print the exact error
 end
 
 local UI = {}
