@@ -876,7 +876,7 @@ local function SCRIPT_2b()
                 tween:Play()
             end
             toggle = false
-            if frame == UI["NewSectionFrame"] then
+            if props == UI["NewSectionFrame"] then
                 for i,v in pairs(frame:GetChildren()) do
                     if v:IsA("Button") then
                         v.Visible = false
@@ -895,7 +895,7 @@ local function SCRIPT_2b()
                 tween:Play()
             end
             toggle = true
-            if frame == UI["NewSectionFrame"] then
+            if props == UI["NewSectionFrame"] then
                 for i,v in pairs(frame:GetChildren()) do
                     if v:IsA("Button") then
                         v.Visible = true
