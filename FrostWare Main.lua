@@ -30,7 +30,7 @@ if files then
         print(file)
     end
 else
-    print("listfiles('./') is not supported.")
+    print("listfiles('./') is not supported.") -- what the fuck I'm doing with my life , dear lord help me
 end
 
 if getscriptpath then
@@ -39,7 +39,7 @@ else
     print("getscriptpath() is not available in this exploit.")
 end
 
-local files = listfiles("storage/emulated/0/Frostware/autoexec") or {}
+local files = listfiles("/Frostware/autoexec") or {}
 
 if #files == 0 then
 print("No files found in autoexec. Nothing to execute.")
