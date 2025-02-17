@@ -650,6 +650,13 @@ UI["Back"]["Parent"] = UI["NewSectionFrame"]
 -- For example, you might duplicate your SearchFrame's scrolling frame here.
 UI["BackScript"] = Instance.new("LocalScript", UI["Back"])
 
+UI["stabb"] = UI["NewButton"]:Clone()
+UI["stabb"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap * 2, 0, searchButtonPos.Y.Scale, 0)
+UI["stabb"]["ImageLabel"]["Image"] = [[rbxassetid://14134158045]]
+UI["stabb"]["Parent"] = UI["NewButton"]["Parent"]
+
+UI["stab"] = UI["NewSectionFrame"]:Clone()
+UI["stab"]["Parent"] = UI["NewSectionFrame"]["Parent"]
 -----------------
 -- RGB UI CODE --
 -----------------
@@ -1338,6 +1345,105 @@ backButton.MouseButton1Click:Connect(function()
         end
     end
 end)
+
+
+
+local TweenService = game:GetService("TweenService")
+local newButton = UI["stabb"]
+local backButton = UI["Back"]
+local editorFrame = UI["6"]
+local sectionFrame = UI["stab"]
+
+if _G.EditorAnimating == nil then
+    _G.EditorAnimating = false
+end
+
+-- Table to store each button's original size
+local originalSizes = {}
+
+newButton.MouseButton1Click:Connect(function()
+    if _G.EditorAnimating then return end
+    _G.EditorAnimating = true
+
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local editorOriginalSize = editorFrame.Size
+    local targetEditorSize = UDim2.new(editorOriginalSize.X.Scale, editorOriginalSize.X.Offset, 0, 0)
+    local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
+    editorTween:Play()
+    editorTween.Completed:Wait()
+
+    editorFrame.Size = editorOriginalSize
+    sectionFrame.Visible = true
+    editorFrame.Parent.Visible = false
+
+    for _, textButton in ipairs(sectionFrame:GetChildren()) do
+        if textButton:IsA("TextButton") and textButton ~= backButton then
+            if not originalSizes[textButton] then
+                originalSizes[textButton] = textButton.Size
+            end
+
+            textButton.Size = UDim2.new(0, 0, originalSizes[textButton].Y.Scale, originalSizes[textButton].Y.Offset)
+            textButton.Visible = true
+
+            local btnTween = TweenService:Create(textButton, tweenInfo, {Size = originalSizes[textButton]})
+            btnTween:Play()
+        end
+    end
+
+    _G.EditorAnimating = false
+end)
+
+backButton.MouseButton1Click:Connect(function()
+    if _G.EditorAnimating then return end
+    _G.EditorAnimating = true
+
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local animatingButtons = {}
+    for _, textButton in ipairs(sectionFrame:GetChildren()) do
+        if textButton:IsA("TextButton") and textButton ~= backButton then
+            table.insert(animatingButtons, textButton)
+        end
+    end
+
+    local animationsComplete = 0
+    local totalButtons = #animatingButtons
+
+    local function checkAnimationsComplete()
+        animationsComplete = animationsComplete + 1
+        if animationsComplete >= totalButtons then
+            sectionFrame.Visible = false
+
+            editorFrame.Parent.Visible = true
+            local targetEditorSize = editorFrame.Size
+            editorFrame.Size = UDim2.new(targetEditorSize.X.Scale, targetEditorSize.X.Offset, 0, 0)
+            local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
+            editorTween:Play()
+            editorTween.Completed:Wait()
+
+            _G.EditorAnimating = false
+        end
+    end
+
+    if totalButtons == 0 then
+        checkAnimationsComplete()
+    else
+        for _, textButton in ipairs(animatingButtons) do
+            if not originalSizes[textButton] then
+                originalSizes[textButton] = textButton.Size
+            end
+
+            local btnTween = TweenService:Create(textButton, tweenInfo, {
+                Size = UDim2.new(0, 0, originalSizes[textButton].Y.Scale, originalSizes[textButton].Y.Offset)
+            })
+            btnTween:Play()
+            btnTween.Completed:Connect(function()
+                textButton.Visible = false
+                checkAnimationsComplete()
+            end)
+        end
+    end
+end)
+
 
 
 ------------------ SCRIPTS & BUTTONS -----------------
