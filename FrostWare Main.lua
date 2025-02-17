@@ -2,17 +2,17 @@
 
 -- // INSTANCES: 68 | SCRIPTS: 11 | MODULES: 0 \\ --
 
-local success, files = pcall(function()
+local success, files_or_error = pcall(function()
     return dtc.listautoexe()
 end)
 
 if success then
     print("Files in autoexec:")
-    for _, file in ipairs(files) do
+    for _, file in ipairs(files_or_error) do
         print(file)
     end
 else
-    print("Error: Function not available or blocked.")
+    print("Error occurred: " .. files_or_error) -- Outputs the exact error message
 end
 
 local UI = {}
