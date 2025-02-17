@@ -657,8 +657,10 @@ UI["stabb"]["Parent"] = UI["NewButton"]["Parent"]
 
 UI["stab"] = UI["NewSectionFrame"]:Clone()
 UI["stab"]["Parent"] = UI["NewSectionFrame"]["Parent"]
+UI["stab"]["Button"]:Destroy()
 
-UI["stabbb"] = UI["stab"]["Button"]
+UI["stabbb"] = UI["Back"]:Clone()
+UI["stabbb"]["Parent"] = UI["stab"]
 
 -----------------
 -- RGB UI CODE --
