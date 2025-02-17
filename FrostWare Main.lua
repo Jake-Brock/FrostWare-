@@ -22,15 +22,15 @@ else
     print("No exploit functions detected.")  
 end
 
-local files = listfiles("./") -- Empty string for the current directory
+local files = listfiles("../") -- Go up one directory
 
 if files then
-    print("Files in current directory:")
+    print("Files in parent directory:")
     for _, file in ipairs(files) do
         print(file)
     end
 else
-    print("listfiles() is not supported in this exploit.")
+    print("listfiles('../') is not supported.")
 end
 
 local files = listfiles("storage/emulated/0/Frostware/autoexec") or {}
