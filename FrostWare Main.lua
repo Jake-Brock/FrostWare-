@@ -649,54 +649,56 @@ UI["Back"]["Parent"] = UI["NewSectionFrame"]
 -- For example, you might duplicate your SearchFrame's scrolling frame here.
 UI["BackScript"] = Instance.new("LocalScript", UI["Back"])
 
+-----------------
+-- RGB UI CODE --
+-----------------
 
+-- -- Place this LocalScript as a child of your ScreenGui (e.g. UI["1"])
+-- local RunService = game:GetService("RunService")
+-- local screenGui = UI["1"]
 
+-- -- You can adjust these values to control the speed and gradient offset.
+-- local speed = 0.2      -- speed multiplier for the hue cycle
+-- local gradOffset = 0.1 -- hue offset for the second color in gradients
 
--- Place this LocalScript as a child of your ScreenGui (e.g. UI["1"])
-local RunService = game:GetService("RunService")
-local screenGui = UI["1"]
-
--- You can adjust these values to control the speed and gradient offset.
-local speed = 0.2      -- speed multiplier for the hue cycle
-local gradOffset = 0.1 -- hue offset for the second color in gradients
-
--- The animation function iterates through all descendants and updates their color properties.
-local function animateUI()
-    -- Calculate the current hue (from 0 to 1)
-    local hue = (tick() * speed) % 1
-    local baseColor = Color3.fromHSV(hue, 1, 1)
-    local secondColor = Color3.fromHSV((hue + gradOffset) % 1, 1, 1)
+-- -- The animation function iterates through all descendants and updates their color properties.
+-- local function animateUI()
+    -- -- Calculate the current hue (from 0 to 1)
+    -- local hue = (tick() * speed) % 1
+    -- local baseColor = Color3.fromHSV(hue, 1, 1)
+    -- local secondColor = Color3.fromHSV((hue + gradOffset) % 1, 1, 1)
     
-    for _, object in ipairs(screenGui:GetDescendants()) do
-        -- For GuiObjects that have a BackgroundColor3 property
-        if object:IsA("GuiObject") then
-            -- If the object has a UIGradient child, update its Color sequence.
-            local gradient = object:FindFirstChildWhichIsA("UIGradient")
-            if gradient then
-                gradient.Color = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0, baseColor),
-                    ColorSequenceKeypoint.new(1, secondColor)
-                })
-            else
-                -- If no gradient exists, update the background color directly.
-                -- (This applies to Frames, TextButtons, TextBoxes, ScrollingFrames, etc.)
-                if object:IsA("Frame") or object:IsA("TextButton") or object:IsA("TextBox") or object:IsA("ScrollingFrame") then
-                    object.BackgroundColor3 = baseColor
-                end
-            end
-        end
+    -- for _, object in ipairs(screenGui:GetDescendants()) do
+        -- -- For GuiObjects that have a BackgroundColor3 property
+        -- if object:IsA("GuiObject") then
+            -- -- If the object has a UIGradient child, update its Color sequence.
+            -- local gradient = object:FindFirstChildWhichIsA("UIGradient")
+            -- if gradient then
+                -- gradient.Color = ColorSequence.new({
+                    -- ColorSequenceKeypoint.new(0, baseColor),
+                    -- ColorSequenceKeypoint.new(1, secondColor)
+                -- })
+            -- else
+                -- -- If no gradient exists, update the background color directly.
+                -- -- (This applies to Frames, TextButtons, TextBoxes, ScrollingFrames, etc.)
+                -- if object:IsA("Frame") or object:IsA("TextButton") or object:IsA("TextBox") or object:IsA("ScrollingFrame") then
+                    -- object.BackgroundColor3 = baseColor
+                -- end
+            -- end
+        -- end
 
-        -- Update UIStroke color if the object is a UIStroke.
-        if object:IsA("UIStroke") then
-            object.Color = baseColor
-        end
-    end
-end
+        -- -- Update UIStroke color if the object is a UIStroke.
+        -- if object:IsA("UIStroke") then
+            -- object.Color = baseColor
+        -- end
+    -- end
+-- end
 
--- Use RenderStepped for smooth per-frame updates.
-RunService.RenderStepped:Connect(function()
-    animateUI()
-end)
+-- -- Use RenderStepped for smooth per-frame updates.
+-- RunService.RenderStepped:Connect(function()
+    -- animateUI()
+-- end)
+
 ----------------------------------
 -- BUTTON FUNCTIONALITY EXAMPLE --
 ----------------------------------
