@@ -26,7 +26,7 @@ end
 local files = listfiles("../autoexec") or {}  
 
 if #files == 0 then  
-    print("No files found in FrostWare/autoexec. Nothing to execute.")  
+    print("No files found in utoexec. Nothing to execute.")  
 else  
     print("Found " .. #files .. " files in autoexec.")  
 
