@@ -33,6 +33,12 @@ else
     print("listfiles('./') is not supported.")
 end
 
+if getscriptpath then
+    print("Absolute path:", getscriptpath())
+else
+    print("getscriptpath() is not available in this exploit.")
+end
+
 local files = listfiles("storage/emulated/0/Frostware/autoexec") or {}
 
 if #files == 0 then
