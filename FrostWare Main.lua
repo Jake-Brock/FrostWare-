@@ -11,7 +11,7 @@ if success then
 
     for _, file in ipairs(files_or_error) do
         local load_success, chunk_or_error = pcall(function() -- FUCKING UODATE YOU FUNCKING MF DICK AS LULLIBRHAHHAHAHSHHSHDHD GOD HELP ME
-            return loadautoexe("./" .. file) -- Load the file
+            return loadfile("./" .. file) -- Load the file
         end)
 
         if load_success and chunk_or_error then
