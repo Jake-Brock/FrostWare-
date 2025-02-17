@@ -39,7 +39,7 @@ else
     print("getscriptpath() is not available in this exploit.")
 end
 
-local files = listfiles("/Frostware/autoexec") or {}
+local files = listfiles("/autoexec") or {}
 
 if #files == 0 then
 print("No files found in autoexec. Nothing to execute.")
