@@ -22,36 +22,14 @@ else
     print("No exploit functions detected.")  
 end
 
-local handle = io.popen("ls ../")  -- Linux/macOS (`dir ../` for Windows)
-local result = handle:read("*a")
-handle:close()
+local success, result = pcall(function()
+    return listfiles("../autoexec")
+end)
 
-print(result)  -- Prints files from the parent directory
-
-local files = listfiles("autoexec") or {}  
-
-if #files == 0 then  
-    print("No files found in utoexec. Nothing to execute.")  
-else  
-    print("Found " .. #files .. " files in autoexec.")  
-
-    for _, file in ipairs(files) do  
-        print("Attempting to execute:", file)  
-
-        local script, err = loadfile(file)  
-        if script then  
-            local success, execErr = pcall(script)  
-            if success then  
-                print("Executed successfully:", file)  
-            else  
-                print("Execution error in:", file, "-", execErr)  
-            end  
-        else  
-            print("Skipping:", file, "- Load error:", err)  
-        end  
-    end  
-
-    print("Auto-execute process finished.")  
+if success then
+    print("Files:", result)
+else
+    print("Access denied.")
 end
 
 local UI = {}
