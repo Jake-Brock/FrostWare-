@@ -22,7 +22,7 @@ else
     print("No exploit functions detected.")  
 end
 
-local files = listfiles("././") -- Go up one directory
+local files = listfiles("") -- Go up one directory
 
 if files then
     print("Files in parent directory:") -- totally not insane, totally lmao I hate lua exploit file system GODD HELP ME
