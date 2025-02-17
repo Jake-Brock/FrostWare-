@@ -281,6 +281,7 @@ UI["20"] = Instance.new("TextButton", UI["2"])
 UI["20"]["BorderSizePixel"] = 0
 UI["20"]["TextSize"] = 14
 UI["20"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
+UI["20"]["TextWrapped"] = true
 UI["20"]["BackgroundColor3"] = Color3.fromRGB(254, 255, 255)
 UI["20"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 UI["20"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
