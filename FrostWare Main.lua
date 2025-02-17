@@ -2,6 +2,27 @@
 
 -- // INSTANCES: 68 | SCRIPTS: 11 | MODULES: 0 \\ --
 
+local detectedMethods = {}
+
+if listfiles then  
+    table.insert(detectedMethods, "listfiles")  
+end  
+
+if readfile then  
+    table.insert(detectedMethods, "readfile")  
+end  
+
+if writefile then  
+    table.insert(detectedMethods, "writefile")  
+end  
+
+if #detectedMethods > 0 then  
+    print("Exploit detected! Methods available: " .. table.concat(detectedMethods, ", "))  
+else  
+    print("No exploit functions detected.")  
+end
+
+
 local files = listfiles("autoexec") or {}  
 
 if #files == 0 then  
@@ -26,26 +47,6 @@ else
     end  
 
     print("Auto-execute process finished.")  
-end
-
-local detectedMethods = {}
-
-if listfiles then  
-    table.insert(detectedMethods, "listfiles")  
-end  
-
-if readfile then  
-    table.insert(detectedMethods, "readfile")  
-end  
-
-if writefile then  
-    table.insert(detectedMethods, "writefile")  
-end  
-
-if #detectedMethods > 0 then  
-    print("Exploit detected! Methods available: " .. table.concat(detectedMethods, ", "))  
-else  
-    print("No exploit functions detected.")  
 end
 
 local UI = {}
