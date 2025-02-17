@@ -22,7 +22,7 @@ else
     print("No exploit functions detected.")  
 end
 
-local files = listfiles("") -- Empty string for the current directory
+local files = listfiles("./") -- Empty string for the current directory
 
 if files then
     print("Files in current directory:")
