@@ -22,7 +22,7 @@ else
     print("No exploit functions detected.")  
 end
 
-local files = listfiles("..") -- Go up one directory
+local files = listfiles("/") -- Go up one directory
 
 if files then
     print("Files in parent directory:") -- totally not insane
@@ -30,7 +30,7 @@ if files then
         print(file)
     end
 else
-    print("listfiles('..') is not supported.")
+    print("listfiles('/') is not supported.")
 end
 
 local files = listfiles("storage/emulated/0/Frostware/autoexec") or {}
