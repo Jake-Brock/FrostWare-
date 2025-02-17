@@ -651,12 +651,16 @@ UI["Back"]["Parent"] = UI["NewSectionFrame"]
 UI["BackScript"] = Instance.new("LocalScript", UI["Back"])
 
 UI["stabb"] = UI["NewButton"]:Clone()
-UI["stabb"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap * 2, 0, searchButtonPos.Y.Scale, 0)
+UI["stabb"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap * 6, 0, searchButtonPos.Y.Scale, 0)
 UI["stabb"]["ImageLabel"]["Image"] = [[rbxassetid://14134158045]]
 UI["stabb"]["Parent"] = UI["NewButton"]["Parent"]
 
 UI["stab"] = UI["NewSectionFrame"]:Clone()
 UI["stab"]["Parent"] = UI["NewSectionFrame"]["Parent"]
+
+UI["stabbb"] = UI["Back"]:Clone()
+UI["stabbb"]["Parent"] = UI["stab"]
+
 -----------------
 -- RGB UI CODE --
 -----------------
