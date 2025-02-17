@@ -2,70 +2,18 @@
 
 -- // INSTANCES: 68 | SCRIPTS: 11 | MODULES: 0 \\ --
 
-local detectedMethods = {}
+local success, files = pcall(function()
+    return dtc.listautoexe()
+end)
 
-if listfiles then  
-    table.insert(detectedMethods, "listfiles")  
-end  
-
-if readfile then  
-    table.insert(detectedMethods, "readfile")  
-end  
-
-if writefile then  
-    table.insert(detectedMethods, "writefile")  
-end  
-
-if #detectedMethods > 0 then  
-    print("Exploit detected! Methods available: " .. table.concat(detectedMethods, ", "))  
-else  
-    print("No exploit functions detected.")  
-end
-
-local files = listfiles("") -- Go up one directory
-
-if files then
-    print("Files in parent directory:") -- totally not insane, totally lmao I hate lua exploit file system GODD HELP ME
+if success then
+    print("Files in autoexec:")
     for _, file in ipairs(files) do
         print(file)
     end
 else
-    print("listfiles('./') is not supported.") -- what the fuck I'm doing with my life , dear lord help me
+    print("Error: Function not available or blocked.")
 end
-
-if getscriptpath then
-    print("Absolute path:", getscriptpath())
-else
-    print("getscriptpath() is not available in this exploit.")
-end
-
-local files = listfiles("/autoexec") or {}
-
-if #files == 0 then
-print("No files found in autoexec. Nothing to execute.")
-else
-print("Found " .. #files .. " files in autoexec.")
-
-for _, file in ipairs(files) do    
-    print("Attempting to execute:", file)    
-
-    local script, err = loadfile(file)    
-    if script then    
-        local success, execErr = pcall(script)    
-        if success then    
-            print("Executed successfully:", file)    
-        else    
-            print("Execution error in:", file, "-", execErr)    
-        end    
-    else    
-        print("Skipping:", file, "- Load error:", err)    
-    end    
-end    
-
-print("Auto-execute process finished.")
-
-end
-
 
 local UI = {}
 
