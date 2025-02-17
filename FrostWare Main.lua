@@ -657,6 +657,7 @@ UI["stabb"]["Parent"] = UI["NewButton"]["Parent"]
 
 UI["stab"] = UI["NewSectionFrame"]:Clone()
 UI["stab"]["Parent"] = UI["NewSectionFrame"]["Parent"]
+UI["stab"]["TextButton"]:Destroy()
 
 UI["stabbb"] = UI["Back"]:Clone()
 UI["stabbb"]["Parent"] = UI["stab"]
