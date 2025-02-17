@@ -891,16 +891,16 @@ local function SCRIPT_d()
 end
 task.spawn(SCRIPT_d)
 
-
 -- // StarterGui.FrostWareUI.FWButton.LocalScript \\ --
 local function SCRIPT_2b()
     local scriptRef = UI["2b"]
     local button = scriptRef.Parent
     local screenGui = button.Parent
     local tweenService = game:GetService("TweenService")
-
+    
     local toggle = true
     local originalProperties = {}
+    local newSectionFrame = UI["NewSectionFrame"]
 
     -- Cache the original position and size of each frame
     for _, frame in ipairs(screenGui:GetChildren()) do
@@ -924,14 +924,17 @@ local function SCRIPT_2b()
                 local tween = tweenService:Create(frame, tweenInfo, goal)
                 tween:Play()
             end
-            toggle = false
-            if props == UI["NewSectionFrame"] then
-                for i,v in pairs(frame:GetChildren()) do
+
+            -- Hide all Buttons within the newSectionFrame, if it exists
+            if newSectionFrame then
+                for _, v in pairs(newSectionFrame:GetChildren()) do
                     if v:IsA("Button") then
                         v.Visible = false
                     end
                 end
             end
+
+            toggle = false
         else
             -- Restore original properties
             for frame, props in pairs(originalProperties) do
@@ -943,14 +946,17 @@ local function SCRIPT_2b()
                 local tween = tweenService:Create(frame, tweenInfo, goal)
                 tween:Play()
             end
-            toggle = true
-            if props == UI["NewSectionFrame"] then
-                for i,v in pairs(frame:GetChildren()) do
+
+            -- Show all Buttons within the newSectionFrame, if it exists
+            if newSectionFrame then
+                for _, v in pairs(newSectionFrame:GetChildren()) do
                     if v:IsA("Button") then
                         v.Visible = true
                     end
                 end
             end
+
+            toggle = true
         end
     end)
 end
