@@ -29,7 +29,7 @@ end)
 if success then
     print("Files:", result)
 else
-    print("Access denied.")
+    print(Unknown Error.")
 end
 
 local UI = {}
