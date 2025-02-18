@@ -1054,55 +1054,55 @@ local function SCRIPT_2b()
     
     local toggle = true
     local originalProperties = {}
-    local newSectionFrame = UI["NewSectionFrame"]
 
-    -- Cache the original position and size of each frame
+    -- Cache original properties of frames
     for _, frame in ipairs(screenGui:GetChildren()) do
-        if frame:IsA("Frame") then
+        if frame:IsA("Frame") and frame ~= UI["uibg"] then
             originalProperties[frame] = {
                 Position = frame.Position,
-                Size = frame.Size
+                Size = frame.Size,
+                Visible = frame.Visible
             }
         end
     end
 
     button.MouseButton1Click:Connect(function()
         if toggle then
-            -- Tween all frames to center and shrink to (0,0,0)
+            -- Minimize all frames except FWButton
             for frame, props in pairs(originalProperties) do
-                if frame ~= UI["uibg"] then
-                local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                local goal = {
-                    Position = UDim2.new(0.5, 0, 0.5, 0),
-                    Size = UDim2.new(0, 0, 0, 0)
-                }
-                local tween = tweenService:Create(frame, tweenInfo, goal)
-                tween:Play()
+                if frame:IsA("Frame") then
+                    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                    local goal = {
+                        Position = UDim2.new(0.5, 0, 0.5, 0),
+                        Size = UDim2.new(0, 0, 0, 0)
+                    }
+                    local tween = tweenService:Create(frame, tweenInfo, goal)
+                    tween:Play()
+                    tween.Completed:Connect(function()
+                        frame.Visible = false
+                    end)
                 end
             end
-
-            toggle = false
             uibgfadeOut()
+            toggle = false
         else
-            -- Restore original properties
+            -- Restore all frames
             for frame, props in pairs(originalProperties) do
-                if frame ~= UI["uibg"] then
-                local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                local goal = {
-                    Position = props.Position,
-                    Size = props.Size
-                }
-                local tween = tweenService:Create(frame, tweenInfo, goal)
-                tween:Play()
+                if frame:IsA("Frame") then
+                    frame.Visible = props.Visible
+                    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                    local tween = tweenService:Create(frame, tweenInfo, {
+                        Position = props.Position,
+                        Size = props.Size
+                    })
+                    tween:Play()
                 end
             end
-
             uibgfadeIn()
             toggle = true
         end
     end)
 end
-
 task.spawn(SCRIPT_2b)
 
 -- // StarterGui.FrostWareUI.FWButton.LocalScript (2c) \\ --
