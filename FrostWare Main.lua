@@ -736,7 +736,7 @@ UI["stabbb"]["Parent"] = UI["stab"]
 
 UI["sstabb"] = UI["NewButton"]:Clone()
 UI["sstabb"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap * 9, 0, searchButtonPos.Y.Scale, 0)
-UI["sstabb"]["ImageLabel"]["Image"] = [[rbxassetid://54599946]]
+UI["sstabb"]["ImageLabel"]["Image"] = [[rbxassetid://4998267428]]
 UI["sstabb"]["Parent"] = UI["NewButton"]["Parent"]
 
 UI["sstab"] = UI["NewSectionFrame"]:Clone()
@@ -786,7 +786,7 @@ InnerUICorner.Parent = UI["uibgg"]
 local function uibgfadeIn()
     local tweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     
-    local frameTween = TweenService:Create(UI["uibg"], tweenInfo, {BackgroundTransparency = 0.5})
+    local frameTween = TweenService:Create(UI["uibg"], tweenInfo, {BackgroundTransparency = 0.75})
     local imageTween = TweenService:Create(UI["uibgg"], tweenInfo, {ImageTransparency = 0})
     
     frameTween:Play()
