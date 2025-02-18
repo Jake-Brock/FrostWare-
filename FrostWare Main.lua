@@ -248,7 +248,7 @@ UI["13"] = Instance.new("ImageLabel", UI["11"])
 UI["13"]["BorderSizePixel"] = 0
 UI["13"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
 UI["13"]["ScaleType"] = Enum.ScaleType.Fit
-UI["13"]["Image"] = [[rbxasset://textures/StudioToolbox/AssetPreview/play_button.png]]
+UI["13"]["Image"] = [[rbxasset://textures/LayeredClothingEditor/Icon_Play_Light.png]]
 UI["13"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
 UI["13"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
 UI["13"]["BackgroundTransparency"] = 1
@@ -292,7 +292,6 @@ UI["18"]["Image"] = [[rbxasset://textures/TerrainTools/icon_regions_paste.png]]
 UI["18"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
 UI["18"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
 UI["18"]["BackgroundTransparency"] = 1
-UI["18"]["Rotation"] = 42
 UI["18"]["Position"] = UDim2.new(0.19036, 0, 0.19036, 0)
 
 -- // StarterGui.FrostWareUI.EditorFrame.PasteButton.UIStroke \\ --
