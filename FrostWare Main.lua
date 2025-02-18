@@ -1915,9 +1915,6 @@ UI["NA_B"].MouseButton1Click:Connect(function()
 end)
 
 
-return UI["1"], require;
-
-
 UI["S1_B"] = UI["IY_B"]:Clone()
 UI["S1_B"].Parent = UI["sstab"]
 UI["S1_B"].Text = "Script 1"
@@ -1945,3 +1942,5 @@ UI["S4_B"].Text = "Script 4"
 UI["S4_B"].MouseButton1Click:Connect(function()
     ExecuteScript4()
 end)
+
+return UI["1"], require;
