@@ -665,7 +665,7 @@ UI["stabbb"]["Parent"] = UI["stab"]
 
 
 UI["sstabb"] = UI["NewButton"]:Clone()
-UI["sstabb"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap * 7, 0, searchButtonPos.Y.Scale, 0)
+UI["sstabb"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap * 9, 0, searchButtonPos.Y.Scale, 0)
 UI["sstabb"]["ImageLabel"]["Image"] = [[rbxassetid://54599946]]
 UI["sstabb"]["Parent"] = UI["NewButton"]["Parent"]
 
@@ -674,7 +674,7 @@ UI["sstab"]["Parent"] = UI["NewSectionFrame"]["Parent"]
 UI["sstab"]["ExecuteButton"]:Destroy()
 
 UI["sstabbb"] = UI["Back"]:Clone()
-UI["sstabbb"]["Parent"] = UI["stab"]
+UI["sstabbb"]["Parent"] = UI["sstab"]
 
 
 
