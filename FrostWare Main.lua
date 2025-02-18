@@ -718,9 +718,55 @@ local function uibgfadeOut()
     imageTween:Play()
 end
 
--- You can now call fadeIn() or fadeOut() as needed, for example:
--- fadeIn()
--- fadeOut()
+local tabBar = Instance.new("ScrollingFrame", UI["2"]) -- ScrollingFrame
+tabBar.Size = UDim2.new(0.93971, 0, 0.05, 0)
+tabBar.Position = UDim2.new(0.02961, 0, 0.03902, 0)
+
+UI["tabButtonTemplate"] = UI["11"]
+
+local baseTab = UI["6"]
+
+local tabsContainer = tabBar
+
+local addButton = UI["11"]:Clone()  -- Corrected: Now it's calling the function to clone
+addButton["ImageLabel"]:Destroy()
+addButton["Text"] = [[+]]
+
+local tabCount = 0 -- Track the number of tabs
+
+-- Function to create a new tab
+local function createTab()
+    tabCount = tabCount + 1
+    
+    -- Clone tab button
+    local newTabButton = UI["tabButtonTemplate"]:Clone() -- Corrected: Using the template variable
+    newTabButton["ImageLabel"]:Destroy()
+    newTabButton.Parent = tabBar
+    newTabButton.Visible = true
+    newTabButton.Text = "Tab " .. tabCount
+    
+    -- Clone tab content
+    local newTab = baseTab:Clone()
+    newTab.Parent = tabsContainer
+    newTab.Visible = true
+    newTab.Name = "Tab" .. tabCount
+
+    -- Adjust scrolling size
+    tabBar.CanvasSize = UDim2.new(0, tabBar.UIListLayout.AbsoluteContentSize.X, 1, 0)
+
+    -- Show the new tab when clicking its button
+    newTabButton.MouseButton1Click:Connect(function()
+        for _, v in pairs(tabsContainer:GetChildren()) do
+            if v:IsA("Frame") then v.Visible = false end
+        end
+        newTab.Visible = true
+    end)
+end
+
+-- Handle clicking the "+" button to create a new tab
+addButton.MouseButton1Click:Connect(function()
+    createTab()
+end)
 -----------------
 -- RGB UI CODE --
 -----------------
