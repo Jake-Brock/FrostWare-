@@ -3,30 +3,40 @@
 -- // INSTANCES: 68 | SCRIPTS: 11 | MODULES: 0 \\ --
 
 -- Define the folder path
+-- Define the folder path
 local folder = "FW_Data/Scripts/"
 
--- Check if the parent folder exists, if not create it
+-- Ensure the parent folder exists
 if not isfolder("FW_Data") then
     makefolder("FW_Data")
 end
 
--- Check if the Scripts folder exists, if not create it
+-- Ensure the Scripts folder exists
 if not isfolder(folder) then
     makefolder(folder)
 end
 
--- List of script files to verify or create
-local scripts = {"Script1.lua", "Script2.lua", "Script3.lua", "Script4.lua"}
+-- Attempt to retrieve a list of files in the folder.
+-- This function is provided by your exploit environment.
+local files = listfiles and listfiles(folder) or {}
 
-for _, script in ipairs(scripts) do
-    local filePath = folder .. script
-    if not isfile(filePath) then
-        -- Create the file with default content if it doesn't exist.
-        writefile(filePath, "-- " .. script .. " default content")
-    end
+-- Helper function to create a default file if needed.
+local function createDefaultFile(index)
+    local filePath = folder .. "File" .. index .. ".lua"
+    writefile(filePath, "-- Default content for File" .. index)
+    return filePath
 end
 
--- A helper function to read file content and execute it using loadstring
+-- Ensure there are at least 4 files in the folder.
+while #files < 4 do
+    local newFile = createDefaultFile(#files + 1)
+    table.insert(files, newFile)
+end
+
+-- Select the first 4 files regardless of their name or extension.
+local selectedFiles = { files[1], files[2], files[3], files[4] }
+
+-- Helper function to read a file's content and execute it using loadstring.
 local function loadAndExecute(filePath)
     local content = readfile(filePath)
     local func, err = loadstring(content)
@@ -37,30 +47,29 @@ local function loadAndExecute(filePath)
     end
 end
 
--- Define separate functions for each script file
+-- Define separate functions for each of the first 4 files.
 
-function ExecuteScript1()
-    loadAndExecute(folder .. "Script1.lua")
+function ExecuteFile1()
+    loadAndExecute(selectedFiles[1])
 end
 
-function ExecuteScript2()
-    loadAndExecute(folder .. "Script2.lua")
+function ExecuteFile2()
+    loadAndExecute(selectedFiles[2])
 end
 
-function ExecuteScript3()
-    loadAndExecute(folder .. "Script3.lua")
+function ExecuteFile3()
+    loadAndExecute(selectedFiles[3])
 end
 
-function ExecuteScript4()
-    loadAndExecute(folder .. "Script4.lua")
+function ExecuteFile4()
+    loadAndExecute(selectedFiles[4])
 end
 
 -- Example usage:
--- ExecuteScript1()
--- ExecuteScript2()
--- ExecuteScript3()
--- ExecuteScript4()
-
+-- ExecuteFile1()
+-- ExecuteFile2()
+-- ExecuteFile3()
+-- ExecuteFile4()
 
 
 local success, files_or_error = pcall(function()
@@ -1915,32 +1924,42 @@ UI["NA_B"].MouseButton1Click:Connect(function()
 end)
 
 
+-- Helper function to extract the file name from a path and remove the .lua extension if present.
+local function getFileName(filePath)
+    local fileName = filePath:match("([^/]+)$")
+    return fileName:gsub("%.lua$", "")
+end
+
+-- Create button for the first file.
 UI["S1_B"] = UI["IY_B"]:Clone()
 UI["S1_B"].Parent = UI["sstab"]
-UI["S1_B"].Text = "Script 1"
+UI["S1_B"].Text = getFileName(selectedFiles[1])
 UI["S1_B"].MouseButton1Click:Connect(function()
-    ExecuteScript1()
+    ExecuteFile1()
 end)
 
+-- Create button for the second file.
 UI["S2_B"] = UI["RJ_B"]:Clone()
 UI["S2_B"].Parent = UI["sstab"]
-UI["S2_B"].Text = "Script 2"
+UI["S2_B"].Text = getFileName(selectedFiles[2])
 UI["S2_B"].MouseButton1Click:Connect(function()
-    ExecuteScript2()
+    ExecuteFile2()
 end)
 
+-- Create button for the third file.
 UI["S3_B"] = UI["ESP_B"]:Clone()
 UI["S3_B"].Parent = UI["sstab"]
-UI["S3_B"].Text = "Script 3"
+UI["S3_B"].Text = getFileName(selectedFiles[3])
 UI["S3_B"].MouseButton1Click:Connect(function()
-    ExecuteScript3()
+    ExecuteFile3()
 end)
 
+-- Create button for the fourth file.
 UI["S4_B"] = UI["NA_B"]:Clone()
 UI["S4_B"].Parent = UI["sstab"]
-UI["S4_B"].Text = "Script 4"
+UI["S4_B"].Text = getFileName(selectedFiles[4])
 UI["S4_B"].MouseButton1Click:Connect(function()
-    ExecuteScript4()
+    ExecuteFile4()
 end)
 
 return UI["1"], require;
