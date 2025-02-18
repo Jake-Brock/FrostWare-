@@ -663,6 +663,22 @@ UI["stab"]["ExecuteButton"]:Destroy()
 UI["stabbb"] = UI["Back"]:Clone()
 UI["stabbb"]["Parent"] = UI["stab"]
 
+
+UI["sstabb"] = UI["NewButton"]:Clone()
+UI["sstabb"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap * 7, 0, searchButtonPos.Y.Scale, 0)
+UI["sstabb"]["ImageLabel"]["Image"] = [[rbxassetid://54599946]]
+UI["sstabb"]["Parent"] = UI["NewButton"]["Parent"]
+
+UI["sstab"] = UI["NewSectionFrame"]:Clone()
+UI["sstab"]["Parent"] = UI["NewSectionFrame"]["Parent"]
+UI["sstab"]["ExecuteButton"]:Destroy()
+
+UI["sstabbb"] = UI["Back"]:Clone()
+UI["sstabbb"]["Parent"] = UI["stab"]
+
+
+
+
 local TweenService = game:GetService("TweenService")
 
 local ScreenGui = UI["1"]
@@ -718,55 +734,6 @@ local function uibgfadeOut()
     imageTween:Play()
 end
 
-local tabBar = Instance.new("ScrollingFrame", UI["2"]) -- ScrollingFrame
-tabBar.Size = UDim2.new(0.93971, 0, 0.05, 0)
-tabBar.Position = UDim2.new(0.02961, 0, 0.03902, 0)
-
-UI["tabButtonTemplate"] = UI["11"]
-
-local baseTab = UI["6"]
-
-local tabsContainer = tabBar
-
-local addButton = UI["11"]:Clone()  -- Corrected: Now it's calling the function to clone
-addButton["ImageLabel"]:Destroy()
-addButton["Text"] = [[+]]
-
-local tabCount = 0 -- Track the number of tabs
-
--- Function to create a new tab
-local function createTab()
-    tabCount = tabCount + 1
-    
-    -- Clone tab button
-    local newTabButton = UI["tabButtonTemplate"]:Clone() -- Corrected: Using the template variable
-    newTabButton["ImageLabel"]:Destroy()
-    newTabButton.Parent = tabBar
-    newTabButton.Visible = true
-    newTabButton.Text = "Tab " .. tabCount
-    
-    -- Clone tab content
-    local newTab = baseTab:Clone()
-    newTab.Parent = tabsContainer
-    newTab.Visible = true
-    newTab.Name = "Tab" .. tabCount
-
-    -- Adjust scrolling size
-    tabBar.CanvasSize = UDim2.new(0, tabBar.UIListLayout.AbsoluteContentSize.X, 1, 0)
-
-    -- Show the new tab when clicking its button
-    newTabButton.MouseButton1Click:Connect(function()
-        for _, v in pairs(tabsContainer:GetChildren()) do
-            if v:IsA("Frame") then v.Visible = false end
-        end
-        newTab.Visible = true
-    end)
-end
-
--- Handle clicking the "+" button to create a new tab
-addButton.MouseButton1Click:Connect(function()
-    createTab()
-end)
 -----------------
 -- RGB UI CODE --
 -----------------
@@ -1451,6 +1418,102 @@ local newButton = UI["stabb"]
 local backButton = UI["stabbb"]
 local editorFrame = UI["6"]
 local sectionFrame = UI["stab"]
+
+if _G.EditorAnimating == nil then
+    _G.EditorAnimating = false
+end
+
+-- Table to store each button's original size
+local originalSizes = {}
+
+newButton.MouseButton1Click:Connect(function()
+    if _G.EditorAnimating then return end
+    _G.EditorAnimating = true
+
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local editorOriginalSize = editorFrame.Size
+    local targetEditorSize = UDim2.new(editorOriginalSize.X.Scale, editorOriginalSize.X.Offset, 0, 0)
+    local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
+    editorTween:Play()
+    editorTween.Completed:Wait()
+
+    editorFrame.Size = editorOriginalSize
+    sectionFrame.Visible = true
+    editorFrame.Parent.Visible = false
+
+    for _, textButton in ipairs(sectionFrame:GetChildren()) do
+        if textButton:IsA("TextButton") and textButton ~= backButton then
+            if not originalSizes[textButton] then
+                originalSizes[textButton] = textButton.Size
+            end
+
+            textButton.Size = UDim2.new(0, 0, originalSizes[textButton].Y.Scale, originalSizes[textButton].Y.Offset)
+            textButton.Visible = true
+
+            local btnTween = TweenService:Create(textButton, tweenInfo, {Size = originalSizes[textButton]})
+            btnTween:Play()
+        end
+    end
+
+    _G.EditorAnimating = false
+end)
+
+backButton.MouseButton1Click:Connect(function()
+    if _G.EditorAnimating then return end
+    _G.EditorAnimating = true
+
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local animatingButtons = {}
+    for _, textButton in ipairs(sectionFrame:GetChildren()) do
+        if textButton:IsA("TextButton") and textButton ~= backButton then
+            table.insert(animatingButtons, textButton)
+        end
+    end
+
+    local animationsComplete = 0
+    local totalButtons = #animatingButtons
+
+    local function checkAnimationsComplete()
+        animationsComplete = animationsComplete + 1
+        if animationsComplete >= totalButtons then
+            sectionFrame.Visible = false
+
+            editorFrame.Parent.Visible = true
+            local targetEditorSize = editorFrame.Size
+            editorFrame.Size = UDim2.new(targetEditorSize.X.Scale, targetEditorSize.X.Offset, 0, 0)
+            local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
+            editorTween:Play()
+            editorTween.Completed:Wait()
+
+            _G.EditorAnimating = false
+        end
+    end
+
+    if totalButtons == 0 then
+        checkAnimationsComplete()
+    else
+        for _, textButton in ipairs(animatingButtons) do
+            if not originalSizes[textButton] then
+                originalSizes[textButton] = textButton.Size
+            end
+
+            local btnTween = TweenService:Create(textButton, tweenInfo, {
+                Size = UDim2.new(0, 0, originalSizes[textButton].Y.Scale, originalSizes[textButton].Y.Offset)
+            })
+            btnTween:Play()
+            btnTween.Completed:Connect(function()
+                textButton.Visible = false
+                checkAnimationsComplete()
+            end)
+        end
+    end
+end)
+
+local TweenService = game:GetService("TweenService")
+local newButton = UI["sstabb"]
+local backButton = UI["sstabbb"]
+local editorFrame = UI["6"]
+local sectionFrame = UI["sstab"]
 
 if _G.EditorAnimating == nil then
     _G.EditorAnimating = false
