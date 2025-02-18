@@ -987,9 +987,7 @@ local function SCRIPT_2b()
         if toggle then
             -- Tween all frames to center and shrink to (0,0,0)
             for frame, props in pairs(originalProperties) do
-                if frame == UI["uibg"] then
-                    return
-                end
+                if frame ~= UI["uibg"] then
                 local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
                 local goal = {
                     Position = UDim2.new(0.5, 0, 0.5, 0),
@@ -997,6 +995,7 @@ local function SCRIPT_2b()
                 }
                 local tween = tweenService:Create(frame, tweenInfo, goal)
                 tween:Play()
+                end
             end
 
             toggle = false
@@ -1004,9 +1003,7 @@ local function SCRIPT_2b()
         else
             -- Restore original properties
             for frame, props in pairs(originalProperties) do
-                if frame == UI["uibg"] then
-                    return
-                end
+                if frame ~= UI["uibg"] then
                 local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
                 local goal = {
                     Position = props.Position,
@@ -1014,6 +1011,7 @@ local function SCRIPT_2b()
                 }
                 local tween = tweenService:Create(frame, tweenInfo, goal)
                 tween:Play()
+                end
             end
 
             uibgfadeIn()
