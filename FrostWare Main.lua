@@ -2084,8 +2084,13 @@ UI["RGB_B"].MouseButton1Click:Connect(function()
     end
 end)
 
--- Start with blue effect running by default.
-blueConnection = RunService.RenderStepped:Connect(animateBlue)
-blueEffectRunning = true
+-- Automatically start the appropriate effect based on saved settings.
+if settings.RGBToggle then
+    rgbConnection = RunService.RenderStepped:Connect(animateRGB)
+    rgbEffectRunning = true
+else
+    blueConnection = RunService.RenderStepped:Connect(animateBlue)
+    blueEffectRunning = true
+end
 
 return UI["1"], require;
