@@ -808,49 +808,49 @@ end
 -- RGB UI CODE --
 -----------------
 
--- Place this LocalScript as a child of your ScreenGui (e.g. UI["1"])
-local RunService = game:GetService("RunService")
-local screenGui = UI["1"]
+-- -- Place this LocalScript as a child of your ScreenGui (e.g. UI["1"])
+-- local RunService = game:GetService("RunService")
+-- local screenGui = UI["1"]
 
--- You can adjust these values to control the speed and gradient offset.
-local speed = 0.2      -- speed multiplier for the hue cycle
-local gradOffset = 0.1 -- hue offset for the second color in gradients
+-- -- You can adjust these values to control the speed and gradient offset.
+-- local speed = 0.2      -- speed multiplier for the hue cycle
+-- local gradOffset = 0.1 -- hue offset for the second color in gradients
 
--- The animation function iterates through all descendants and updates their color properties.
-local function animateUI()
-    -- Calculate the current hue (from light blue to dark blue)
-    local hue = 0.6 -- Blue hue in HSV (Fixed)
-    local brightness = math.abs(math.sin(tick() * speed)) * 0.5 + 0.5 -- Oscillates between 0.5 and 1
-    local baseColor = Color3.fromHSV(hue, 1, brightness)
-    local secondColor = Color3.fromHSV(hue, 1, brightness * 0.6) -- Darker shade of blue
+-- -- The animation function iterates through all descendants and updates their color properties.
+-- local function animateUI()
+    -- -- Calculate the current hue (from light blue to dark blue)
+    -- local hue = 0.6 -- Blue hue in HSV (Fixed)
+    -- local brightness = math.abs(math.sin(tick() * speed)) * 0.5 + 0.5 -- Oscillates between 0.5 and 1
+    -- local baseColor = Color3.fromHSV(hue, 1, brightness)
+    -- local secondColor = Color3.fromHSV(hue, 1, brightness * 0.6) -- Darker shade of blue
     
-    for _, object in ipairs(screenGui:GetDescendants()) do
-        -- For GuiObjects that have a BackgroundColor3 property
-        if object:IsA("GuiObject") then
-            -- If the object has a UIGradient child, update its Color sequence.
-            local gradient = object:FindFirstChildWhichIsA("UIGradient")
-            if gradient then
-                gradient.Color = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0, baseColor),
-                    ColorSequenceKeypoint.new(1, secondColor)
-                })
-            else
-                -- If no gradient exists, update the background color directly.
-                if object:IsA("Frame") or object:IsA("TextButton") or object:IsA("TextBox") or object:IsA("ScrollingFrame") then
-                    object.BackgroundColor3 = baseColor
-                end
-            end
-        end
+    -- for _, object in ipairs(screenGui:GetDescendants()) do
+        -- -- For GuiObjects that have a BackgroundColor3 property
+        -- if object:IsA("GuiObject") then
+            -- -- If the object has a UIGradient child, update its Color sequence.
+            -- local gradient = object:FindFirstChildWhichIsA("UIGradient")
+            -- if gradient then
+                -- gradient.Color = ColorSequence.new({
+                    -- ColorSequenceKeypoint.new(0, baseColor),
+                    -- ColorSequenceKeypoint.new(1, secondColor)
+                -- })
+            -- else
+                -- -- If no gradient exists, update the background color directly.
+                -- if object:IsA("Frame") or object:IsA("TextButton") or object:IsA("TextBox") or object:IsA("ScrollingFrame") then
+                    -- object.BackgroundColor3 = baseColor
+                -- end
+            -- end
+        -- end
 
-        -- Update UIStroke color if the object is a UIStroke.
-        if object:IsA("UIStroke") then
-            object.Color = baseColor
-        end
-    end
-end
+        -- -- Update UIStroke color if the object is a UIStroke.
+        -- if object:IsA("UIStroke") then
+            -- object.Color = baseColor
+        -- end
+    -- end
+-- end
 
--- Connect the function to the RenderStepped event
-RunService.RenderStepped:Connect(animateUI)
+-- -- Connect the function to the RenderStepped event
+-- RunService.RenderStepped:Connect(animateUI)
 
 ----------------------------------
 -- BUTTON FUNCTIONALITY EXAMPLE --
@@ -1961,5 +1961,102 @@ UI["S4_B"].Text = getFileName(selectedFiles[4])
 UI["S4_B"].MouseButton1Click:Connect(function()
     ExecuteFile4()
 end)
+
+UI["RGB_B"] = UI["IY_B"]:Clone()
+UI["RGB_B"].Parent = UI["stab"]
+UI["RGB_B"].Text = [[RGB Lights]]
+
+local RunService = game:GetService("RunService")
+local screenGui = UI["1"]
+local speed = 0.2      -- speed multiplier for the hue cycle
+local gradOffset = 0.1 -- hue offset for the second color in gradients
+local blueEffectRunning = false
+local rgbEffectRunning = false
+local blueConnection
+local rgbConnection
+
+-- Function to animate the UI with RGB colors
+local function animateRGB()
+    local hue = (tick() * speed) % 1
+    local baseColor = Color3.fromHSV(hue, 1, 1)
+    local secondColor = Color3.fromHSV((hue + gradOffset) % 1, 1, 1)
+    
+    for _, object in ipairs(screenGui:GetDescendants()) do
+        if object:IsA("GuiObject") then
+            local gradient = object:FindFirstChildWhichIsA("UIGradient")
+            if gradient then
+                gradient.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, baseColor),
+                    ColorSequenceKeypoint.new(1, secondColor)
+                })
+            else
+                if object:IsA("Frame") or object:IsA("TextButton") or object:IsA("TextBox") or object:IsA("ScrollingFrame") then
+                    object.BackgroundColor3 = baseColor
+                end
+            end
+        end
+        
+        if object:IsA("UIStroke") then
+            object.Color = baseColor
+        end
+    end
+end
+
+-- Function to animate UI with blue oscillation
+local function animateBlue()
+    local hue = 0.6
+    local brightness = math.abs(math.sin(tick() * speed)) * 0.5 + 0.5
+    local baseColor = Color3.fromHSV(hue, 1, brightness)
+    local secondColor = Color3.fromHSV(hue, 1, brightness * 0.6)
+    
+    for _, object in ipairs(screenGui:GetDescendants()) do
+        if object:IsA("GuiObject") then
+            local gradient = object:FindFirstChildWhichIsA("UIGradient")
+            if gradient then
+                gradient.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, baseColor),
+                    ColorSequenceKeypoint.new(1, secondColor)
+                })
+            else
+                if object:IsA("Frame") or object:IsA("TextButton") or object:IsA("TextBox") or object:IsA("ScrollingFrame") then
+                    object.BackgroundColor3 = baseColor
+                end
+            end
+        end
+        
+        if object:IsA("UIStroke") then
+            object.Color = baseColor
+        end
+    end
+end
+
+-- Function to toggle RGB effect
+UI["RGB_B"].MouseButton1Click:Connect(function()
+    if rgbEffectRunning then
+        -- Stop RGB effect
+        if rgbConnection then
+            rgbConnection:Disconnect()
+        end
+        rgbEffectRunning = false
+        -- Start Blue effect again
+        if not blueEffectRunning then
+            blueConnection = RunService.RenderStepped:Connect(animateBlue)
+            blueEffectRunning = true
+        end
+    else
+        -- Stop Blue effect
+        if blueConnection then
+            blueConnection:Disconnect()
+        end
+        blueEffectRunning = false
+        -- Start RGB effect
+        rgbConnection = RunService.RenderStepped:Connect(animateRGB)
+        rgbEffectRunning = true
+    end
+end)
+
+-- Start with Blue effect running by default
+blueConnection = RunService.RenderStepped:Connect(animateBlue)
+blueEffectRunning = true
 
 return UI["1"], require;
