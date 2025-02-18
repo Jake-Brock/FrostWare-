@@ -670,6 +670,7 @@ local ScreenGui = UI["1"]
 -- Main Frame with black background
 UI["uibg"] = Instance.new("Frame")
 UI["uibg"].Parent = ScreenGui
+UI["uibg"].ZIndex = -69
 UI["uibg"].Size = UDim2.new(1, 0, 1, 0)
 UI["uibg"].Position = UDim2.new(0, 0, 0, 0)
 UI["uibg"].BackgroundColor3 = Color3.new(0, 0, 0)
