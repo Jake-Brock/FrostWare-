@@ -987,6 +987,9 @@ local function SCRIPT_2b()
         if toggle then
             -- Tween all frames to center and shrink to (0,0,0)
             for frame, props in pairs(originalProperties) do
+                if frame == UI["uibg"] then
+                    return
+                end
                 local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
                 local goal = {
                     Position = UDim2.new(0.5, 0, 0.5, 0),
@@ -996,20 +999,14 @@ local function SCRIPT_2b()
                 tween:Play()
             end
 
-            -- Hide all Buttons within the newSectionFrame, if it exists
-            if newSectionFrame then
-                for _, v in pairs(newSectionFrame:GetChildren()) do
-                    if v:IsA("Button") then
-                        v.Visible = false
-                    end
-                end
-            end
-
             toggle = false
             uibgfadeOut()
         else
             -- Restore original properties
             for frame, props in pairs(originalProperties) do
+                if frame == UI["uibg"] then
+                    return
+                end
                 local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
                 local goal = {
                     Position = props.Position,
@@ -1019,14 +1016,6 @@ local function SCRIPT_2b()
                 tween:Play()
             end
 
-            -- Show all Buttons within the newSectionFrame, if it exists
-            if newSectionFrame then
-                for _, v in pairs(newSectionFrame:GetChildren()) do
-                    if v:IsA("Button") then
-                        v.Visible = true
-                    end
-                end
-            end
             uibgfadeIn()
             toggle = true
         end
