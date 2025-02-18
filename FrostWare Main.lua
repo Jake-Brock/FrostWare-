@@ -315,7 +315,7 @@ UI["23"]["Color"] = Color3.fromRGB(44, 65, 88)
 -- // StarterGui.FrostWareUI.EditorFrame.SearchButton.UIGradient \\ --
 UI["24"] = Instance.new("UIGradient", UI["20"])
 UI["24"]["Rotation"] = -50
-UI["24"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0.000, 0.6),NumberSequenceKeypoint.new(1.000, 0.6)}
+UI["24"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0.000, 0.2),NumberSequenceKeypoint.new(1.000, 0.2)}
 UI["24"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(30, 60, 95)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(51, 82, 121))}
 
 -- // StarterGui.FrostWareUI.EditorFrame.SearchButton.LocalScript \\ --
@@ -618,7 +618,7 @@ UI["NewButtonStroke"]["Color"] = Color3.fromRGB(44, 65, 88)
 -- NewSectionButton UIGradient
 UI["NewButtonGradient"] = Instance.new("UIGradient", UI["NewButton"])
 UI["NewButtonGradient"]["Rotation"] = -50
-UI["NewButtonGradient"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0, 0.6), NumberSequenceKeypoint.new(1, 0.6)}
+UI["NewButtonGradient"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0.000, 0.2),NumberSequenceKeypoint.new(1.000, 0.2)}
 UI["NewButtonGradient"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 60, 95)), ColorSequenceKeypoint.new(1, Color3.fromRGB(51, 82, 121))}
 
 
