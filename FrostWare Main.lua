@@ -2093,4 +2093,6 @@ else
     blueEffectRunning = true
 end
 
+print("Applied Settings")
+
 return UI["1"], require;
