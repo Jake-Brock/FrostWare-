@@ -1962,20 +1962,39 @@ UI["S4_B"].MouseButton1Click:Connect(function()
     ExecuteFile4()
 end)
 
-UI["RGB_B"] = UI["IY_B"]:Clone()
-UI["RGB_B"].Parent = UI["stab"]
-UI["RGB_B"].Text = [[RGB Lights]]
+-- Create folder and settings file if they don't exist.
+local settingsFolder = "FW_Data"
+local settingsFile = settingsFolder .. "/settings.lua"
 
+if not isfolder(settingsFolder) then
+    makefolder(settingsFolder)
+end
+
+if not isfile(settingsFile) then
+    local defaultSettings = "return {RGBToggle = false}"
+    writefile(settingsFile, defaultSettings)
+end
+
+-- Load the settings table.
+local settings = loadfile(settingsFile)()
+
+-- Function to save settings to file.
+local function saveSettings()
+    local data = "return {RGBToggle = " .. tostring(settings.RGBToggle) .. "}"
+    writefile(settingsFile, data)
+end
+
+-- Define services and variables for UI animation.
 local RunService = game:GetService("RunService")
 local screenGui = UI["1"]
-local speed = 0.2      -- speed multiplier for the hue cycle
-local gradOffset = 0.1 -- hue offset for the second color in gradients
+local speed = 0.2      -- Speed multiplier for the hue cycle.
+local gradOffset = 0.1 -- Hue offset for the second color in gradients.
 local blueEffectRunning = false
 local rgbEffectRunning = false
 local blueConnection
 local rgbConnection
 
--- Function to animate the UI with RGB colors
+-- RGB animation function.
 local function animateRGB()
     local hue = (tick() * speed) % 1
     local baseColor = Color3.fromHSV(hue, 1, 1)
@@ -2002,9 +2021,9 @@ local function animateRGB()
     end
 end
 
--- Function to animate UI with blue oscillation
+-- Blue animation function.
 local function animateBlue()
-    local hue = 0.6
+    local hue = 0.6 -- Fixed blue hue.
     local brightness = math.abs(math.sin(tick() * speed)) * 0.5 + 0.5
     local baseColor = Color3.fromHSV(hue, 1, brightness)
     local secondColor = Color3.fromHSV(hue, 1, brightness * 0.6)
@@ -2030,32 +2049,42 @@ local function animateBlue()
     end
 end
 
--- Function to toggle RGB effect
+-- Create the RGB button and set up its toggle functionality.
+UI["RGB_B"] = UI["IY_B"]:Clone()
+UI["RGB_B"].Parent = UI["stab"]
+UI["RGB_B"].Text = "RGB Lights"
+
 UI["RGB_B"].MouseButton1Click:Connect(function()
     if rgbEffectRunning then
-        -- Stop RGB effect
+        -- Turn off RGB effect.
         if rgbConnection then
             rgbConnection:Disconnect()
         end
         rgbEffectRunning = false
-        -- Start Blue effect again
+        settings.RGBToggle = false
+        saveSettings()
+        
+        -- Resume blue effect.
         if not blueEffectRunning then
             blueConnection = RunService.RenderStepped:Connect(animateBlue)
             blueEffectRunning = true
         end
     else
-        -- Stop Blue effect
+        -- Turn off blue effect.
         if blueConnection then
             blueConnection:Disconnect()
         end
         blueEffectRunning = false
-        -- Start RGB effect
+        
+        -- Enable RGB effect.
         rgbConnection = RunService.RenderStepped:Connect(animateRGB)
         rgbEffectRunning = true
+        settings.RGBToggle = true
+        saveSettings()
     end
 end)
 
--- Start with Blue effect running by default
+-- Start with blue effect running by default.
 blueConnection = RunService.RenderStepped:Connect(animateBlue)
 blueEffectRunning = true
 
