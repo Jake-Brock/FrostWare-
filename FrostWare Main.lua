@@ -98,7 +98,7 @@ UI["9"]["BackgroundTransparency"] = 1
 -- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.Line.Line Number \\ --
 UI["a"] = Instance.new("TextLabel", UI["9"])
 UI["a"]["TextWrapped"] = false
-UI["a"]["TextScaled"] = true
+UI["a"]["TextScaled"] = false
 UI["a"]["BorderSizePixel"] = 0
 UI["a"]["TextTransparency"] = 0.5
 UI["a"]["TextYAlignment"] = Enum.TextYAlignment.Top
@@ -663,6 +663,63 @@ UI["stab"]["ExecuteButton"]:Destroy()
 UI["stabbb"] = UI["Back"]:Clone()
 UI["stabbb"]["Parent"] = UI["stab"]
 
+local TweenService = game:GetService("TweenService")
+
+local ScreenGui = UI["1"]
+
+-- Main Frame with black background
+UI["uibg"] = Instance.new("Frame")
+UI["uibg"].Parent = ScreenGui
+UI["uibg"].Size = UDim2.new(1, 0, 1, 0)
+UI["uibg"].Position = UDim2.new(0, 0, 0, 0)
+UI["uibg"].BackgroundColor3 = Color3.new(0, 0, 0)
+UI["uibg"].BorderSizePixel = 0
+UI["uibg"].BackgroundTransparency = 1  -- Start fully transparent
+
+-- (Optional) UICorner for rounded edges if desired
+local UICorner = Instance.new("UICorner")
+UICorner.Parent = UI["uibg"]
+
+-- InnerGlow overlay using an ImageLabel with a radial gradient
+UI["uibgg"] = Instance.new("ImageLabel")
+UI["uibgg"].Parent = UI["uibg"]
+UI["uibgg"].Size = UDim2.new(1, 0, 1, 0)
+UI["uibgg"].Position = UDim2.new(0, 0, 0, 0)
+UI["uibgg"].BackgroundTransparency = 1
+UI["uibgg"].Image = "rbxassetid://8387197183"
+UI["uibgg"].ImageColor3 = Color3.fromRGB(255, 255, 255)
+UI["uibgg"].ScaleType = Enum.ScaleType.Stretch
+UI["uibgg"].ImageTransparency = 1  -- Start fully transparent
+
+-- If your gradient image is square and you want to match rounded corners:
+local InnerUICorner = Instance.new("UICorner")
+InnerUICorner.Parent = UI["uibgg"]
+
+-- Function for fade-in animation
+local function uibgfadeIn()
+    local tweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    
+    local frameTween = TweenService:Create(UI["uibg"], tweenInfo, {BackgroundTransparency = 0.5})
+    local imageTween = TweenService:Create(UI["uibgg"], tweenInfo, {ImageTransparency = 0})
+    
+    frameTween:Play()
+    imageTween:Play()
+end
+
+-- Function for fade-out animation
+local function uibgfadeOut()
+    local tweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    
+    local frameTween = TweenService:Create(UI["uibg"], tweenInfo, {BackgroundTransparency = 1})
+    local imageTween = TweenService:Create(UI["uibgg"], tweenInfo, {ImageTransparency = 1})
+    
+    frameTween:Play()
+    imageTween:Play()
+end
+
+-- You can now call fadeIn() or fadeOut() as needed, for example:
+-- fadeIn()
+-- fadeOut()
 -----------------
 -- RGB UI CODE --
 -----------------
@@ -949,6 +1006,7 @@ local function SCRIPT_2b()
             end
 
             toggle = false
+            uibgfadeOut()
         else
             -- Restore original properties
             for frame, props in pairs(originalProperties) do
@@ -969,7 +1027,7 @@ local function SCRIPT_2b()
                     end
                 end
             end
-
+            uibgfadeIn()
             toggle = true
         end
     end)
