@@ -370,7 +370,7 @@ UI["22"] = Instance.new("ImageLabel", UI["20"])
 UI["22"]["BorderSizePixel"] = 0
 UI["22"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
 UI["22"]["ScaleType"] = Enum.ScaleType.Fit
-UI["22"]["Image"] = [[rbxassetid://122959358068457]]
+UI["22"]["Image"] = [[rbxasset://textures/DevConsole/Search.png]]
 UI["22"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
 UI["22"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
 UI["22"]["BackgroundTransparency"] = 1
@@ -669,7 +669,7 @@ UI["NewButtonLabel"] = Instance.new("ImageLabel", UI["NewButton"])
 UI["NewButtonLabel"]["BorderSizePixel"] = 0
 UI["NewButtonLabel"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
 UI["NewButtonLabel"]["ScaleType"] = Enum.ScaleType.Fit
-UI["NewButtonLabel"]["Image"] = [[rbxasset://textures/StudioToolbox/script.png]]
+UI["NewButtonLabel"]["Image"] = [[rbxassetid://4998267428]]
 UI["NewButtonLabel"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
 UI["NewButtonLabel"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
 UI["NewButtonLabel"]["BackgroundTransparency"] = 1
@@ -723,7 +723,7 @@ UI["BackScript"] = Instance.new("LocalScript", UI["Back"])
 
 UI["stabb"] = UI["NewButton"]:Clone()
 UI["stabb"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap * 5, 0, searchButtonPos.Y.Scale, 0)
-UI["stabb"]["ImageLabel"]["Image"] = [[rbxassetid://14134158045]]
+UI["stabb"]["ImageLabel"]["Image"] = [[rbxasset://textures/ui/Settings/MenuBarIcons/GameSettingsTab@2x.png]]
 UI["stabb"]["Parent"] = UI["NewButton"]["Parent"]
 
 UI["stab"] = UI["NewSectionFrame"]:Clone()
@@ -736,7 +736,7 @@ UI["stabbb"]["Parent"] = UI["stab"]
 
 UI["sstabb"] = UI["NewButton"]:Clone()
 UI["sstabb"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap * 9, 0, searchButtonPos.Y.Scale, 0)
-UI["sstabb"]["ImageLabel"]["Image"] = [[rbxassetid://4998267428]]
+UI["sstabb"]["ImageLabel"]["Image"] = [[rbxasset://textures/StudioSharedUI/scripts.png]]
 UI["sstabb"]["Parent"] = UI["NewButton"]["Parent"]
 
 UI["sstab"] = UI["NewSectionFrame"]:Clone()
