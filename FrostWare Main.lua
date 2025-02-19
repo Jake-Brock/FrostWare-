@@ -1986,16 +1986,6 @@ end
 -- UI Setup
 --------------------------------------------------
 
---[[ 
-Assuming you already have a UI table with:
-    UI["IY_B"] as a base button template,
-    UI["NewSectionFrame"] as the parent frame, and
-    originalPos containing the original position data for placement.
---]]
-local UI = {}  -- Define UI table if not already defined
-UI["IY_B"] = script:WaitForChild("IY_B") -- Replace with your actual button reference
-UI["NewSectionFrame"] = script:WaitForChild("NewSectionFrame") -- Replace with your actual frame reference
-
 -- Clone the base button and set it up
 UI["F_B"] = UI["IY_B"]:Clone()
 UI["F_B"].Parent = UI["NewSectionFrame"]
