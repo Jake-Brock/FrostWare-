@@ -1936,7 +1936,7 @@ local function getRoot(character)
 end
 
 -- Walkfling function: Applies a strong velocity to the local player's root part until stopped
-local function walkfling(speaker)
+local function walkfling(Players.LocalPlayer)
     walkflinging = true  -- Ensure the flag is set to true
     local character = speaker.Character or speaker.CharacterAdded:Wait()
     local humanoid = character:FindFirstChildWhichIsA("Humanoid")
