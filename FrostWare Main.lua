@@ -881,7 +881,7 @@ local function SCRIPT_5()
     end)
 
     script.Parent:WaitForChild("PasteButton").MouseButton1Click:Connect(function()
-        SyntaxEditor.Text = (getclipboard or function() end)()
+        --[[SyntaxEditor.Text = (getclipboard or function() end)()]] local syntaxEditor = SyntaxEditor; local fullText = (getclipboard or function() return "" end)(); local lines = {}; for line in fullText:gmatch("([^\n]+)") do table.insert(lines, line); end; local function updateSyntaxEditor() local chunkSize = 500; for i = 1, #lines, chunkSize do local chunk = table.concat(lines, "\n", i, math.min(i + chunkSize - 1, #lines)); syntaxEditor.Text = syntaxEditor.Text .. chunk .. "\n"; task.wait(0.01); end; end; updateSyntaxEditor();
     end)
 end
 task.spawn(SCRIPT_5)
