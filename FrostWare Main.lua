@@ -1700,7 +1700,7 @@ end)
 
 UI["ESP_B"] = UI["IY_B"]:Clone()
 UI["ESP_B"].Parent = UI["NewSectionFrame"]
-UI["ESP_B"].Text = "ESP"
+UI["ESP_B"].Text = "Observation Haki"
 UI["ESP_B"].Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1.15 - originalPos.Y.Scale, originalPos.Y.Offset)
 
 -- Services  
