@@ -1922,93 +1922,25 @@ UI["NA_B"].MouseButton1Click:Connect(function()
     loadstring(game:HttpGet('https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/main/Source'))()
 end)
 
--- Services
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-
--- Global flag for walkfling state
-local walkflinging = false
-
--- Utility function to get the HumanoidRootPart from a character
-local function getRoot(character)
-    return character and character:FindFirstChild("HumanoidRootPart")
-end
-
--- Walkfling function: Applies a strong velocity to the local player's root part until stopped
-local function walkfling(speaker)
-    walkflinging = true  -- Ensure the flag is set to true
-    local character = speaker.Character or speaker.CharacterAdded:Wait()
-    local humanoid = character:FindFirstChildWhichIsA("Humanoid")
-    
-    if humanoid then
-        humanoid.Died:Connect(function()
-            walkflinging = false
-        end)
-    end
-
-    -- Loop until walkflinging is toggled off
-    repeat
-        task.wait()  -- Small delay to yield execution
-
-        local root = getRoot(character)
-        if not (character and character.Parent and root and root.Parent) then
-            character = speaker.Character
-            root = getRoot(character)
-            continue
-        end
-
-        local vel = root.Velocity
-        local movel = 0.1
-
-        -- Apply extreme velocity upward and in the direction of current velocity
-        root.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
-
-        RunService.RenderStepped:Wait()
-        if root then
-            root.Velocity = vel
-        end
-
-        RunService.Stepped:Wait()
-        if root then
-            root.Velocity = vel + Vector3.new(0, movel, 0)
-            movel = -movel
-        end
-    until not walkflinging
-end
-
--- Function to stop walkfling
-local function unwalkfling()
-    walkflinging = false
-end
-
 --------------------------------------------------
 -- UI Setup
 --------------------------------------------------
 
 -- Clone the base button and set it up
-UI["F_B"] = UI["IY_B"]:Clone()
-UI["F_B"].Parent = UI["NewSectionFrame"]
-UI["F_B"].Text = "Fling (Toggle)"
+UI["Dex_B"] = UI["IY_B"]:Clone()
+UI["Dex_B"].Parent = UI["NewSectionFrame"]
+UI["Dex_B"].Text = "Mobile Dex (Keyless)"
 
 -- Example originalPos table; adjust these values as needed
 local originalPos = {
     X = { Scale = 0.2, Offset = 0 },
     Y = { Scale = 0.2, Offset = 0 }
 }
-UI["F_B"].Position = UDim2.new(1 - originalPos.X.Scale, originalPos.X.Offset, 1 - originalPos.Y.Scale, originalPos.Y.Offset)
+UI["Dex_B"].Position = UDim2.new(1 - originalPos.X.Scale, originalPos.X.Offset, 1 - originalPos.Y.Scale, originalPos.Y.Offset)
 
 -- Toggle the walkfling effect when the button is clicked
-UI["F_B"].MouseButton1Click:Connect(function()
-    if walkflinging then
-        unwalkfling()  -- Stop the effect
-        UI["F_B"].Text = "Fling (Toggle) - OFF"
-    else
-        UI["F_B"].Text = "Fling (Toggle) - ON"
-        task.spawn(function()
-            walkfling(player)  -- Start the effect for the local player
-        end)
-    end
+UI["Dex_B"].MouseButton1Click:Connect(function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Kaiso-666/Kaiso-666/refs/heads/main/MobileDex.lua"))()
 end)
 
 
