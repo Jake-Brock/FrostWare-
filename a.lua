@@ -326,7 +326,7 @@ else
 
       pcall(writefile, "FrostWare_Key.txt", tostring(inputKey))
 
-      loadstring(game:HttpGet('https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Intro'))()
+      loadstring(game:HttpGet('https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua'))()
 
   
 
