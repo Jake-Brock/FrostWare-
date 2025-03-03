@@ -1,2118 +1,5238 @@
--- // GUI TO LUA \\ --
+repeat task.wait() until game.Players.LocalPlayer~=nil
 
--- // INSTANCES: 68 | SCRIPTS: 11 | MODULES: 0 \\ --
+local level = 8 -- instead of using getidentity, was lazy to make it not error
 
--- Define the folder path
--- Define the folder path
-local folder = "FW_Data/Scripts/"
+exec=function(char)
+repeat task.wait() until char:FindFirstChild'Animate'
+local senv=getsenv(char.Animate)
+for i,v in pairs(getgenv()) do
+senv[i]=v
+end
+senv.getgenv=getrenv
+senv.getrenv=getgenv
+local step=senv.stepAnimate
+local s
+local func
+execute=function(x) s=true func=x end
+senv.stepAnimate=function(...) task.spawn(function() if s==true then s=false task.spawn(func) end end) step(...) end end
+exec(game.Players.LocalPlayer.Character)
+game.Players.LocalPlayer.CharacterAdded:Connect(exec)
 
--- Ensure the parent folder exists
-if not isfolder("FW_Data") then
-    makefolder("FW_Data")
+local framework = setmetatable({
+	dependencies = {
+		utils = {}
+	},
+	data = {},
+	components = {
+		base = {}
+	},
+	popups = {},
+	pages = {
+		startup = {},
+		navbar = {},
+		exploitSettings = {
+			optionTypes = {}
+		},
+		editor = {},
+		localScripts = {},
+		globalScripts = {}
+	},
+	fun = {
+		customexecute = false,
+		nex = false
+	}
+}, {
+	__index = function(t, k)
+		local res, split = t, string.split(k, ".");
+		for i, v in split do
+			res = rawget(res, v);
+		end
+		return res;
+	end
+});
+
+do
+	--[[ Connection ]]--
+
+	local connection = {};
+	connection.__index = connection;
+
+	function connection.new(signal: {any}, fn: (any))
+		return setmetatable({
+			_signal = signal,
+			_fn = fn
+		}, connection);
+	end
+
+	function connection:Disconnect()
+		self._signal[self] = nil;
+	end
+
+	--[[ Signal ]]--
+
+	local signal = {};
+	signal.__index = signal;
+
+	function signal.new()
+		return setmetatable({}, signal);
+	end
+
+	function signal:Connect(fn: (any))
+		local conn = connection.new(self, fn);
+		self[conn] = true;
+		return conn;
+	end
+
+	function signal:Once(fn: (any))
+		local conn; conn = self:Connect(function(...)
+			conn:Disconnect();
+			fn(...);
+		end);
+		return conn;
+	end
+
+	function signal:Fire(...)
+		for conn, _ in self do
+			task.spawn(conn._fn, ...);
+		end
+	end
+
+	function signal:Wait()
+		local thread = coroutine.running();
+		local conn; conn = self:Connect(function(...)
+			conn:Disconnect();
+			task.spawn(thread, ...);
+		end);
+		return coroutine.yield();
+	end
+
+	function signal:DisconnectAll()
+		table.clear(self);
+	end
+
+	framework.dependencies.signal = signal;
 end
 
--- Ensure the Scripts folder exists
-if not isfolder(folder) then
-    makefolder(folder)
+do
+	--[[ Variables ]]--
+
+	local runService = game:GetService("RunService");
+	local tweenService = game:GetService("TweenService");
+
+	local dynamicParent;
+
+	--[[ Setup ]]--
+
+	if gethui then
+		dynamicParent = gethui();
+	elseif runService:IsRunning() then
+		dynamicParent = runService:IsStudio() and game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui") or game:GetService("CoreGui");
+	else
+		dynamicParent = game:GetService("StarterGui");
+	end
+
+	--[[ Module ]]--
+
+	local utils = {};
+
+	function utils:Create(className: string, properties: {any}, children: {any}?): Instance
+		local instance = Instance.new(className);
+		for i, v in properties do
+			if typeof(instance[i]) == "RBXScriptSignal" then
+				instance[i]:Connect(v);
+			elseif i ~= "Parent" then
+				instance[i] = v;
+			end
+		end
+		if children ~= nil then
+			for i, v in children do
+				v.Parent = instance;
+			end
+		end
+		instance.Parent = properties.Parent;
+		return instance;
+	end
+
+	function utils:Tween(instance: Instance, duration: number, properties: {any}, ...): Tween
+		local tween = tweenService:Create(instance, TweenInfo.new(duration, ...), properties);
+		tween:Play();
+		return tween;
+	end
+
+	function utils:DynamicParent(instance: Instance): Instance
+		instance.Parent = dynamicParent;
+		return instance;
+	end
+
+	framework.dependencies.utils.instance = utils;
 end
 
--- Attempt to retrieve a list of files in the folder.
--- This function is provided by your exploit environment.
-local files = listfiles and listfiles(folder) or {}
+do
+	--[[ Variables ]]--
 
--- Helper function to create a default file if needed.
-local function createDefaultFile(index)
-    local filePath = folder .. "File" .. index .. ".lua"
-    writefile(filePath, "-- Default content for File" .. index)
-    return filePath
+	local denominations = {
+		"K", "M", "B", "T", "q", "Q", "s", "S", "O", "N", "d", "U", "D"
+	};
+
+	--[[ Module ]]--
+
+	local utils = {};
+
+	function utils:Round(input: number, float: number): number
+		local bracket = 1 / float;
+		return math.round(input * bracket) / bracket;
+	end
+
+	function utils:FormatAsCount(input: number, float: number): string
+		if input < 1000 then
+			return tostring(input);
+		end
+		local denominationIndex = math.floor(math.log10(input) / 3);
+		return tostring(self:Round(input / (10 ^ (denominationIndex * 3)), float)) .. tostring(denominations[denominationIndex]);
+	end
+
+	function utils:FormatAsLiteralCount(input: number): string
+		local x = string.gsub(string.reverse(tostring(input)), "(%d%d%d)", "%1,");
+		return string.gsub(string.reverse(x), "^,", "");
+	end
+
+	function utils:IsWithin2DBounds(position: Vector2, topLeft: Vector2, bottomRight: Vector2): boolean
+		return position.X >= topLeft.X and position.X <= bottomRight.X and position.Y >= topLeft.Y and position.Y <= bottomRight.Y;
+	end
+
+	framework.dependencies.utils.maths = utils;
 end
 
--- Ensure there are at least 4 files in the folder.
-while #files < 4 do
-    local newFile = createDefaultFile(#files + 1)
-    table.insert(files, newFile)
+do
+	--[[ Module ]]--
+
+	local utils = {};
+
+	function utils:DeepCopy(x: {any})
+		local y = {};
+		for i, v in x do
+			y[i] = type(v) == "table" and self:DeepCopy(v) or v;
+		end
+		return y;
+	end
+
+	function utils:Concatenate(x: {any}, y: {any})
+		if y ~= nil then
+			for i, v in y do
+				table.insert(x, v);
+			end
+		end
+		return x;
+	end
+
+	function utils:DeepOverwrite(x: {any}, y: {any}, inclusive: boolean?)
+		if y == nil then
+			return x;
+		end
+		for i, v in y do
+			if x[i] == nil then
+				if inclusive then
+					x[i] = v;
+				end
+			else
+				local _type = typeof(x[i]);
+				if _type == typeof(v) then
+					if _type == "table" then
+						self:DeepOverwrite(x[i], v);
+					else
+						x[i] = v;
+					end
+				end
+			end
+		end
+		return x;
+	end
+
+	framework.dependencies.utils.table = utils;
 end
 
--- Select the first 4 files regardless of their name or extension.
-local selectedFiles = { files[1], files[2], files[3], files[4] }
+do
+	--[[ Module ]]--
 
--- Helper function to read a file's content and execute it using loadstring.
-local function loadAndExecute(filePath)
-    local content = readfile(filePath)
-    local func, err = loadstring(content)
-    if not func then
-        warn("Error loading script from " .. filePath .. ": " .. err)
-    else
-        func()
-    end
+	local utils = {};
+
+	function utils:CapitaliseFirst(str: string): string
+		return string.upper(string.sub(str, 1, 1)) .. string.lower(string.sub(str, 2));
+	end
+
+	function utils:ConvertToCamelCase(str: string): string
+		local res = "";
+		for i, v in string.split(str, " ") do
+			res ..= i == 1 and string.lower(v) or self:CapitaliseFirst(v);
+		end
+		return res;
+	end
+
+	framework.dependencies.utils.string = utils;
 end
 
--- Define separate functions for each of the first 4 files.
+do
+	--[[ Variables ]]--
 
-function ExecuteFile1()
-    loadAndExecute(selectedFiles[1])
+	local httpService = game:GetService("HttpService");
+
+	local httpRequest = request or http_request or (syn and syn.request);
+
+	local runcode = runcode and clonefunction(runcode) or function(scr)
+		loadstring(scr)();
+	end
+
+	--[[ Module ]]--
+
+	local utils = {};
+
+	function utils:Request(url: string, method: string?, headers: {any}?, body: any?): string
+		local s, r = pcall(httpRequest, {
+			Url = url,
+			Method = method or "GET",
+			Headers = headers,
+			Body = type(body) == "table" and httpService:JSONEncode(body) or body
+		});
+		if s == false or r.Success == false or r.StatusCode ~= 200 then
+			return false;
+		end
+		return r.Body;
+	end
+
+	function utils:Execute(scr: string, ...)
+		if framework.fun.customexecute then
+			execute(function() setidentity(level) loadstring(scr)() end)
+		else
+			setidentity(level)
+			loadstring(scr)()
+		end
+	end
+
+	framework.dependencies.utils.internal = utils;
 end
 
-function ExecuteFile2()
-    loadAndExecute(selectedFiles[2])
+do
+	--[[ Enum ]]--
+
+	local frostyEnum = {};
+
+	function frostyEnum.__index(t, k)
+		return t._map[k] or frostyEnum[k];
+	end
+
+	function frostyEnum.new(items: {any}): {any}
+		local map = {};
+
+		for i, v in items do
+			map[v] = i;
+		end
+
+		return setmetatable({
+			_map = map,
+			_items = items
+		}, frostyEnum);
+	end
+
+	function frostyEnum:GetEnumItems()
+		return self._items;
+	end
+
+	--[[ Module ]]--
+
+	framework.dependencies.frostyEnum = {
+		NavbarState = frostyEnum.new({ "Hidden", "Partial", "Full" })
+	};
 end
 
-function ExecuteFile3()
-    loadAndExecute(selectedFiles[3])
+do
+	--[[ Variables ]]--
+
+	local httpService = game:GetService("HttpService");
+
+	local signal = framework.dependencies.signal;
+	local tableUtils = framework.dependencies.utils.table;
+
+	local signalCache = {};
+	local settingsCache = {
+		executor = {
+			autoExecute = true,
+			customExecute = false,
+			autoSaveTabs = false,
+			fps = {
+				unlocked = false,
+				vSync = false,
+				value = 60,
+				shown = false
+			},
+			level = {
+				bool = false,
+				changeable = false,
+				value = level
+			}
+		},
+		player = {
+			walkSpeed = {
+				enabled = false,
+				value = 16
+			},
+			jumpPower = {
+				enabled = false,
+				value = 50
+			},
+		},
+		serverHop = {
+			priority = "Most Players"
+		},
+		console = {
+			option = ""
+		}
+	};
+
+	local userSettings = {};
+
+	--[[ Functions ]]--
+
+	local function saveUserSettings()
+		if writefile then
+			writefile("frostySettings.json", httpService:JSONEncode(tableUtils:DeepCopy(settingsCache)));
+		end
+	end
+
+	local function createAutosaveMetatable(options: {any}, hierarchy: string)
+		for i, v in options do
+			if type(v) == "table" then
+				options[i] = createAutosaveMetatable(v, hierarchy == "" and i or string.format("%s.%s", hierarchy, i));
+			end
+		end
+
+		return setmetatable({}, {
+			__index = function(_, k)
+				return options[k];
+			end,
+			__newindex = function(_, k, v)
+				options[k] = v;
+				saveUserSettings();
+				userSettings:FirePropertyChangedSignal(hierarchy == "" and k or string.format("%s.%s", hierarchy, k), v);
+			end,
+			__iter = function()
+				return next, options;
+			end
+		});
+	end
+
+	--[[ Module ]]--
+
+	function userSettings:Initialize()
+		if isfile and isfile("frostySettings.json") then
+			local succ, res = pcall(httpService.JSONDecode, httpService, readfile("frostySettings.json"));
+			if succ then
+				tableUtils:DeepOverwrite(settingsCache, res);
+			else
+				task.defer(error, "settings file is corrupted");
+			end
+		end
+		self.cache = createAutosaveMetatable(settingsCache, "");
+	end
+
+	function userSettings:GetPropertyChangedSignal(path: string)
+		if signalCache[path] == nil then
+			signalCache[path] = signal.new();
+		end
+		return signalCache[path];
+	end
+
+	function userSettings:FirePropertyChangedSignal(path: string, value: any)
+		local sig = signalCache[path];
+		if sig then
+			sig:Fire(value);
+		end
+	end
+
+	framework.data.userSettings = userSettings;
 end
 
-function ExecuteFile4()
-    loadAndExecute(selectedFiles[4])
+do
+	--[[ Variables ]]--
+
+	local changelog = {
+		{
+			stamp = "January 30, 2025",
+			data = {
+				"Released FrostWare",
+				"- [+] release"
+			}
+		},
+		{
+			stamp = "February 14, 2025",
+			data = {
+				"Updated V2.660.547",
+				"- [+] updated to latest version"
+			}
+		},
+		{
+			stamp = "February 15, 2025",
+			data = {
+				"Updated V2.660.547",
+				"- [+] fixed every unwanted error in console and script search not executing"
+			}
+		},
+		{
+			stamp = "February 22, 2025",
+			data = {
+				"Released V2.661.713",
+				"updated to latest version"
+			}
+		},
+		{
+			stamp = "February 22, 2025",
+			data = {
+				"Updated V2.661.713",
+				"- [+] updated ui"
+			}
+		},
+		{
+			stamp = "February 24, 2025",
+			data = {
+				"Updated V2.661.713",
+				"- [+] added console"
+			}
+		},
+		{
+			stamp = "February 26, 2025",
+			data = {
+				"Updated V2.661.713",
+				"- [+] added custom execute"
+			}
+		}
+	};
+
+	--[[ Module ]]--
+
+	framework.data.internalSettings = {
+		changelog = changelog
+	};
 end
 
--- Example usage:
--- ExecuteFile1()
--- ExecuteFile2()
--- ExecuteFile3()
--- ExecuteFile4()
+do
+	--[[ Variables ]]--
 
+	local signal = framework.dependencies.signal;
+	local internalUtils = framework.dependencies.utils.internal;
+	local tableUtils = framework.dependencies.utils.table;
 
-local success, files_or_error = pcall(function()
-    return dtc.listautoexe("") -- List files in the current directory
-end)
+	local httpService = game:GetService("HttpService");
 
-if success then
-    print("Executing all files in current directory...")
+	local savedScripts = {
+		accumulator = 0,
+		cache = {},
+		onScriptAdded = signal.new(),
+		onScriptRemoved = signal.new()
+	};
 
-    for _, file in ipairs(files_or_error) do
-        local load_success, chunk_or_error = pcall(function() -- FUCKING UODATE YOU FUNCKING MF DICK AS LULLIBRHAHHAHAHSHHSHDHD GOD HELP ME
-            return loadfile("./" .. file) -- Load the file
-        end)
+	--[[ Functions ]]--
 
-        if load_success and chunk_or_error then
-            print("Running: " .. file)
-            pcall(chunk_or_error) -- Execute the script safely
-        else
-            pcall(function() error("Failed to load: " .. file .. " | Error: " .. tostring(chunk_or_error)) end)
-        end
-    end
+	local function reassignIndexes(cache: {any})
+		for i, v in cache do
+			v.index = i;
+		end
+		return cache;
+	end
 
-else
-    pcall(function() error("Error occurred: " .. tostring(files_or_error)) end) -- Print the exact error
+	local function loadScriptCache()
+		if isfile and isfile("frostyScriptCache.json") then
+			local s, r = pcall(httpService.JSONDecode, httpService, readfile("frostyScriptCache.json"));
+			if s and type(r) == "table" then
+				local accumulation = 0;
+				local cache = {};
+				local hasFoundDuplicateIndex = false;
+				for i, v in r do
+					if not (type(v) == "table" and v.title and v.description and v.content and v.index and v.autoExecute ~= nil) then
+						continue;
+					end
+
+					if v.index > accumulation then
+						accumulation = v.index;
+					end
+
+					if hasFoundDuplicateIndex == false then -- backwards fix from an old broken update and/or someone trying to fuck with the system
+						for i2, v2 in cache do
+							if v2.index == v.index then
+								hasFoundDuplicateIndex = true;
+							end
+						end
+					end
+
+					v.onAutoExecuteToggled = signal.new();
+					cache[#cache + 1] = hasFoundDuplicateIndex and reassignIndexes(v) or v;
+				end
+				savedScripts.accumulator = accumulation;
+				savedScripts.cache = cache;
+			end
+		end
+	end
+
+	local function saveScriptCache()
+		if writefile then
+			local cache = tableUtils:DeepCopy(savedScripts.cache);
+			for i, v in cache do
+				v.onAutoExecuteToggled = nil;
+			end
+			writefile("frostyScriptCache.json", httpService:JSONEncode(cache));
+		end
+	end
+
+	--[[ Module ]]--
+
+	function savedScripts:Initialize()
+		loadScriptCache();
+		for i, v in savedScripts.cache do
+			if v.autoExecute then
+				task.spawn(function()
+					internalUtils:Execute(v.content);
+				end);
+			end
+		end
+	end
+
+	function savedScripts:Get(index: number)
+		for i, v in self.cache do
+			if v.index == index then
+				return i, v;
+			end
+		end
+	end
+
+	function savedScripts:Add(title: string, description: string, content: string)
+		self.accumulator += 1;
+		local index = self.accumulator;
+
+		local newScript = {
+			title = title,
+			description = description,
+			content = content,
+			index = index,
+			autoExecute = false,
+			onAutoExecuteToggled = signal.new()
+		};
+
+		self.cache[#self.cache + 1] = newScript;
+		self.onScriptAdded:Fire(newScript);
+		saveScriptCache();
+	end
+
+	function savedScripts:Remove(index: number)
+		local i, save = self:Get(index);
+		if save then
+			table.remove(self.cache, i);
+			self.onScriptRemoved:Fire(save);
+			saveScriptCache();
+		end
+	end
+
+	function savedScripts:ToggleAutomaticExecution(index: number, state: boolean)
+		local _, save = self:Get(index);
+		if save then
+			save.autoExecute = state;
+			save.onAutoExecuteToggled:Fire(state);
+			saveScriptCache();
+		end
+	end
+
+	framework.data.savedScripts = savedScripts;
 end
 
-local UI = {}
-
--- // StarterGui.FrostWareUI \\ --
-UI["1"] = Instance.new("ScreenGui", game:GetService("CoreGui"))
-UI["1"]["IgnoreGuiInset"] = true
-UI["1"]["ScreenInsets"] = Enum.ScreenInsets.None
-UI["1"]["Name"] = [[FrostWareUI]]
-UI["1"]["ResetOnSpawn"] = false
-
--- // StarterGui.FrostWareUI.EditorFrame \\ --
-UI["2"] = Instance.new("Frame", UI["1"])
-UI["2"]["BorderSizePixel"] = 0
-UI["2"]["BackgroundColor3"] = Color3.fromRGB(57, 83, 117)
-UI["2"]["Size"] = UDim2.new(0.38726, 0, 0.56496, 0)
-UI["2"]["Position"] = UDim2.new(0.30594, 0, 0.21667, 0)
-UI["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["2"]["Name"] = [[EditorFrame]]
-UI["2"]["BackgroundTransparency"] = 1
-
--- // StarterGui.FrostWareUI.EditorFrame.UICorner \\ --
-UI["3"] = Instance.new("UICorner", UI["2"])
-UI["3"]["CornerRadius"] = UDim.new(0, 28)
-
--- // StarterGui.FrostWareUI.EditorFrame.UIStroke \\ --
-UI["4"] = Instance.new("UIStroke", UI["2"])
-UI["4"]["Transparency"] = 0.8
-UI["4"]["Thickness"] = 2.5
-UI["4"]["Color"] = Color3.fromRGB(44, 65, 88)
-
--- // StarterGui.FrostWareUI.EditorFrame.EditorFunctions \\ --
-UI["5"] = Instance.new("LocalScript", UI["2"])
-UI["5"]["Name"] = [[EditorFunctions]]
-
--- // StarterGui.FrostWareUI.EditorFrame.Frame \\ --
-UI["6"] = Instance.new("Frame", UI["2"])
-UI["6"]["BorderSizePixel"] = 0
-UI["6"]["BackgroundColor3"] = Color3.fromRGB(51, 77, 110)
-UI["6"]["Size"] = UDim2.new(0.93971, 0, 0.77209, 0)
-UI["6"]["Position"] = UDim2.new(0.02961, 0, 0.03902, 0)
-UI["6"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["6"]["BackgroundTransparency"] = 0.4
-
--- // StarterGui.FrostWareUI.EditorFrame.Frame.UICorner \\ --
-UI["7"] = Instance.new("UICorner", UI["6"])
-UI["7"]["CornerRadius"] = UDim.new(0, 24)
-
--- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame \\ --
-UI["8"] = Instance.new("ScrollingFrame", UI["6"])
-UI["8"]["Active"] = true
-UI["8"]["ScrollingDirection"] = Enum.ScrollingDirection.Y
-UI["8"]["BorderSizePixel"] = 0
-UI["8"]["BackgroundColor3"] = Color3.fromRGB(25, 26, 26)
-UI["8"]["Size"] = UDim2.new(0.94039, 0, 0.90575, 0)
-UI["8"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
-UI["8"]["Position"] = UDim2.new(0.02961, 0, 0.04335, 0)
-UI["8"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["8"]["ScrollBarThickness"] = 0
-UI["8"]["BackgroundTransparency"] = 1
-
--- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.Line \\ --
-UI["9"] = Instance.new("Frame", UI["8"])
-UI["9"]["BorderSizePixel"] = 0
-UI["9"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["9"]["Size"] = UDim2.new(0.01764, 0, 0.68182, 0)
-UI["9"]["Position"] = UDim2.new(0, 0, -0, 0)
-UI["9"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["9"]["Name"] = [[Line]]
-UI["9"]["BackgroundTransparency"] = 1
-
--- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.Line.Line Number \\ --
-UI["a"] = Instance.new("TextLabel", UI["9"])
-UI["a"]["TextWrapped"] = false
-UI["a"]["TextScaled"] = false
-UI["a"]["BorderSizePixel"] = 0
-UI["a"]["TextTransparency"] = 0.5
-UI["a"]["TextYAlignment"] = Enum.TextYAlignment.Top
-UI["a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["a"]["TextSize"] = 14
-UI["a"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-UI["a"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-UI["a"]["BackgroundTransparency"] = 1
-UI["a"]["RichText"] = true
-UI["a"]["Size"] = UDim2.new(1.04496, 0, 0.58454, 0)
-UI["a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["a"]["Text"] = [[1]]
-UI["a"]["Name"] = [[Line Number]]
-UI["a"]["Position"] = UDim2.new(-0.04495, 0, 0.0011, 0)
-
--- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.Line.Line Number.LocalScript \\ --
-UI["b"] = Instance.new("LocalScript", UI["a"])
-
-
--- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.SyntaxEditor \\ --
-UI["c"] = Instance.new("TextBox", UI["8"])
-UI["c"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-UI["c"]["BorderSizePixel"] = 0
-UI["c"]["TextXAlignment"] = Enum.TextXAlignment.Left
-UI["c"]["TextWrapped"] = true
-UI["c"]["TextSize"] = 14
-UI["c"]["Name"] = [[SyntaxEditor]]
-UI["c"]["TextYAlignment"] = Enum.TextYAlignment.Top
-UI["c"]["BackgroundColor3"] = Color3.fromRGB(8, 8, 8)
-UI["c"]["FontFace"] = Font.new([[rbxasset://fonts/families/RobotoMono.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-UI["c"]["RichText"] = true
-UI["c"]["MultiLine"] = true
-UI["c"]["ClearTextOnFocus"] = false
-UI["c"]["Size"] = UDim2.new(0.973, 0, 0.39953, 0)
-UI["c"]["Position"] = UDim2.new(0.02746, 0, 0, 0)
-UI["c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["c"]["Text"] = [[print('Hello World')
--- FrostWare V2.0.0]]
-UI["c"]["BackgroundTransparency"] = 1
-
--- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.SyntaxEditor.SyntaxScript \\ --
-UI["d"] = Instance.new("LocalScript", UI["c"])
-UI["d"]["Name"] = [[SyntaxScript]]
-
--- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.SyntaxEditor.UICorner \\ --
-UI["e"] = Instance.new("UICorner", UI["c"])
-UI["e"]["CornerRadius"] = UDim.new(0, 24)
-
--- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.UICorner \\ --
-UI["f"] = Instance.new("UICorner", UI["8"])
-UI["f"]["CornerRadius"] = UDim.new(0, 15)
-
--- // StarterGui.FrostWareUI.EditorFrame.Frame.UIStroke \\ --
-UI["10"] = Instance.new("UIStroke", UI["6"])
-UI["10"]["Thickness"] = 2.5
-UI["10"]["Color"] = Color3.fromRGB(44, 65, 88)
-
--- // StarterGui.FrostWareUI.EditorFrame.ExecuteButton \\ --
-UI["11"] = Instance.new("TextButton", UI["2"])
-UI["11"]["BorderSizePixel"] = 0
-UI["11"]["TextSize"] = 14
-UI["11"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
-UI["11"]["BackgroundColor3"] = Color3.fromRGB(254, 255, 255)
-UI["11"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-UI["11"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
-UI["11"]["Name"] = [[ExecuteButton]]
-UI["11"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["11"]["Text"] = [[]]
-UI["11"]["Position"] = UDim2.new(0.88397, 0, 0.85311, 0)
-
--- // StarterGui.FrostWareUI.EditorFrame.ExecuteButton.UICorner \\ --
-UI["12"] = Instance.new("UICorner", UI["11"])
-UI["12"]["CornerRadius"] = UDim.new(0, 16)
-
--- // StarterGui.FrostWareUI.EditorFrame.ExecuteButton.ImageLabel \\ --
-UI["13"] = Instance.new("ImageLabel", UI["11"])
-UI["13"]["BorderSizePixel"] = 0
-UI["13"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["13"]["ScaleType"] = Enum.ScaleType.Fit
-UI["13"]["Image"] = [[rbxasset://textures/LayeredClothingEditor/Icon_Play_Light.png]]
-UI["13"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
-UI["13"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["13"]["BackgroundTransparency"] = 1
-UI["13"]["Position"] = UDim2.new(0.19036, 0, 0.19036, 0)
-
--- // StarterGui.FrostWareUI.EditorFrame.ExecuteButton.UIStroke \\ --
-UI["14"] = Instance.new("UIStroke", UI["11"])
-UI["14"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-UI["14"]["Thickness"] = 2.5
-UI["14"]["Color"] = Color3.fromRGB(44, 65, 88)
-
--- // StarterGui.FrostWareUI.EditorFrame.ExecuteButton.UIGradient \\ --
-UI["15"] = Instance.new("UIGradient", UI["11"])
-UI["15"]["Rotation"] = -50
-UI["15"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0.000, 0.2),NumberSequenceKeypoint.new(1.000, 0.2)}
-UI["15"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(30, 60, 95)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(51, 82, 121))}
-
--- // StarterGui.FrostWareUI.EditorFrame.PasteButton \\ --
-UI["16"] = Instance.new("TextButton", UI["2"])
-UI["16"]["BorderSizePixel"] = 0
-UI["16"]["TextSize"] = 14
-UI["16"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
-UI["16"]["BackgroundColor3"] = Color3.fromRGB(231, 233, 233)
-UI["16"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-UI["16"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
-UI["16"]["Name"] = [[PasteButton]]
-UI["16"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["16"]["Text"] = [[]]
-UI["16"]["Position"] = UDim2.new(0.76553, 0, 0.85311, 0)
-
--- // StarterGui.FrostWareUI.EditorFrame.PasteButton.UICorner \\ --
-UI["17"] = Instance.new("UICorner", UI["16"])
-UI["17"]["CornerRadius"] = UDim.new(0, 16)
-
--- // StarterGui.FrostWareUI.EditorFrame.PasteButton.ImageLabel \\ --
-UI["18"] = Instance.new("ImageLabel", UI["16"])
-UI["18"]["BorderSizePixel"] = 0
-UI["18"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["18"]["ScaleType"] = Enum.ScaleType.Fit
-UI["18"]["Image"] = [[rbxasset://textures/TerrainTools/icon_regions_paste.png]]
-UI["18"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
-UI["18"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["18"]["BackgroundTransparency"] = 1
-UI["18"]["Position"] = UDim2.new(0.19036, 0, 0.19036, 0)
-
--- // StarterGui.FrostWareUI.EditorFrame.PasteButton.UIStroke \\ --
-UI["19"] = Instance.new("UIStroke", UI["16"])
-UI["19"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-UI["19"]["Thickness"] = 2.5
-UI["19"]["Color"] = Color3.fromRGB(44, 65, 88)
-
--- // StarterGui.FrostWareUI.EditorFrame.PasteButton.UIGradient \\ --
-UI["1a"] = Instance.new("UIGradient", UI["16"])
-UI["1a"]["Rotation"] = -50
-UI["1a"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0.000, 0.2),NumberSequenceKeypoint.new(1.000, 0.2)}
-UI["1a"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(30, 60, 95)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(51, 82, 121))}
-
--- // StarterGui.FrostWareUI.EditorFrame.ClearButton \\ --
-UI["1b"] = Instance.new("TextButton", UI["2"])
-UI["1b"]["BorderSizePixel"] = 0
-UI["1b"]["TextSize"] = 14
-UI["1b"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
-UI["1b"]["BackgroundColor3"] = Color3.fromRGB(254, 255, 255)
-UI["1b"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-UI["1b"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
-UI["1b"]["Name"] = [[ClearButton]]
-UI["1b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["1b"]["Text"] = [[]]
-UI["1b"]["Position"] = UDim2.new(0.64919, 0, 0.85311, 0)
-
--- // StarterGui.FrostWareUI.EditorFrame.ClearButton.UICorner \\ --
-UI["1c"] = Instance.new("UICorner", UI["1b"])
-UI["1c"]["CornerRadius"] = UDim.new(0, 18)
-
--- // StarterGui.FrostWareUI.EditorFrame.ClearButton.ImageLabel \\ --
-UI["1d"] = Instance.new("ImageLabel", UI["1b"])
-UI["1d"]["BorderSizePixel"] = 0
-UI["1d"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["1d"]["ScaleType"] = Enum.ScaleType.Fit
-UI["1d"]["Image"] = [[rbxasset://textures/CompositorDebugger/clear.png]]
-UI["1d"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
-UI["1d"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["1d"]["BackgroundTransparency"] = 1
-UI["1d"]["Position"] = UDim2.new(0.19036, 0, 0.19036, 0)
-
--- // StarterGui.FrostWareUI.EditorFrame.ClearButton.UIGradient \\ --
-UI["1e"] = Instance.new("UIGradient", UI["1b"])
-UI["1e"]["Rotation"] = -50
-UI["1e"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0.000, 0.2),NumberSequenceKeypoint.new(1.000, 0.2)}
-UI["1e"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(30, 60, 95)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(51, 82, 121))}
-
--- // StarterGui.FrostWareUI.EditorFrame.ClearButton.UIStroke \\ --
-UI["1f"] = Instance.new("UIStroke", UI["1b"])
-UI["1f"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-UI["1f"]["Thickness"] = 2.5
-UI["1f"]["Color"] = Color3.fromRGB(44, 65, 88)
-
--- // StarterGui.FrostWareUI.EditorFrame.SearchButton \\ --
-UI["20"] = Instance.new("TextButton", UI["2"])
-UI["20"]["BorderSizePixel"] = 0
-UI["20"]["TextSize"] = 14
-UI["20"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
-UI["20"]["TextWrapped"] = true
-UI["20"]["BackgroundColor3"] = Color3.fromRGB(254, 255, 255)
-UI["20"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-UI["20"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
-UI["20"]["Name"] = [[SearchButton]]
-UI["20"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["20"]["Text"] = [[]]
-UI["20"]["Position"] = UDim2.new(0.032, 0, 0.853, 0)
-
--- // StarterGui.FrostWareUI.EditorFrame.SearchButton.UICorner \\ --
-UI["21"] = Instance.new("UICorner", UI["20"])
-UI["21"]["CornerRadius"] = UDim.new(0, 16)
-
--- // StarterGui.FrostWareUI.EditorFrame.SearchButton.ImageLabel \\ --
-UI["22"] = Instance.new("ImageLabel", UI["20"])
-UI["22"]["BorderSizePixel"] = 0
-UI["22"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["22"]["ScaleType"] = Enum.ScaleType.Fit
-UI["22"]["Image"] = [[rbxasset://textures/DevConsole/Search.png]]
-UI["22"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
-UI["22"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["22"]["BackgroundTransparency"] = 1
-UI["22"]["Position"] = UDim2.new(0.19036, 0, 0.19036, 0)
-
--- // StarterGui.FrostWareUI.EditorFrame.SearchButton.UIStroke \\ --
-UI["23"] = Instance.new("UIStroke", UI["20"])
-UI["23"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-UI["23"]["Thickness"] = 2.5
-UI["23"]["Color"] = Color3.fromRGB(44, 65, 88)
-
--- // StarterGui.FrostWareUI.EditorFrame.SearchButton.UIGradient \\ --
-UI["24"] = Instance.new("UIGradient", UI["20"])
-UI["24"]["Rotation"] = -50
-UI["24"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0.000, 0.2),NumberSequenceKeypoint.new(1.000, 0.2)}
-UI["24"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(30, 60, 95)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(51, 82, 121))}
-
--- // StarterGui.FrostWareUI.EditorFrame.SearchButton.LocalScript \\ --
-UI["25"] = Instance.new("LocalScript", UI["20"])
-
-
--- // StarterGui.FrostWareUI.FWButton \\ --
-UI["26"] = Instance.new("TextButton", UI["1"])
-UI["26"]["BorderSizePixel"] = 0
-UI["26"]["TextSize"] = 14
-UI["26"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
-UI["26"]["BackgroundColor3"] = Color3.fromRGB(254, 255, 255)
-UI["26"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-UI["26"]["Size"] = UDim2.new(0.04803, 0, 0.08402, 0)
-UI["26"]["Name"] = [[FWButton]]
-UI["26"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["26"]["Text"] = [[]]
-UI["26"]["Position"] = UDim2.new(0.47533, 0, 0.06519, 0)
-
--- // StarterGui.FrostWareUI.FWButton.UICorner \\ --
-UI["27"] = Instance.new("UICorner", UI["26"])
-UI["27"]["CornerRadius"] = UDim.new(0, 24)
-
--- // StarterGui.FrostWareUI.FWButton.ImageLabel \\ --
-UI["28"] = Instance.new("ImageLabel", UI["26"])
-UI["28"]["BorderSizePixel"] = 0
-UI["28"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["28"]["ScaleType"] = Enum.ScaleType.Fit
-UI["28"]["ImageTransparency"] = 0.3
-UI["28"]["Image"] = [[rbxassetid://126235623427509]]
-UI["28"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
-UI["28"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["28"]["BackgroundTransparency"] = 1
-UI["28"]["Position"] = UDim2.new(0.19036, 0, 0.19036, 0)
-
--- // StarterGui.FrostWareUI.FWButton.UIStroke \\ --
-UI["29"] = Instance.new("UIStroke", UI["26"])
-UI["29"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-UI["29"]["Thickness"] = 2.5
-UI["29"]["Color"] = Color3.fromRGB(44, 65, 88)
-
--- // StarterGui.FrostWareUI.FWButton.UIGradient \\ --
-UI["2a"] = Instance.new("UIGradient", UI["26"])
-UI["2a"]["Rotation"] = -50
-UI["2a"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0.000, 0.6),NumberSequenceKeypoint.new(1.000, 0.6)}
-UI["2a"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(30, 60, 95)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(51, 82, 121))}
-
--- // StarterGui.FrostWareUI.FWButton.LocalScript \\ --
-UI["2b"] = Instance.new("LocalScript", UI["26"])
-
-
--- // StarterGui.FrostWareUI.FWButton.LocalScript \\ --
-UI["2c"] = Instance.new("LocalScript", UI["26"])
-
-
--- // StarterGui.FrostWareUI.SearchFrame \\ --
-UI["2d"] = Instance.new("Frame", UI["1"])
-UI["2d"]["Visible"] = false
-UI["2d"]["BorderSizePixel"] = 0
-UI["2d"]["BackgroundColor3"] = Color3.fromRGB(57, 83, 117)
-UI["2d"]["Size"] = UDim2.new(0.38726, 0, 0.56496, 0)
-UI["2d"]["Position"] = UDim2.new(0.30594, 0, 0.21667, 0)
-UI["2d"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["2d"]["Name"] = [[SearchFrame]]
-UI["2d"]["BackgroundTransparency"] = 1
-
--- // StarterGui.FrostWareUI.SearchFrame.UICorner \\ --
-UI["2e"] = Instance.new("UICorner", UI["2d"])
-UI["2e"]["CornerRadius"] = UDim.new(0, 28)
-
--- // StarterGui.FrostWareUI.SearchFrame.UIStroke \\ --
-UI["2f"] = Instance.new("UIStroke", UI["2d"])
-UI["2f"]["Transparency"] = 0.8
-UI["2f"]["Thickness"] = 2.5
-UI["2f"]["Color"] = Color3.fromRGB(44, 65, 88)
-
--- // StarterGui.FrostWareUI.SearchFrame.CloudAPI \\ --
-UI["30"] = Instance.new("LocalScript", UI["2d"])
-UI["30"]["Name"] = [[CloudAPI]]
-
--- // StarterGui.FrostWareUI.SearchFrame.ScrollingFrame \\ --
-UI["31"] = Instance.new("ScrollingFrame", UI["2d"])
-UI["31"]["Active"] = true
-UI["31"]["BorderSizePixel"] = 0
-UI["31"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["31"]["ScrollBarImageTransparency"] = 0.8
-UI["31"]["Size"] = UDim2.new(0.93115, 0, 0.73127, 0)
-UI["31"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
-UI["31"]["Position"] = UDim2.new(0.03196, 0, 0.21174, 0)
-UI["31"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["31"]["BackgroundTransparency"] = 1
-
--- // StarterGui.FrostWareUI.SearchFrame.ScrollingFrame.ScriptFrame \\ --
-UI["32"] = Instance.new("Frame", UI["31"])
-UI["32"]["Visible"] = false
-UI["32"]["BorderSizePixel"] = 0
-UI["32"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["32"]["Size"] = UDim2.new(0.33333, 0, 0.3911, 0)
-UI["32"]["Position"] = UDim2.new(0.33333, 0, 0, 0)
-UI["32"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["32"]["Name"] = [[ScriptFrame]]
-UI["32"]["BackgroundTransparency"] = 1
-
--- // StarterGui.FrostWareUI.SearchFrame.ScrollingFrame.ScriptFrame.ImageButton \\ --
-UI["33"] = Instance.new("ImageButton", UI["32"])
-UI["33"]["BorderSizePixel"] = 0
-UI["33"]["ScaleType"] = Enum.ScaleType.Crop
-UI["33"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0)
-UI["33"]["Image"] = [[rbxassetid://111973669155622]]
-UI["33"]["Size"] = UDim2.new(0.84089, 0, 0.86062, 0)
-UI["33"]["BackgroundTransparency"] = 1
-UI["33"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["33"]["Position"] = UDim2.new(0.07786, 0, 0.06733, 0)
-
--- // StarterGui.FrostWareUI.SearchFrame.ScrollingFrame.ScriptFrame.ImageButton.UICorner \\ --
-UI["34"] = Instance.new("UICorner", UI["33"])
-UI["34"]["CornerRadius"] = UDim.new(0, 14)
-
--- // StarterGui.FrostWareUI.SearchFrame.ScrollingFrame.ScriptFrame.ImageButton.NameLabel \\ --
-UI["35"] = Instance.new("TextLabel", UI["33"])
-UI["35"]["TextWrapped"] = true
-UI["35"]["BorderSizePixel"] = 0
-UI["35"]["TextXAlignment"] = Enum.TextXAlignment.Left
-UI["35"]["TextScaled"] = true
-UI["35"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["35"]["TextSize"] = 14
-UI["35"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-UI["35"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-UI["35"]["BackgroundTransparency"] = 1
-UI["35"]["Size"] = UDim2.new(0.35142, 0, 0.13579, 0)
-UI["35"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["35"]["Name"] = [[NameLabel]]
-UI["35"]["Position"] = UDim2.new(0.06825, 0, 0.08523, 0)
-
--- // StarterGui.FrostWareUI.SearchFrame.ScrollingFrame.ScriptFrame.ImageButton.NameLabel.LocalScript \\ --
-UI["36"] = Instance.new("LocalScript", UI["35"])
-
-
--- // StarterGui.FrostWareUI.SearchFrame.ScrollingFrame.ScriptFrame.ImageButton.GameLabel \\ --
-UI["37"] = Instance.new("TextLabel", UI["33"])
-UI["37"]["TextWrapped"] = true
-UI["37"]["BorderSizePixel"] = 0
-UI["37"]["TextXAlignment"] = Enum.TextXAlignment.Left
-UI["37"]["TextTransparency"] = 0.4
-UI["37"]["TextScaled"] = true
-UI["37"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["37"]["TextSize"] = 14
-UI["37"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-UI["37"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-UI["37"]["BackgroundTransparency"] = 1
-UI["37"]["Size"] = UDim2.new(0.35142, 0, 0.13579, 0)
-UI["37"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["37"]["Name"] = [[GameLabel]]
-UI["37"]["Position"] = UDim2.new(0.06539, 0, 0.30967, 0)
-
--- // StarterGui.FrostWareUI.SearchFrame.ScrollingFrame.ScriptFrame.ImageButton.GameLabel.LocalScript \\ --
-UI["38"] = Instance.new("LocalScript", UI["37"])
-
-
--- // StarterGui.FrostWareUI.SearchFrame.ScrollingFrame.UIGridLayout \\ --
-UI["39"] = Instance.new("UIGridLayout", UI["31"])
-UI["39"]["CellSize"] = UDim2.new(0.33, 0, 0.143, 0)
-UI["39"]["SortOrder"] = Enum.SortOrder.LayoutOrder
-UI["39"]["CellPadding"] = UDim2.new(0, 0, 0, 0)
-
--- // StarterGui.FrostWareUI.SearchFrame.SearchButton \\ --
-UI["3a"] = Instance.new("ImageButton", UI["2d"])
-UI["3a"]["BorderSizePixel"] = 0
-UI["3a"]["ScaleType"] = Enum.ScaleType.Crop
-UI["3a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["3a"]["ImageColor3"] = Color3.fromRGB(105, 108, 112)
-UI["3a"]["Image"] = [[rbxassetid://87276827891567]]
-UI["3a"]["Size"] = UDim2.new(0.0415, 0, 0.05088, 0)
-UI["3a"]["BackgroundTransparency"] = 1
-UI["3a"]["Name"] = [[SearchButton]]
-UI["3a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["3a"]["Visible"] = false
-UI["3a"]["Position"] = UDim2.new(0.09431, 0, 0.06834, 0)
-
--- // StarterGui.FrostWareUI.SearchFrame.SearchBar \\ --
-UI["3b"] = Instance.new("TextBox", UI["2d"])
-UI["3b"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
-UI["3b"]["PlaceholderColor3"] = Color3.fromRGB(255, 255, 255)
-UI["3b"]["BorderSizePixel"] = 0
-UI["3b"]["TextWrapped"] = true
-UI["3b"]["TextSize"] = 14
-UI["3b"]["Name"] = [[SearchBar]]
-UI["3b"]["BackgroundColor3"] = Color3.fromRGB(51, 77, 110)
-UI["3b"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-UI["3b"]["ClearTextOnFocus"] = false
-UI["3b"]["PlaceholderText"] = [[Search]]
-UI["3b"]["Size"] = UDim2.new(0.93115, 0, 0.10899, 0)
-UI["3b"]["Position"] = UDim2.new(0.03196, 0, 0.04162, 0)
-UI["3b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["3b"]["Text"] = [[]]
-UI["3b"]["BackgroundTransparency"] = 0.4
-
--- // StarterGui.FrostWareUI.SearchFrame.SearchBar.UICorner \\ --
-UI["3c"] = Instance.new("UICorner", UI["3b"])
-UI["3c"]["CornerRadius"] = UDim.new(0, 14)
-
--- // StarterGui.FrostWareUI.SearchFrame.SearchBar.FontScript \\ --
-UI["3d"] = Instance.new("LocalScript", UI["3b"])
-UI["3d"]["Name"] = [[FontScript]]
-
--- // StarterGui.FrostWareUI.SearchFrame.SearchBar.UIStroke \\ --
-UI["3e"] = Instance.new("UIStroke", UI["3b"])
-UI["3e"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-UI["3e"]["Thickness"] = 2.5
-UI["3e"]["Color"] = Color3.fromRGB(44, 65, 88)
-
--- // StarterGui.FrostWareUI.SearchFrame.ExecuteButton \\ --
-UI["3f"] = Instance.new("TextButton", UI["2d"])
-UI["3f"]["BorderSizePixel"] = 0
-UI["3f"]["TextSize"] = 14
-UI["3f"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
-UI["3f"]["BackgroundColor3"] = Color3.fromRGB(254, 255, 255)
-UI["3f"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-UI["3f"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
-UI["3f"]["Name"] = [[ExecuteButton]]
-UI["3f"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["3f"]["Text"] = [[]]
-UI["3f"]["Position"] = UDim2.new(0.03171, 0, 0.85311, 0)
-
--- // StarterGui.FrostWareUI.SearchFrame.ExecuteButton.UICorner \\ --
-UI["40"] = Instance.new("UICorner", UI["3f"])
-UI["40"]["CornerRadius"] = UDim.new(0, 16)
-
--- // StarterGui.FrostWareUI.SearchFrame.ExecuteButton.ImageLabel \\ --
-UI["41"] = Instance.new("ImageLabel", UI["3f"])
-UI["41"]["BorderSizePixel"] = 0
-UI["41"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["41"]["ScaleType"] = Enum.ScaleType.Fit
-UI["41"]["Image"] = [[rbxasset://textures/StudioToolbox/AssetPreview/play_button.png]]
-UI["41"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
-UI["41"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["41"]["BackgroundTransparency"] = 1
-UI["41"]["Position"] = UDim2.new(0.19036, 0, 0.19036, 0)
-
--- // StarterGui.FrostWareUI.SearchFrame.ExecuteButton.UIStroke \\ --
-UI["42"] = Instance.new("UIStroke", UI["3f"])
-UI["42"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-UI["42"]["Thickness"] = 2.5
-UI["42"]["Color"] = Color3.fromRGB(44, 65, 88)
-
--- // StarterGui.FrostWareUI.SearchFrame.ExecuteButton.UIGradient \\ --
-UI["43"] = Instance.new("UIGradient", UI["3f"])
-UI["43"]["Rotation"] = -50
-UI["43"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0.000, 0.2),NumberSequenceKeypoint.new(1.000, 0.2)}
-UI["43"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(30, 60, 95)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(51, 82, 121))}
-
--- // StarterGui.FrostWareUI.SearchFrame.ExecuteButton.LocalScript \\ --
-UI["44"] = Instance.new("LocalScript", UI["3f"])
-
--------------------------------
--- NEW SECTION & BUTTON CODE --
--------------------------------
-
--- Calculate the gap (using the gap between Execute and Paste buttons)
-local gap = 0.0275  -- approximately 0.11844
-
--- Get the SearchButton's position and size from UI["20"]
-local searchButtonPos = UI["20"].Position
-local searchButtonSize = UI["20"].Size
-
--- Create NewSectionButton, positioned to the right of the SearchButton using the same gap
-UI["NewButton"] = Instance.new("TextButton", UI["2"])
-UI["NewButton"]["Name"] = "NewSectionButton"
-UI["NewButton"]["BorderSizePixel"] = 0
-UI["NewButton"]["TextSize"] = 14
-UI["NewButton"]["TextColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewButton"]["BackgroundColor3"] = Color3.fromRGB(254, 255, 255)
-UI["NewButton"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-UI["NewButton"]["Size"] = UDim2.new(0.08535, 0, 0.10498, 0)
--- New X position = SearchButton.X + SearchButton.Width + gap
-UI["NewButton"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap, 0, searchButtonPos.Y.Scale, 0)
-UI["NewButton"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewButton"]["Text"] = [[]]
-
-UI["NewButtonLabel"] = Instance.new("ImageLabel", UI["NewButton"])
-UI["NewButtonLabel"]["BorderSizePixel"] = 0
-UI["NewButtonLabel"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-UI["NewButtonLabel"]["ScaleType"] = Enum.ScaleType.Fit
-UI["NewButtonLabel"]["Image"] = [[rbxassetid://4998267428]]
-UI["NewButtonLabel"]["Size"] = UDim2.new(0.61927, 0, 0.61927, 0)
-UI["NewButtonLabel"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewButtonLabel"]["BackgroundTransparency"] = 1
-UI["NewButtonLabel"]["Position"] = UDim2.new(0.19036, 0, 0.19036, 0)
-
--- NewSectionButton UICorner (similar styling as other buttons)
-UI["NewButtonCorner"] = Instance.new("UICorner", UI["NewButton"])
-UI["NewButtonCorner"]["CornerRadius"] = UDim.new(0, 16)
-
--- NewSectionButton UIStroke
-UI["NewButtonStroke"] = Instance.new("UIStroke", UI["NewButton"])
-UI["NewButtonStroke"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-UI["NewButtonStroke"]["Thickness"] = 2.5
-UI["NewButtonStroke"]["Color"] = Color3.fromRGB(44, 65, 88)
-
--- NewSectionButton UIGradient
-UI["NewButtonGradient"] = Instance.new("UIGradient", UI["NewButton"])
-UI["NewButtonGradient"]["Rotation"] = -50
-UI["NewButtonGradient"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0.000, 0.2),NumberSequenceKeypoint.new(1.000, 0.2)}
-UI["NewButtonGradient"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 60, 95)), ColorSequenceKeypoint.new(1, Color3.fromRGB(51, 82, 121))}
-
-
--- Create NewSectionFrame (similar to SearchFrame)
-UI["NewSectionFrame"] = Instance.new("Frame", UI["1"])
-UI["NewSectionFrame"]["Name"] = "NewSectionFrame"
-UI["NewSectionFrame"]["Visible"] = false  -- set to true if you want it visible by default
-UI["NewSectionFrame"]["BorderSizePixel"] = 0
-UI["NewSectionFrame"]["BackgroundColor3"] = Color3.fromRGB(57, 83, 117)
-UI["NewSectionFrame"]["Size"] = UDim2.new(0.38726, 0, 0.56496, 0)
-UI["NewSectionFrame"]["Position"] = UDim2.new(0.30594, 0, 0.21667, 0)
-UI["NewSectionFrame"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-UI["NewSectionFrame"]["BackgroundTransparency"] = 1
-
--- NewSectionFrame UICorner
-UI["NewSectionFrameUICorner"] = Instance.new("UICorner", UI["NewSectionFrame"])
-UI["NewSectionFrameUICorner"]["CornerRadius"] = UDim.new(0, 28)
-
--- NewSectionFrame UIStroke
-UI["NewSectionFrameUIStroke"] = Instance.new("UIStroke", UI["NewSectionFrame"])
-UI["NewSectionFrameUIStroke"]["Transparency"] = 0.8
-UI["NewSectionFrameUIStroke"]["Thickness"] = 2.5
-UI["NewSectionFrameUIStroke"]["Color"] = Color3.fromRGB(44, 65, 88)
-
-UI["Back"] = UI["11"]:Clone()
-UI["Back"]["Position"] = UDim2.new(0.03171, 0, 0.85311, 0)
-UI["Back"]["Parent"] = UI["NewSectionFrame"]
-
--- (Optional) Add additional elements (such as a scrolling frame, inner content, etc.)
--- For example, you might duplicate your SearchFrame's scrolling frame here.
-UI["BackScript"] = Instance.new("LocalScript", UI["Back"])
-
-UI["stabb"] = UI["NewButton"]:Clone()
-UI["stabb"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap * 5, 0, searchButtonPos.Y.Scale, 0)
-UI["stabb"]["ImageLabel"]["Image"] = [[rbxasset://textures/ui/Settings/MenuBarIcons/GameSettingsTab@2x.png]]
-UI["stabb"]["Parent"] = UI["NewButton"]["Parent"]
-
-UI["stab"] = UI["NewSectionFrame"]:Clone()
-UI["stab"]["Parent"] = UI["NewSectionFrame"]["Parent"]
-UI["stab"]["ExecuteButton"]:Destroy()
-
-UI["stabbb"] = UI["Back"]:Clone()
-UI["stabbb"]["Parent"] = UI["stab"]
-
-
-UI["sstabb"] = UI["NewButton"]:Clone()
-UI["sstabb"]["Position"] = UDim2.new(searchButtonPos.X.Scale + searchButtonSize.X.Scale + gap * 9, 0, searchButtonPos.Y.Scale, 0)
-UI["sstabb"]["ImageLabel"]["Image"] = [[rbxasset://textures/StudioSharedUI/scripts.png]]
-UI["sstabb"]["Parent"] = UI["NewButton"]["Parent"]
-
-UI["sstab"] = UI["NewSectionFrame"]:Clone()
-UI["sstab"]["Parent"] = UI["NewSectionFrame"]["Parent"]
-UI["sstab"]["ExecuteButton"]:Destroy()
-
-UI["sstabbb"] = UI["Back"]:Clone()
-UI["sstabbb"]["Parent"] = UI["sstab"]
-
-
-
-
-local TweenService = game:GetService("TweenService")
-
-local ScreenGui = UI["1"]
-
--- Main Frame with black background
-UI["uibg"] = Instance.new("Frame")
-UI["uibg"].Parent = ScreenGui
-UI["uibg"].ZIndex = -69
-UI["uibg"].Size = UDim2.new(1, 0, 1, 0)
-UI["uibg"].Position = UDim2.new(0, 0, 0, 0)
-UI["uibg"].BackgroundColor3 = Color3.new(0, 0, 0)
-UI["uibg"].BorderSizePixel = 0
-UI["uibg"].BackgroundTransparency = 1  -- Start fully transparent
-
--- (Optional) UICorner for rounded edges if desired
-local UICorner = Instance.new("UICorner")
-UICorner.Parent = UI["uibg"]
-
--- InnerGlow overlay using an ImageLabel with a radial gradient
-UI["uibgg"] = Instance.new("ImageLabel")
-UI["uibgg"].Parent = UI["uibg"]
-UI["uibgg"].Size = UDim2.new(1, 0, 1, 0)
-UI["uibgg"].Position = UDim2.new(0, 0, 0, 0)
-UI["uibgg"].BackgroundTransparency = 1
-UI["uibgg"].Image = "rbxassetid://8387197183"
-UI["uibgg"].ImageColor3 = Color3.fromRGB(255, 255, 255)
-UI["uibgg"].ScaleType = Enum.ScaleType.Stretch
-UI["uibgg"].ImageTransparency = 1  -- Start fully transparent
-
--- If your gradient image is square and you want to match rounded corners:
-local InnerUICorner = Instance.new("UICorner")
-InnerUICorner.Parent = UI["uibgg"]
-
--- Function for fade-in animation
-local function uibgfadeIn()
-    local tweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    
-    local frameTween = TweenService:Create(UI["uibg"], tweenInfo, {BackgroundTransparency = 0.75})
-    local imageTween = TweenService:Create(UI["uibgg"], tweenInfo, {ImageTransparency = 0})
-    
-    frameTween:Play()
-    imageTween:Play()
+do
+	framework.data.builtInScripts = {
+		{
+			title = "Dark Dex V4",
+			description = "A powerful game explorer GUI. Shows every instance of the game and all their properties. Useful for developers.",
+			icon = "rbxassetid://14806198159",
+			content = "local file = \"dexV4.lua\"; local raw = isfile and isfile(file) and readfile(file); raw = raw or game:HttpGetAsync(\"https://raw.githubusercontent.com/loglizzy/dexV4/main/source.lua\"); if isfile then task.spawn(writefile, file, game:HttpGet(url)); end loadstring(raw)();"
+		},
+		{
+			title = "Hydroxide",
+			description = "General purpose pen-testing tool for games on the Roblox engine",
+			icon = "rbxassetid://14806229032",
+			content = "loadstring(game:HttpGetAsync(\"https://raw.githubusercontent.com/Upbolt/Hydroxide/revision/init.lua\"))(); loadstring(game:HttpGetAsync(\"https://raw.githubusercontent.com/Upbolt/Hydroxide/revision/ui/main.lua\"))();"
+		},
+		{
+			title = "Infinite Yield",
+			description = "Admin command line script with 300+ commands and 6 years of development",
+			icon = "rbxassetid://14806239733",
+			content = "loadstring(game:HttpGetAsync(\"https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source\"))();"
+		},
+		{
+			title = "RemoteSpy",
+			description = "Remotespy script that spies every remote if they were fired on server or invoked on server.",
+			icon = "rbxassetid://106400446571367",
+			content = "loadstring(game:HttpGetAsync(\"https://raw.githubusercontent.com/78n/SimpleSpy/refs/heads/main/SimpleSpySource.lua\"))();"
+		}
+	};
 end
 
--- Function for fade-out animation
-local function uibgfadeOut()
-    local tweenInfo = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    
-    local frameTween = TweenService:Create(UI["uibg"], tweenInfo, {BackgroundTransparency = 1})
-    local imageTween = TweenService:Create(UI["uibgg"], tweenInfo, {ImageTransparency = 1})
-    
-    frameTween:Play()
-    imageTween:Play()
+do
+	--[[ Variables ]]--
+
+	local signal = framework.dependencies.signal;
+	local tableUtils = framework.dependencies.utils.table;
+
+	local httpService = game:GetService("HttpService");
+
+	local tabSystem = {
+		accumulator = 1,
+		selected = nil,
+		cache = {
+			{
+				title = "Note",
+				content = "--[[\n    FrostWare, https://discord.gg/getfrost\n--]]",
+				index = 1
+			}
+		},
+		onTabCreated = signal.new(),
+		onTabRemoved = signal.new(),
+		onTabSelected = signal.new()
+	};
+
+	--[[ Functions ]]--
+
+	local function reassignIndexes(cache: {any})
+		for i, v in cache do
+			v.index = i;
+		end
+		return cache;
+	end
+
+	local function loadTabCache()
+		if isfile and isfile("frostyTabs.json") then
+			local s, r = pcall(httpService.JSONDecode, httpService, readfile("frostyTabs.json"));
+			if s and type(r) == "table" then
+				local accumulation = 0;
+				local cache = {};
+				local hasFoundDuplicateIndex = false;
+				for i, v in r do
+					if not (type(v) == "table" and v.title and v.content and v.index) then
+						continue;
+					end
+
+					if v.index > accumulation then
+						accumulation = v.index;
+					end
+
+					if hasFoundDuplicateIndex == false then -- backwards fix from an old broken update and/or someone trying to fuck with the system
+						for i2, v2 in cache do
+							if v2.index == v.index then
+								hasFoundDuplicateIndex = true;
+							end
+						end
+					end
+
+					cache[#cache + 1] = hasFoundDuplicateIndex and reassignIndexes(v) or v;
+				end
+				tabSystem.accumulator = accumulation;
+				tabSystem.cache = cache;
+			end
+		end
+	end
+
+	--[[ Module ]]--
+
+	function tabSystem:Initialize()
+		loadTabCache();
+	end
+
+	function tabSystem:Get(index: number)
+		for i, v in self.cache do
+			if v.index == index then
+				return i, v;
+			end
+		end
+	end
+
+	function tabSystem:Add(title: string, content: string?)
+		self.accumulator += 1;
+		local index = self.accumulator;
+
+		local newTab = {
+			title = title,
+			content = content or "--[[\n    FrostWare, https://discord.gg/getfrost\n--]]",
+			index = index
+		};
+
+		self.cache[#self.cache + 1] = newTab;
+		self.onTabCreated:Fire(newTab);
+		self:Select(index);
+	end
+
+	function tabSystem:Remove(index: number)
+		if #self.cache > 1 then
+			local i, tab = self:Get(index);
+			if tab then
+				if self.selected == tab then
+					self:Select(self.cache[i == 1 and 2 or 1].index);
+				end
+				table.remove(self.cache, i);
+				self.onTabRemoved:Fire(tab);
+			end
+		end
+	end
+
+	function tabSystem:Select(index: number)
+		local _, tab = self:Get(index);
+		if tab and (self.selected == nil or tab.index ~= self.selected.index) then
+			self.selected = tab;
+			self.onTabSelected:Fire(tab);
+		end
+	end
+
+	function tabSystem:UpdateContent(index: number, content: string)
+		local _, tab = self:Get(index);
+		if tab then
+			tab.content = content;
+		end
+	end
+
+	function tabSystem:Save()
+		if writefile then
+			writefile("frostyTabs.json", httpService:JSONEncode(tableUtils:DeepCopy(self.cache)));
+		end
+	end
+
+	framework.data.tabSystem = tabSystem;
 end
 
------------------
--- RGB UI CODE --
------------------
+do
+	--[[ Variables ]]--
 
--- -- Place this LocalScript as a child of your ScreenGui (e.g. UI["1"])
--- local RunService = game:GetService("RunService")
--- local screenGui = UI["1"]
+	local instanceUtils = framework.dependencies.utils.instance;
+	local tableUtils = framework.dependencies.utils.table;
 
--- -- You can adjust these values to control the speed and gradient offset.
--- local speed = 0.2      -- speed multiplier for the hue cycle
--- local gradOffset = 0.1 -- hue offset for the second color in gradients
+	--[[ Module ]]--
 
--- -- The animation function iterates through all descendants and updates their color properties.
--- local function animateUI()
-    -- -- Calculate the current hue (from light blue to dark blue)
-    -- local hue = 0.6 -- Blue hue in HSV (Fixed)
-    -- local brightness = math.abs(math.sin(tick() * speed)) * 0.5 + 0.5 -- Oscillates between 0.5 and 1
-    -- local baseColor = Color3.fromHSV(hue, 1, brightness)
-    -- local secondColor = Color3.fromHSV(hue, 1, brightness * 0.6) -- Darker shade of blue
-    
-    -- for _, object in ipairs(screenGui:GetDescendants()) do
-        -- -- For GuiObjects that have a BackgroundColor3 property
-        -- if object:IsA("GuiObject") then
-            -- -- If the object has a UIGradient child, update its Color sequence.
-            -- local gradient = object:FindFirstChildWhichIsA("UIGradient")
-            -- if gradient then
-                -- gradient.Color = ColorSequence.new({
-                    -- ColorSequenceKeypoint.new(0, baseColor),
-                    -- ColorSequenceKeypoint.new(1, secondColor)
-                -- })
-            -- else
-                -- -- If no gradient exists, update the background color directly.
-                -- if object:IsA("Frame") or object:IsA("TextButton") or object:IsA("TextBox") or object:IsA("ScrollingFrame") then
-                    -- object.BackgroundColor3 = baseColor
-                -- end
-            -- end
-        -- end
-
-        -- -- Update UIStroke color if the object is a UIStroke.
-        -- if object:IsA("UIStroke") then
-            -- object.Color = baseColor
-        -- end
-    -- end
--- end
-
--- -- Connect the function to the RenderStepped event
--- RunService.RenderStepped:Connect(animateUI)
-
-----------------------------------
--- BUTTON FUNCTIONALITY EXAMPLE --
-----------------------------------
-
--- // StarterGui.FrostWareUI.EditorFrame.EditorFunctions \\ --
-local function SCRIPT_5()
-    local script = UI["5"]
-    local SyntaxEditor = script.Parent:WaitForChild("Frame"):WaitForChild("ScrollingFrame"):WaitForChild("SyntaxEditor")
-
-    local function RemoveRichText(input)
-        return input:gsub("<[^>]->", "")
-    end
-
-    local function RunExecute(v)
-        if dtc and dtc.schedule then
-            return clonefunction(dtc.schedule)(v)
-        else
-            return loadstring(v)()
-        end
-    end
-
-    script.Parent:WaitForChild("ExecuteButton").MouseButton1Click:Connect(function()
-        RunExecute(RemoveRichText(SyntaxEditor.Text))
-    end)
-
-    script.Parent:WaitForChild("ClearButton").MouseButton1Click:Connect(function()
-        SyntaxEditor.Text = ""
-    end)
-
-    script.Parent:WaitForChild("PasteButton").MouseButton1Click:Connect(function()
-        --[[SyntaxEditor.Text = (getclipboard or function() end)()]] local syntaxEditor = SyntaxEditor; local fullText = (getclipboard or function() return "" end)(); local lines = {}; for line in fullText:gmatch("([^\n]+)") do table.insert(lines, line); end; local function updateSyntaxEditor() local chunkSize = 500; for i = 1, #lines, chunkSize do local chunk = table.concat(lines, "\n", i, math.min(i + chunkSize - 1, #lines)); syntaxEditor.Text = syntaxEditor.Text .. chunk .. "\n"; task.wait(0.01); end; end; updateSyntaxEditor();
-    end)
-end
-task.spawn(SCRIPT_5)
-
--- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.Line.Line Number.LocalScript \\ --
-local function SCRIPT_b()
-    local script = UI["b"]
-    script.Parent.Parent.Parent.SyntaxEditor:GetPropertyChangedSignal("Text"):Connect(function()
-        local Lines = #script.Parent.Parent.Parent.SyntaxEditor.Text:split("\n")
-        local Num = ""
-        for i = 1, Lines do
-            Num = Num .. tostring(i) .. "\n"
-        end
-        script.Parent.Text = Num
-    end)
-end
-task.spawn(SCRIPT_b)
-
--- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.SyntaxEditor.SyntaxScript \\ --
-local function SCRIPT_d()
-    local script = UI["d"]
-    local SyntaxEditor = script.Parent 
-
-    -- These functions are assumed to be defined already:
-    isfile = isfile or function(...) end
-    readfile = readfile or function(...) end
-    writefile = writefile or function(...) end
-
-    ListCode = {
-        -- Core Lua keywords and symbols
-        ["local"]       = "rgb(173, 216, 230)",
-        ["function"]    = "rgb(70, 130, 180)",
-        ["end"]         = "rgb(70, 130, 180)",
-        ["if"]          = "rgb(100, 149, 237)",
-        ["then"]        = "rgb(100, 149, 237)",
-        ["else"]        = "rgb(100, 149, 237)",
-        ["elseif"]      = "rgb(100, 149, 237)",
-        ["return"]      = "rgb(65, 105, 225)",
-        ["while"]       = "rgb(70, 130, 180)",
-        ["for"]         = "rgb(70, 130, 180)",
-        ["do"]          = "rgb(70, 130, 180)",
-        ["break"]       = "rgb(65, 105, 225)",
-        ["continue"]    = "rgb(65, 105, 225)",
-        ["and"]         = "rgb(70, 130, 180)",
-        ["or"]          = "rgb(70, 130, 180)",
-        ["not"]         = "rgb(70, 130, 180)",
-        ["repeat"]      = "rgb(135, 206, 235)",
-        ["until"]       = "rgb(135, 206, 235)",
-        ["nil"]         = "rgb(100, 149, 237)",
-        ["true"]        = "rgb(100, 149, 237)",
-        ["false"]       = "rgb(100, 149, 237)",
-        ["in"]          = "rgb(70, 130, 180)",
-        ["goto"]        = "rgb(100, 149, 237)",
-        ["%d+%.?%d*"]   = "rgb(0, 0, 255)",
-        ['"[^"]*"']    = "rgb(176, 224, 230)",
-        ["'[^']*'"]    = "rgb(176, 224, 230)",
-        ["[%+%-%*/%%%^#=<>~]"] = "rgb(70, 130, 180)",
-        ["[%(%)]"]     = "rgb(70, 130, 180)",
-        ["[%[%]]"]     = "rgb(70, 130, 180)",
-        ["[%{%}]"]     = "rgb(70, 130, 180)",
-        ["%."]         = "rgb(30, 144, 255)",
-        [":"]          = "rgb(30, 144, 255)",
-
-        -- Core Lua built-in functions and libraries
-        ["print"]          = "rgb(0, 191, 255)",
-        ["wait"]           = "rgb(0, 191, 255)",
-        ["loadstring"]     = "rgb(0, 0, 139)",
-        ["assert"]         = "rgb(0, 191, 255)",
-        ["error"]          = "rgb(0, 191, 255)",
-        ["pcall"]          = "rgb(0, 191, 255)",
-        ["xpcall"]         = "rgb(0, 191, 255)",
-        ["tonumber"]       = "rgb(0, 191, 255)",
-        ["tostring"]       = "rgb(0, 191, 255)",
-        ["type"]           = "rgb(0, 191, 255)",
-        ["next"]           = "rgb(0, 191, 255)",
-        ["getmetatable"]   = "rgb(0, 191, 255)",
-        ["setmetatable"]   = "rgb(0, 191, 255)",
-        ["rawget"]         = "rgb(0, 191, 255)",
-        ["rawset"]         = "rgb(0, 191, 255)",
-        ["select"]         = "rgb(0, 191, 255)",
-        ["collectgarbage"] = "rgb(0, 191, 255)",
-        ["rawequal"]       = "rgb(0, 191, 255)",
-        ["unpack"]         = "rgb(0, 191, 255)",
-        ["dofile"]         = "rgb(0, 191, 255)",
-        ["loadfile"]       = "rgb(0, 191, 255)",
-        ["require"]        = "rgb(0, 191, 255)",
-
-        -- Roblox Lua specific globals and functions
-        ["game"]       = "rgb(0, 191, 255)",
-        ["workspace"]  = "rgb(0, 191, 255)",
-        ["script"]     = "rgb(0, 191, 255)",
-        ["spawn"]      = "rgb(255, 165, 0)",
-        ["delay"]      = "rgb(255, 165, 0)",
-        ["task"]       = "rgb(255, 165, 0)",
-        ["tick"]       = "rgb(255, 165, 0)",
-        ["time"]       = "rgb(255, 165, 0)",
-
-        -- Roblox services (common names)
-        ["Players"]             = "rgb(255, 140, 0)",
-        ["Lighting"]            = "rgb(255, 140, 0)",
-        ["ReplicatedStorage"]   = "rgb(255, 140, 0)",
-        ["ServerStorage"]       = "rgb(255, 140, 0)",
-        ["TweenService"]        = "rgb(255, 140, 0)",
-        ["RunService"]          = "rgb(255, 140, 0)",
-        ["UserInputService"]    = "rgb(255, 140, 0)",
-        ["MarketplaceService"]  = "rgb(255, 140, 0)",
-        ["GuiService"]          = "rgb(255, 140, 0)",
-        ["CoreGui"]             = "rgb(255, 140, 0)",
-        ["Stats"]               = "rgb(255, 140, 0)",
-
-        -- Roblox classes and constructors
-        ["Instance"]    = "rgb(148, 0, 211)",
-        ["BrickColor"]  = "rgb(148, 0, 211)",
-        ["Vector3"]     = "rgb(148, 0, 211)",
-        ["CFrame"]      = "rgb(148, 0, 211)",
-        ["Color3"]      = "rgb(148, 0, 211)",
-        ["UDim2"]       = "rgb(148, 0, 211)",
-        ["Rect"]        = "rgb(148, 0, 211)",
-        ["Ray"]         = "rgb(148, 0, 211)",
-        ["Region3"]     = "rgb(148, 0, 211)",
-        ["Enum"]        = "rgb(148, 0, 211)"
-    }    
-
-    -- Helper to escape non-alphanumeric characters for simple keywords.
-    local function escapePattern(text)
-        return text:gsub("([^%w])", "%%%1")
-    end
-
-    function SetSyntax(Str)
-        for keyword, color in pairs(ListCode) do
-            -- If the keyword is only alphanumeric, escape it; otherwise assume it's a complex pattern.
-            local pattern = ("%f[%a]" .. (keyword:match("^%w+$") and escapePattern(keyword) or keyword) .. "%f[%A]")
-            Str = Str:gsub(pattern, '<font color="' .. color .. '">' .. keyword .. '</font>')
-        end
-        return Str
-    end
-
-    task.spawn(function()
-        if isfile("Editor.txt") and readfile("Editor.txt") ~= "" and readfile("Editor.txt") ~= nil then
-            SyntaxEditor.Text = SetSyntax(readfile("Editor.txt"):gsub("<[^>]+>", ""))
-        end
-
-        SyntaxEditor.Focused:Connect(function()
-            SyntaxEditor.Text = SyntaxEditor.Text:gsub("<[^>]+>", "")
-        end)
-
-        SyntaxEditor.FocusLost:Connect(function()
-            SyntaxEditor.Text = SetSyntax(SyntaxEditor.Text:gsub("<[^>]+>", ""))
-        end)
-
-        if SyntaxEditor.Text ~= "" then
-            SyntaxEditor.Text = SetSyntax(SyntaxEditor.Text:gsub("<[^>]+>", ""))
-        end
-
-        SyntaxEditor:GetPropertyChangedSignal("Text"):Connect(function()
-            if SyntaxEditor.Text ~= "" then
-                writefile("Editor.txt", SyntaxEditor.Text)
-            end
-        end)
-    end)
-end
-task.spawn(SCRIPT_d)
-
--- // StarterGui.FrostWareUI.FWButton.LocalScript \\ --
-local function SCRIPT_2b()
-    local scriptRef = UI["2b"]
-    local button = scriptRef.Parent
-    local screenGui = button.Parent
-    local tweenService = game:GetService("TweenService")
-    
-    local toggle = true
-    local originalProperties = {}
-
-    -- Cache original properties of frames
-    for _, frame in ipairs(screenGui:GetChildren()) do
-        if frame:IsA("Frame") and frame ~= UI["uibg"] then
-            originalProperties[frame] = {
-                Position = frame.Position,
-                Size = frame.Size,
-                Visible = frame.Visible
-            }
-        end
-    end
-
-    button.MouseButton1Click:Connect(function()
-        if toggle then
-            -- Minimize all frames except FWButton
-            for frame, props in pairs(originalProperties) do
-                if frame:IsA("Frame") then
-                    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                    local goal = {
-                        Position = UDim2.new(0.5, 0, 0.5, 0),
-                        Size = UDim2.new(0, 0, 0, 0)
-                    }
-                    local tween = tweenService:Create(frame, tweenInfo, goal)
-                    tween:Play()
-                    tween.Completed:Connect(function()
-                        frame.Visible = false
-                    end)
-                end
-            end
-            uibgfadeOut()
-            toggle = false
-        else
-            -- Restore all frames
-            for frame, props in pairs(originalProperties) do
-                if frame:IsA("Frame") then
-                    frame.Visible = props.Visible
-                    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                    local tween = tweenService:Create(frame, tweenInfo, {
-                        Position = props.Position,
-                        Size = props.Size
-                    })
-                    tween:Play()
-                end
-            end
-            uibgfadeIn()
-            toggle = true
-        end
-    end)
-end
-task.spawn(SCRIPT_2b)
-
--- // StarterGui.FrostWareUI.FWButton.LocalScript (2c) \\ --
-local function SCRIPT_2c()
-    local script = UI["2c"]
-    local UserInputService = game:GetService("UserInputService")
-    local runService = game:GetService("RunService")
-
-    local gui = script.Parent
-    local dragging = false
-    local dragInput, dragStart, initialPos, lastMousePos, lastGoalPos
-    local DRAG_SPEED = 8  -- The speed of the UI drag.
-
-    local function Lerp(a, b, m)
-        return a + (b - a) * m
-    end
-
-    local function Update(dt)
-        if not initialPos then return end
-
-        if not dragging and lastGoalPos then
-            gui.Position = UDim2.new(
-                initialPos.X.Scale, Lerp(gui.Position.X.Offset, lastGoalPos.X.Offset, dt * DRAG_SPEED),
-                initialPos.Y.Scale, Lerp(gui.Position.Y.Offset, lastGoalPos.Y.Offset, dt * DRAG_SPEED)
-            )
-            return 
-        end
-
-        local currentMousePos = UserInputService:GetMouseLocation()
-        local delta = lastMousePos - currentMousePos
-        local newX = initialPos.X.Offset - delta.X
-        local newY = initialPos.Y.Offset - delta.Y
-        lastGoalPos = UDim2.new(initialPos.X.Scale, newX, initialPos.Y.Scale, newY)
-        gui.Position = UDim2.new(
-            initialPos.X.Scale, Lerp(gui.Position.X.Offset, newX, dt * DRAG_SPEED),
-            initialPos.Y.Scale, Lerp(gui.Position.Y.Offset, newY, dt * DRAG_SPEED)
-        )
-    end
-
-    gui.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            initialPos = gui.Position
-            lastMousePos = UserInputService:GetMouseLocation()
-
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-
-    gui.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-
-    runService.Heartbeat:Connect(Update)
-end
-task.spawn(SCRIPT_2c)
-
--- // StarterGui.FrostWareUI.SearchFrame.CloudAPI \\ --
-local function SCRIPT_30()
-    local script = UI["30"]
-    local Scripts = script.Parent
-    local SearchButton = Scripts:WaitForChild("SearchButton")
-    local SearchTextBox = Scripts:WaitForChild("SearchBar")
-    local HttpService = game:GetService("HttpService")
-
-    local function RunExecute(v)
-        if dtc and dtc.schedule then
-            return clonefunction(dtc.schedule)(v)
-        else
-            return loadstring(v)()
-        end
-    end
-
-    local setclipboard = setclipboard or function(_) end
-
-    local function Add_Tab(GameName, NameScript, ScriptCode, ImageCode)
-        local ScriptFrame = Scripts:WaitForChild("ScrollingFrame"):FindFirstChild("ScriptFrame")
-        local New = ScriptFrame:Clone()
-
-        local Button = New:FindFirstChild("ImageButton")
-
-        Button.Image = ImageCode or "rbxassetid://72797583317405"
-        Button.GameLabel.Text = GameName or "Unknown Game"
-        Button.NameLabel.Text = NameScript or "Unknown Script"
-
-        New.Visible = true
-        New.Parent = Scripts:WaitForChild("ScrollingFrame")
-
-        Button.MouseButton1Click:Connect(function()
-            RunExecute(ScriptCode)
-        end)
-    end
-
-    local function StartAPI()
-        for _, v in ipairs(Scripts:WaitForChild("ScrollingFrame"):GetChildren()) do
-            if v:IsA("Frame") and v.Name == "ScriptFrame" and v.Visible then
-                v:Destroy()
-            end
-        end
-
-        local API = "https://scriptblox.com/api/script/search?q=" .. HttpService:UrlEncode(SearchTextBox.Text)
-        local s, r = pcall(function()
-            return HttpService:JSONDecode(game:HttpGetAsync(API))
-        end)
-
-        if s and r and r.result and r.result.scripts then
-            for _, v in ipairs(r.result.scripts) do
-                if not v.isPatched then
-                    local gameName = (v.game and v.game.name) or "Unknown Game"
-                    local scriptName = v.title or "Untitled"
-                    local scriptCode = v.script or ""
-                    local image
-                    if v.isUniversal == true then
-                        image = "rbxassetid://111973669155622"
-                    elseif v.game and v.game.gameId then
-                        image = "https://assetgame.roblox.com/Game/Tools/ThumbnailAsset.ashx?aid=" .. v.game.gameId .. "&fmt=png&wd=420&ht=420"
-                    else
-                        image = "rbxassetid://72797583317405"
-                    end
-                    Add_Tab(gameName, scriptName, scriptCode, image)
-                    task.wait(0.3)
-                end
-            end
-        end
-    end
-
-    SearchButton.MouseButton1Click:Connect(StartAPI)
-    SearchTextBox.FocusLost:Connect(StartAPI)
-end
-task.spawn(SCRIPT_30)
-
--- // StarterGui.FrostWareUI.SearchFrame.ScrollingFrame.ScriptFrame.ImageButton.NameLabel.LocalScript \\ --
-local function SCRIPT_36()
-    local script = UI["36"]
-    script.Parent.Font = Enum.Font.GothamBold
-end
-task.spawn(SCRIPT_36)
-
--- // StarterGui.FrostWareUI.SearchFrame.ScrollingFrame.ScriptFrame.ImageButton.GameLabel.LocalScript \\ --
-local function SCRIPT_38()
-    local script = UI["38"]
-    script.Parent.Font = Enum.Font.GothamBold
-end
-task.spawn(SCRIPT_38)
-
--- // StarterGui.FrostWareUI.SearchFrame.SearchBar.FontScript \\ --
-local function SCRIPT_3d()
-    local script = UI["3d"]
-    script.Parent.Font = Enum.Font.GothamBold
-end
-task.spawn(SCRIPT_3d)
-
--- First Script (Opening the SearchBar)
-local TweenService = game:GetService("TweenService")
-local button = UI["20"]
-local editorFrame = UI["6"]
-local screenGui = UI["1"]
-local searchFrameContainer = screenGui:FindFirstChild("SearchFrame")
-local searchBar = searchFrameContainer and searchFrameContainer:FindFirstChild("SearchBar")
-
--- Create a global flag if it doesn’t exist yet
-if _G.EditorAnimating == nil then
-    _G.EditorAnimating = false
+	framework.components.base.textLabel = (function(overwriteProps: {any}, children: {any}): Instance
+		return instanceUtils:Create("TextLabel", tableUtils:DeepOverwrite({
+			AutomaticSize = Enum.AutomaticSize.XY,
+			BackgroundTransparency = 1,
+			FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold),
+			Size = UDim2.new(),
+			TextColor3 = Color3.new(1, 1, 1),
+			TextSize = 14,
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			TextWrapped = true,
+			TextXAlignment = Enum.TextXAlignment.Center,
+			TextYAlignment = Enum.TextYAlignment.Center
+		}, overwriteProps, true), children);
+	end);
 end
 
-if searchFrameContainer and searchBar then
-    local editorOriginalSize = editorFrame.Size
-    local searchBarOriginalSize = searchBar.Size
+do
+	--[[ Variables ]]--
 
-    button.MouseButton1Click:Connect(function()
-        if _G.EditorAnimating then return end
-        _G.EditorAnimating = true  -- start animating
+	local instanceUtils = framework.dependencies.utils.instance;
+	local tableUtils = framework.dependencies.utils.table;
 
-        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	--[[ Module ]]--
 
-        -- Tween the editorFrame’s Y-size to 0 (collapse vertically)
-        local targetEditorSize = UDim2.new(editorOriginalSize.X.Scale, editorOriginalSize.X.Offset, 0, 0)
-        local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
-        editorTween:Play()
-        editorTween.Completed:Wait()
-
-        editorFrame.Size = editorOriginalSize
-        editorFrame.Parent.Visible = false
-
-        -- Prepare and show the search frame container and search bar
-        searchBar.Size = UDim2.new(0, 0, searchBarOriginalSize.Y.Scale, searchBarOriginalSize.Y.Offset)
-        searchFrameContainer.Visible = true
-
-        -- Tween the search bar back to its original size
-        local searchTween = TweenService:Create(searchBar, tweenInfo, {Size = searchBarOriginalSize})
-        searchTween:Play()
-        searchTween.Completed:Wait()
-
-        _G.EditorAnimating = false  -- animation finished
-    end)
-end
------------------------------------------------------------
--- Second Script (Closing the SearchBar and Reopening Editor)
-
-local TweenService = game:GetService("TweenService")
-local button = UI["3f"]              -- Ensure this is the correct button for closing the search bar.
-local searchFrameContainer = UI["2d"]  -- Ensure this is the correct container.
-local screenGui = UI["1"]
-local editorFrame = UI["6"]
-
--- Make sure the searchFrameContainer has a child named "SearchBar"
-local searchBar = searchFrameContainer and searchFrameContainer:FindFirstChild("SearchBar")
-
--- Debug: Check that all elements exist.
-if not button then
-    warn("Script2: Button UI['3f'] not found.")
-end
-if not searchFrameContainer then
-    warn("Script2: searchFrameContainer UI['3b'] not found.")
-end
-if not editorFrame then
-    warn("Script2: editorFrame UI['6'] not found.")
-end
-if not searchBar then
-    warn("Script2: searchBar not found under searchFrameContainer.")
+	framework.components.base.textBox = (function(overwriteProps: {any}, children: {any}): Instance
+		return instanceUtils:Create("TextBox", tableUtils:DeepOverwrite({
+			AutomaticSize = Enum.AutomaticSize.X,
+			BackgroundColor3 = Color3.fromRGB(58, 58, 74),
+			FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json"),
+			PlaceholderText = "Value...",
+			Size = UDim2.new(0, 0, 0, 32),
+			Text = "",
+			TextColor3 = Color3.fromRGB(159, 164, 186),
+			TextSize = 14,
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			TextWrapped = true,
+			TextXAlignment = Enum.TextXAlignment.Center,
+			TextYAlignment = Enum.TextYAlignment.Center
+		}, overwriteProps, true), tableUtils:Concatenate({
+			instanceUtils:Create("UIPadding", {
+				Name = "padding",
+				PaddingLeft = UDim.new(0, 10),
+				PaddingRight = UDim.new(0, 10)
+			}),
+			instanceUtils:Create("UICorner", {
+				Name = "corner",
+				CornerRadius = UDim.new(0, 6)
+			})
+		}, children));
+	end);
 end
 
-if _G.EditorAnimating == nil then
-    _G.EditorAnimating = false
+do
+	--[[ Variables ]]--
+
+	local instanceUtils = framework.dependencies.utils.instance;
+	local tableUtils = framework.dependencies.utils.table;
+
+	--[[ Module ]]--
+
+	framework.components.base.textButton = (function(overwriteProps: {any}, children: {any}): Instance
+		return instanceUtils:Create("TextButton", tableUtils:DeepOverwrite({
+			AutomaticSize = Enum.AutomaticSize.X,
+			BackgroundColor3 = Color3.fromRGB(76, 161, 235),
+			FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold),
+			Size = UDim2.new(0, 0, 0, 32),
+			TextColor3 = Color3.new(1, 1, 1),
+			TextSize = 14,
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			TextWrapped = true,
+			TextXAlignment = Enum.TextXAlignment.Center,
+			TextYAlignment = Enum.TextYAlignment.Center
+		}, overwriteProps, true), tableUtils:Concatenate({
+			instanceUtils:Create("UIPadding", {
+				Name = "padding",
+				PaddingLeft = UDim.new(0, 10),
+				PaddingRight = UDim.new(0, 10)
+			}),
+			instanceUtils:Create("UICorner", {
+				Name = "corner",
+				CornerRadius = UDim.new(0, 6)
+			})
+		}, children));
+	end);
 end
 
-if editorFrame and searchFrameContainer and searchBar then
-    local editorOriginalSize = editorFrame.Size
-    local searchBarOriginalSize = searchBar.Size
+do
+	--[[ Variables ]]--
 
-    button.MouseButton1Click:Connect(function()
-        print("Script2: Button clicked.")
-        if _G.EditorAnimating then 
-            print("Script2: Animation already in progress, exiting.")
-            return 
-        end
-        _G.EditorAnimating = true
+	local instanceUtils = framework.dependencies.utils.instance;
+	local tableUtils = framework.dependencies.utils.table;
 
-        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	--[[ Module ]]--
 
-        -- Tween the search bar's width to 0 (collapse horizontally)
-        local targetSearchBarSize = UDim2.new(0, 0, searchBarOriginalSize.Y.Scale, searchBarOriginalSize.Y.Offset)
-        print("Script2: Tweening searchBar to target size: ", targetSearchBarSize)
-        local searchTween = TweenService:Create(searchBar, tweenInfo, {Size = targetSearchBarSize})
-        searchTween:Play()
-        searchTween.Completed:Wait()
-        print("Script2: SearchBar tween completed.")
-
-        -- Reset searchBar size and hide its container
-        searchBar.Size = searchBarOriginalSize
-        searchFrameContainer.Visible = false
-        print("Script2: SearchFrameContainer hidden.")
-
-        -- Prepare and show the editorFrame (start with 0 height)
-        editorFrame.Size = UDim2.new(editorOriginalSize.X.Scale, editorOriginalSize.X.Offset, 0, 0)
-        editorFrame.Parent.Visible = true
-        print("Script2: Editor frame container shown. Tweening editorFrame back to original size: ", editorOriginalSize)
-
-        -- Tween the editorFrame back to its original size
-        local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = editorOriginalSize})
-        editorTween:Play()
-        editorTween.Completed:Wait()
-        print("Script2: EditorFrame tween completed.")
-
-        _G.EditorAnimating = false
-        print("Script2: Animation complete, EditorAnimating reset.")
-    end)
-else
-    warn("Script2: One or more required UI elements were not found. Check your UI references.")
+	framework.components.base.background = (function(overwriteProps: {any}?, children: {any}?): Instance
+		return instanceUtils:Create("Frame", tableUtils:DeepOverwrite({
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = Color3.fromRGB(21, 21, 29),
+			BackgroundTransparency = 0.1,
+			BorderSizePixel = 0,
+			Name = "background",
+			Position = UDim2.new(0.5, 0, 0.5, 0),
+			Size = UDim2.new(1, 0, 1, 0),
+			ZIndex = 0
+		}, overwriteProps, true), children);
+	end);
 end
 
-------------------------- DEFUALT SCRIPT HUB SECTION STARTS HERE -------------------------
+do
+	--[[ Variables ]]--
 
+	local instanceUtils = framework.dependencies.utils.instance;
+	local stringUtils = framework.dependencies.utils.string;
 
-local TweenService = game:GetService("TweenService")
-local newButton = UI["NewButton"]
-local backButton = UI["Back"]
-local editorFrame = UI["6"]
-local sectionFrame = UI["NewSectionFrame"]
+	--[[ Functions ]]--
 
-if _G.EditorAnimating == nil then
-    _G.EditorAnimating = false
+	local function createButton(title: string, icon: string): Instance
+		return instanceUtils:Create("TextButton", { 
+			AutoButtonColor = false, 
+			BackgroundTransparency = 1, 
+			BorderSizePixel = 0, 
+			Name = stringUtils:ConvertToCamelCase(title), 
+			Size = UDim2.new(1, 0, 0, 50), 
+			Text = "",
+			ZIndex = 2
+		}, {
+			instanceUtils:Create("ImageLabel", { 
+				AnchorPoint = Vector2.new(0.5, 0.5), 
+				BackgroundTransparency = 1, 
+				BorderSizePixel = 0, 
+				Image = icon, 
+				ImageColor3 = Color3.fromHex("979ebd"), 
+				ImageTransparency = 0.6, 
+				Name = "icon", 
+				Position = UDim2.new(0, 38, 0.5, 0), 
+				Size = UDim2.new(0, 24, 0, 24),
+				ZIndex = 2
+			}, {
+				instanceUtils:Create("ImageLabel", { 
+					AnchorPoint = Vector2.new(0.5, 0.5), 
+					BackgroundTransparency = 1, 
+					BorderSizePixel = 0, 
+					Image = "rbxassetid://11559270573", 
+					ImageTransparency = 1, 
+					Name = "glow", 
+					ImageColor3 = Color3.fromHex("45b0eb"),
+					Position = UDim2.new(0.5, 0, 0.5, 0), 
+					Size = UDim2.new(0, 85, 0, 102),
+					ZIndex = 2
+				})
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AnchorPoint = Vector2.new(0, 0.5), 
+				AutomaticSize = Enum.AutomaticSize.XY, 
+				BackgroundTransparency = 1, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size12, 
+				Name = "text", 
+				Position = UDim2.new(0, 70, 0.5, 0), 
+				Text = title, 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 12, 
+				TextTransparency = 0.2, 
+				TextXAlignment = Enum.TextXAlignment.Left,
+				ZIndex = 2
+			}),
+			instanceUtils:Create("ImageLabel", { 
+				AnchorPoint = Vector2.new(0, 0.5), 
+				BackgroundTransparency = 1, 
+				BorderSizePixel = 0, 
+				Image = "rbxassetid://11558444554", 
+				Name = "arrow", 
+				Position = UDim2.new(0, 224, 0.5, 0), 
+				Size = UDim2.new(0, 16, 0, 16),
+				ZIndex = 2
+			})
+		});
+	end
+
+	--[[ Module ]]--
+
+	local navbarButton = {};
+	navbarButton.__index = navbarButton;
+
+	function navbarButton.new(title: string, icon: string)
+		return setmetatable({
+			instance = createButton(title, icon);
+		}, navbarButton);
+	end
+
+	function navbarButton:Highlight(selected: boolean)
+		instanceUtils:Tween(self.instance.icon, 0.2, {
+			ImageColor3 = Color3.fromHex("45b0eb"),
+			ImageTransparency = selected and 0 or 0.6
+		});
+		instanceUtils:Tween(self.instance.icon.glow, 0.2, {
+			ImageTransparency = selected and 0 or 1
+		});
+	end
+
+	framework.components.navbarButton = navbarButton;
 end
 
--- Table to store each button's original size
-local originalSizes = {}
+do
+	--[[ Variables ]]--
 
-newButton.MouseButton1Click:Connect(function()
-    if _G.EditorAnimating then return end
-    _G.EditorAnimating = true
+	local instanceUtils = framework.dependencies.utils.instance;
+	local stringUtils = framework.dependencies.utils.string;
+	local tableUtils = framework.dependencies.utils.table;
 
-    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local editorOriginalSize = editorFrame.Size
-    local targetEditorSize = UDim2.new(editorOriginalSize.X.Scale, editorOriginalSize.X.Offset, 0, 0)
-    local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
-    editorTween:Play()
-    editorTween.Completed:Wait()
+	--[[ Module ]]--
 
-    editorFrame.Size = editorOriginalSize
-    sectionFrame.Visible = true
-    editorFrame.Parent.Visible = false
-
-    for _, textButton in ipairs(sectionFrame:GetChildren()) do
-        if textButton:IsA("TextButton") and textButton ~= backButton then
-            if not originalSizes[textButton] then
-                originalSizes[textButton] = textButton.Size
-            end
-
-            textButton.Size = UDim2.new(0, 0, originalSizes[textButton].Y.Scale, originalSizes[textButton].Y.Offset)
-            textButton.Visible = true
-
-            local btnTween = TweenService:Create(textButton, tweenInfo, {Size = originalSizes[textButton]})
-            btnTween:Play()
-        end
-    end
-
-    _G.EditorAnimating = false
-end)
-
-backButton.MouseButton1Click:Connect(function()
-    if _G.EditorAnimating then return end
-    _G.EditorAnimating = true
-
-    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local animatingButtons = {}
-    for _, textButton in ipairs(sectionFrame:GetChildren()) do
-        if textButton:IsA("TextButton") and textButton ~= backButton then
-            table.insert(animatingButtons, textButton)
-        end
-    end
-
-    local animationsComplete = 0
-    local totalButtons = #animatingButtons
-
-    local function checkAnimationsComplete()
-        animationsComplete = animationsComplete + 1
-        if animationsComplete >= totalButtons then
-            sectionFrame.Visible = false
-
-            editorFrame.Parent.Visible = true
-            local targetEditorSize = editorFrame.Size
-            editorFrame.Size = UDim2.new(targetEditorSize.X.Scale, targetEditorSize.X.Offset, 0, 0)
-            local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
-            editorTween:Play()
-            editorTween.Completed:Wait()
-
-            _G.EditorAnimating = false
-        end
-    end
-
-    if totalButtons == 0 then
-        checkAnimationsComplete()
-    else
-        for _, textButton in ipairs(animatingButtons) do
-            if not originalSizes[textButton] then
-                originalSizes[textButton] = textButton.Size
-            end
-
-            local btnTween = TweenService:Create(textButton, tweenInfo, {
-                Size = UDim2.new(0, 0, originalSizes[textButton].Y.Scale, originalSizes[textButton].Y.Offset)
-            })
-            btnTween:Play()
-            btnTween.Completed:Connect(function()
-                textButton.Visible = false
-                checkAnimationsComplete()
-            end)
-        end
-    end
-end)
-
-
-
-local TweenService = game:GetService("TweenService")
-local newButton = UI["stabb"]
-local backButton = UI["stabbb"]
-local editorFrame = UI["6"]
-local sectionFrame = UI["stab"]
-
-if _G.EditorAnimating == nil then
-    _G.EditorAnimating = false
+	framework.components.editorButton = (function(title: string, icon: string, overwriteProps: {any}?, foreground: Color3?): Instance
+		return instanceUtils:Create("TextButton", tableUtils:DeepOverwrite({ 
+			BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+			BorderSizePixel = 0, 
+			FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+			Name = stringUtils:ConvertToCamelCase(title), 
+			Size = UDim2.new(0, 50, 0, 50), 
+			Text = "", 
+			TextColor3 = Color3.fromHex("1b2a35"),
+			ZIndex = 2
+		}, overwriteProps, true), {
+			instanceUtils:Create("UICorner", { 
+				Name = "corner"
+			}),
+			instanceUtils:Create("ImageLabel", { 
+				AnchorPoint = Vector2.new(0.5, 0.5), 
+				BackgroundTransparency = 1, 
+				BorderSizePixel = 0, 
+				Image = icon, 
+				ImageColor3 = foreground or Color3.fromHex("9fa4ba"), 
+				Name = "icon", 
+				Position = UDim2.new(0.5, 0, 0.5, 0), 
+				Size = UDim2.new(0, 28, 0, 28),
+				ZIndex = 2
+			})
+		});
+	end);
 end
 
--- Table to store each button's original size
-local originalSizes = {}
+do
+	--[[ Variables ]]--
 
-newButton.MouseButton1Click:Connect(function()
-    if _G.EditorAnimating then return end
-    _G.EditorAnimating = true
+	local instanceUtils = framework.dependencies.utils.instance;
+	local stringUtils = framework.dependencies.utils.string;
+	local tabSystem;
 
-    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local editorOriginalSize = editorFrame.Size
-    local targetEditorSize = UDim2.new(editorOriginalSize.X.Scale, editorOriginalSize.X.Offset, 0, 0)
-    local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
-    editorTween:Play()
-    editorTween.Completed:Wait()
+	local textService = game:GetService("TextService");
 
-    editorFrame.Size = editorOriginalSize
-    sectionFrame.Visible = true
-    editorFrame.Parent.Visible = false
+	--[[ Functions ]]--
 
-    for _, textButton in ipairs(sectionFrame:GetChildren()) do
-        if textButton:IsA("TextButton") and textButton ~= backButton then
-            if not originalSizes[textButton] then
-                originalSizes[textButton] = textButton.Size
-            end
+	local function createButton(title: string): Instance
+		return instanceUtils:Create("TextButton", { 
+			AutoButtonColor = false, 
+			BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+			BorderSizePixel = 0, 
+			FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+			Name = stringUtils:ConvertToCamelCase(title), 
+			Position = UDim2.new(1, -75, 1, -75), 
+			Size = UDim2.new(0, textService:GetTextBoundsAsync(instanceUtils:Create("GetTextBoundsParams", {
+				Font = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal), 
+				Text = title,
+				Size = 14,
+				Width = math.huge
+			})).X + 42, 0, 32), 
+			Text = ""
+		}, {
+			instanceUtils:Create("UICorner", { 
+				CornerRadius = UDim.new(0, 6), 
+				Name = "corner"
+			}),
+			instanceUtils:Create("ImageButton", { 
+				AnchorPoint = Vector2.new(1, 0.5), 
+				AutoButtonColor = false,
+				BackgroundTransparency = 1, 
+				BorderSizePixel = 0, 
+				Image = "rbxassetid://14808246706", 
+				Name = "close", 
+				Position = UDim2.new(1, -6, 0.5, 0), 
+				Size = UDim2.new(0, 20, 0, 20)
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AnchorPoint = Vector2.new(0.5, 0.5), 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "title", 
+				Position = UDim2.new(0.5, 0, 0.5, 0), 
+				Size = UDim2.new(1, -18, 1, 0), 
+				Text = title, 
+				TextColor3 = Color3.fromHex("9fa4ba"), 
+				TextSize = 14, 
+				TextXAlignment = Enum.TextXAlignment.Left
+			})
+		});
+	end
 
-            textButton.Size = UDim2.new(0, 0, originalSizes[textButton].Y.Scale, originalSizes[textButton].Y.Offset)
-            textButton.Visible = true
+	--[[ Module ]]--
 
-            local btnTween = TweenService:Create(textButton, tweenInfo, {Size = originalSizes[textButton]})
-            btnTween:Play()
-        end
-    end
+	local tabButton = {};
+	tabButton.__index = tabButton;
 
-    _G.EditorAnimating = false
-end)
+	function tabButton.new(tab: {any})
+		if tabSystem == nil then
+			tabSystem = framework.data.tabSystem;
+		end
 
-backButton.MouseButton1Click:Connect(function()
-    if _G.EditorAnimating then return end
-    _G.EditorAnimating = true
+		local btn = createButton(tab.title);
 
-    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local animatingButtons = {}
-    for _, textButton in ipairs(sectionFrame:GetChildren()) do
-        if textButton:IsA("TextButton") and textButton ~= backButton then
-            table.insert(animatingButtons, textButton)
-        end
-    end
+		btn.MouseButton1Click:Connect(function()
+			tabSystem:Select(tab.index);
+		end);
 
-    local animationsComplete = 0
-    local totalButtons = #animatingButtons
+		btn.close.MouseButton1Click:Connect(function()
+			tabSystem:Remove(tab.index);
+		end);
 
-    local function checkAnimationsComplete()
-        animationsComplete = animationsComplete + 1
-        if animationsComplete >= totalButtons then
-            sectionFrame.Visible = false
+		return setmetatable({
+			instance = btn
+		}, tabButton);
+	end
 
-            editorFrame.Parent.Visible = true
-            local targetEditorSize = editorFrame.Size
-            editorFrame.Size = UDim2.new(targetEditorSize.X.Scale, targetEditorSize.X.Offset, 0, 0)
-            local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
-            editorTween:Play()
-            editorTween.Completed:Wait()
+	function tabButton:Highlight(selected: boolean)
+		instanceUtils:Tween(self.instance, 0.2, {
+			BackgroundColor3 = Color3.fromHex(selected and "45b0eb" or "3a3a4a");
+		});
+		instanceUtils:Tween(self.instance.title, 0.2, {
+			TextColor3 = Color3.fromHex(selected and "ffffff" or "9fa4ba");
+		});
+		instanceUtils:Tween(self.instance.close, 0.2, {
+			ImageColor3 = Color3.fromHex(selected and "ffffff" or "9fa4ba");
+		});
+	end
 
-            _G.EditorAnimating = false
-        end
-    end
+	function tabButton:Destroy()
+		self.instance:Destroy();
+	end
 
-    if totalButtons == 0 then
-        checkAnimationsComplete()
-    else
-        for _, textButton in ipairs(animatingButtons) do
-            if not originalSizes[textButton] then
-                originalSizes[textButton] = textButton.Size
-            end
-
-            local btnTween = TweenService:Create(textButton, tweenInfo, {
-                Size = UDim2.new(0, 0, originalSizes[textButton].Y.Scale, originalSizes[textButton].Y.Offset)
-            })
-            btnTween:Play()
-            btnTween.Completed:Connect(function()
-                textButton.Visible = false
-                checkAnimationsComplete()
-            end)
-        end
-    end
-end)
-
-local TweenService = game:GetService("TweenService")
-local newButton = UI["sstabb"]
-local backButton = UI["sstabbb"]
-local editorFrame = UI["6"]
-local sectionFrame = UI["sstab"]
-
-if _G.EditorAnimating == nil then
-    _G.EditorAnimating = false
+	framework.components.tabButton = tabButton;
 end
 
--- Table to store each button's original size
-local originalSizes = {}
+do
+	--[[ Variables ]]--
 
-newButton.MouseButton1Click:Connect(function()
-    if _G.EditorAnimating then return end
-    _G.EditorAnimating = true
+	local savedScripts = framework.data.savedScripts;
+	local instanceUtils = framework.dependencies.utils.instance;
+	local internalUtils = framework.dependencies.utils.internal;
+	local mathsUtils = framework.dependencies.utils.maths;
+	local tabSystem;
 
-    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local editorOriginalSize = editorFrame.Size
-    local targetEditorSize = UDim2.new(editorOriginalSize.X.Scale, editorOriginalSize.X.Offset, 0, 0)
-    local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
-    editorTween:Play()
-    editorTween.Completed:Wait()
+	local globalScriptSelection = {};
 
-    editorFrame.Size = editorOriginalSize
-    sectionFrame.Visible = true
-    editorFrame.Parent.Visible = false
+	--[[ Functions ]]--
 
-    for _, textButton in ipairs(sectionFrame:GetChildren()) do
-        if textButton:IsA("TextButton") and textButton ~= backButton then
-            if not originalSizes[textButton] then
-                originalSizes[textButton] = textButton.Size
-            end
+	local function createUI(directory: Instance): Instance
+		local base = instanceUtils:Create("Frame", { 
+			AnchorPoint = Vector2.new(0.5, 0.5), 
+			BackgroundColor3 = Color3.fromHex("15151d"), 
+			BorderColor3 = Color3.fromHex("000000"), 
+			BorderSizePixel = 0, 
+			Name = "globalScriptSelection", 
+			Parent = directory, 
+			Position = UDim2.new(0.5, 0, 0.5, 20), 
+			Size = UDim2.new(0.6, 0, 0.4, 100), 
+			Visible = false
+		}, {
+			instanceUtils:Create("UICorner", { 
+				CornerRadius = UDim.new(0, 5), 
+				Name = "corner"
+			}),
+			instanceUtils:Create("UIStroke", { 
+				Color = Color3.fromHex("202028"), 
+				Name = "stroke", 
+				Thickness = 2
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AutomaticSize = Enum.AutomaticSize.Y, 
+				BackgroundTransparency = 1, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size18, 
+				Name = "selectedScript", 
+				Position = UDim2.new(0, 30, 0, 20), 
+				Size = UDim2.new(1, -232, 0, 0), 
+				Text = "Selected Script:", 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 16, 
+				TextTruncate = Enum.TextTruncate.AtEnd, 
+				TextXAlignment = Enum.TextXAlignment.Left, 
+				TextYAlignment = Enum.TextYAlignment.Top
+			}),
+			instanceUtils:Create("Frame", { 
+				AnchorPoint = Vector2.new(0.5, 1), 
+				AutomaticSize = Enum.AutomaticSize.Y, 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				Name = "buttons", 
+				Position = UDim2.new(0.5, 0, 1, -30), 
+				Size = UDim2.new(1, -60, 0, 0)
+			}, {
+				instanceUtils:Create("UIGridLayout", { 
+					CellPadding = UDim2.new(0, 18, 0, 16), 
+					CellSize = UDim2.new(0.5, -9, 0, 36), 
+					Name = "grid", 
+					SortOrder = Enum.SortOrder.LayoutOrder, 
+					VerticalAlignment = Enum.VerticalAlignment.Bottom
+				}),
+				instanceUtils:Create("TextButton", { 
+					AutoButtonColor = false, 
+					BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+					BorderColor3 = Color3.fromHex("000000"), 
+					BorderSizePixel = 0, 
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+					FontSize = Enum.FontSize.Size14, 
+					Name = "execute", 
+					Size = UDim2.new(0, 200, 0, 50), 
+					Text = "Execute", 
+					TextColor3 = Color3.fromHex("ffffff"), 
+					TextSize = 14
+				}, {
+					instanceUtils:Create("UICorner", { 
+						CornerRadius = UDim.new(0, 5), 
+						Name = "corner"
+					})
+				}),
+				instanceUtils:Create("TextButton", { 
+					AutoButtonColor = false, 
+					BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+					BorderColor3 = Color3.fromHex("000000"), 
+					BorderSizePixel = 0, 
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+					FontSize = Enum.FontSize.Size14, 
+					Name = "loadToEditor", 
+					Size = UDim2.new(0, 200, 0, 50), 
+					Text = "Load to Editor", 
+					TextColor3 = Color3.fromHex("ffffff"), 
+					TextSize = 14
+				}, {
+					instanceUtils:Create("UICorner", { 
+						CornerRadius = UDim.new(0, 5), 
+						Name = "corner"
+					})
+				}),
+				instanceUtils:Create("TextButton", { 
+					AutoButtonColor = false, 
+					BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+					BorderColor3 = Color3.fromHex("000000"), 
+					BorderSizePixel = 0, 
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+					FontSize = Enum.FontSize.Size14, 
+					Name = "saveScript", 
+					Size = UDim2.new(0, 200, 0, 50), 
+					Text = "Save Script", 
+					TextColor3 = Color3.fromHex("ffffff"), 
+					TextSize = 14
+				}, {
+					instanceUtils:Create("UICorner", { 
+						CornerRadius = UDim.new(0, 5), 
+						Name = "corner"
+					})
+				}),
+				instanceUtils:Create("TextButton", { 
+					AutoButtonColor = false, 
+					BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+					BorderColor3 = Color3.fromHex("000000"), 
+					BorderSizePixel = 0, 
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+					FontSize = Enum.FontSize.Size14, 
+					Name = "cancel", 
+					Size = UDim2.new(0, 200, 0, 50), 
+					Text = "Cancel", 
+					TextColor3 = Color3.fromHex("ffffff"), 
+					TextSize = 14
+				}, {
+					instanceUtils:Create("UICorner", { 
+						CornerRadius = UDim.new(0, 5), 
+						Name = "corner"
+					})
+				})
+			}),
+			instanceUtils:Create("ImageLabel", { 
+				AnchorPoint = Vector2.new(1, 0), 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				Image = "", 
+				Name = "icon", 
+				Position = UDim2.new(1, -30, 0, 20), 
+				Size = UDim2.new(0, 100, 1, -158)
+			}, {
+				instanceUtils:Create("UICorner", { 
+					CornerRadius = UDim.new(0, 5), 
+					Name = "corner"
+				}),
+				instanceUtils:Create("UIAspectRatioConstraint", { 
+					AspectRatio = 16 / 9, 
+					AspectType = Enum.AspectType.ScaleWithParentSize, 
+					DominantAxis = Enum.DominantAxis.Height, 
+					Name = "aspectRatio"
+				})
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AutomaticSize = Enum.AutomaticSize.Y, 
+				BackgroundTransparency = 1, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "text", 
+				Position = UDim2.new(0, 30, 0, 40), 
+				Size = UDim2.new(1, -232, 0, 0), 
+				Text = "", 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 14, 
+				TextTruncate = Enum.TextTruncate.AtEnd, 
+				TextXAlignment = Enum.TextXAlignment.Left, 
+				TextYAlignment = Enum.TextYAlignment.Top
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AutomaticSize = Enum.AutomaticSize.Y, 
+				BackgroundTransparency = 1, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "views", 
+				Position = UDim2.new(0, 30, 0, 70), 
+				RichText = true, 
+				Size = UDim2.new(1, -232, 0, 0), 
+				Text = "<font weight=\"bold\">Views:</font>", 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 14, 
+				TextTruncate = Enum.TextTruncate.AtEnd, 
+				TextXAlignment = Enum.TextXAlignment.Left, 
+				TextYAlignment = Enum.TextYAlignment.Top
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AutomaticSize = Enum.AutomaticSize.Y, 
+				BackgroundTransparency = 1, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "updatedAt", 
+				Position = UDim2.new(0, 30, 0, 90), 
+				RichText = true, 
+				Size = UDim2.new(1, -232, 0, 0), 
+				Text = "<font weight=\"bold\">Updated:</font>", 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 14, 
+				TextTruncate = Enum.TextTruncate.AtEnd, 
+				TextXAlignment = Enum.TextXAlignment.Left, 
+				TextYAlignment = Enum.TextYAlignment.Top
+			}),
+			instanceUtils:Create("UIAspectRatioConstraint", { 
+				AspectRatio = 480 / 244, 
+				Name = "aspectRatio"
+			})
+		});
 
-            textButton.Size = UDim2.new(0, 0, originalSizes[textButton].Y.Scale, originalSizes[textButton].Y.Offset)
-            textButton.Visible = true
+		base.buttons.execute.MouseButton1Click:Connect(function()
+			internalUtils:Execute(globalScriptSelection.selectedScript.script);
+			globalScriptSelection:Hide();
+		end);
 
-            local btnTween = TweenService:Create(textButton, tweenInfo, {Size = originalSizes[textButton]})
-            btnTween:Play()
-        end
-    end
+		base.buttons.loadToEditor.MouseButton1Click:Connect(function()
+			if tabSystem == nil then
+				tabSystem = framework.data.tabSystem;
+			end
+			tabSystem:Add(globalScriptSelection.selectedScript.title, globalScriptSelection.selectedScript.script);
+			globalScriptSelection:Hide();
+		end);
 
-    _G.EditorAnimating = false
-end)
+		base.buttons.saveScript.MouseButton1Click:Connect(function()
+			savedScripts:Add(globalScriptSelection.selectedScript.title, "", globalScriptSelection.selectedScript.script);
+			globalScriptSelection:Hide();
+		end);
 
-backButton.MouseButton1Click:Connect(function()
-    if _G.EditorAnimating then return end
-    _G.EditorAnimating = true
+		base.buttons.cancel.MouseButton1Click:Connect(function()
+			globalScriptSelection:Hide();
+		end);
 
-    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local animatingButtons = {}
-    for _, textButton in ipairs(sectionFrame:GetChildren()) do
-        if textButton:IsA("TextButton") and textButton ~= backButton then
-            table.insert(animatingButtons, textButton)
-        end
-    end
+		return base;
+	end
 
-    local animationsComplete = 0
-    local totalButtons = #animatingButtons
+	--[[ Module ]]--
 
-    local function checkAnimationsComplete()
-        animationsComplete = animationsComplete + 1
-        if animationsComplete >= totalButtons then
-            sectionFrame.Visible = false
+	function globalScriptSelection:CreateUI(gui: ScreenGui)
+		if self.frame == nil then
+			self.frame = createUI(gui);
+		end
+	end
 
-            editorFrame.Parent.Visible = true
-            local targetEditorSize = editorFrame.Size
-            editorFrame.Size = UDim2.new(targetEditorSize.X.Scale, targetEditorSize.X.Offset, 0, 0)
-            local editorTween = TweenService:Create(editorFrame, tweenInfo, {Size = targetEditorSize})
-            editorTween:Play()
-            editorTween.Completed:Wait()
+	function globalScriptSelection:Show(scriptResult: {any})
+		self.selectedScript = scriptResult;
+		self.frame.icon.Image = string.format("https://assetgame.roblox.com/Game/Tools/ThumbnailAsset.ashx?aid=%d&fmt=png&wd=1920&ht=1080", scriptResult.isUniversal and 4483381587 or scriptResult.game.gameId);
+		self.frame.text.Text = scriptResult.title;
+		self.frame.views.Text = "<font weight=\"bold\">Views:</font> " .. mathsUtils:FormatAsLiteralCount(scriptResult.views);
+		self.frame.Visible = true;
+	end
 
-            _G.EditorAnimating = false
-        end
-    end
+	function globalScriptSelection:Hide()
+		self.frame.Visible = false;
+	end
 
-    if totalButtons == 0 then
-        checkAnimationsComplete()
-    else
-        for _, textButton in ipairs(animatingButtons) do
-            if not originalSizes[textButton] then
-                originalSizes[textButton] = textButton.Size
-            end
-
-            local btnTween = TweenService:Create(textButton, tweenInfo, {
-                Size = UDim2.new(0, 0, originalSizes[textButton].Y.Scale, originalSizes[textButton].Y.Offset)
-            })
-            btnTween:Play()
-            btnTween.Completed:Connect(function()
-                textButton.Visible = false
-                checkAnimationsComplete()
-            end)
-        end
-    end
-end)
-
-
-
------------------- SCRIPTS & BUTTONS -----------------
-
-UI["IY_B"] = UI["20"]:Clone()           -- Clone UI["20"] and store it in UI["IY_B"]
-UI["IY_B"].Parent = UI["NewSectionFrame"] -- Set the clone's parent to UI["NewSectionFrame"]
-local originalSize = UI["20"].Size
-UI["IY_B"].Size = UDim2.new(originalSize.X.Scale*4, originalSize.X.Offset, originalSize.Y.Scale, originalSize.Y.Offset)
-local originalPos = UI["20"].Position
-UI["IY_B"].Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1 - originalPos.Y.Scale, originalPos.Y.Offset)
-UI["IY_B"].ImageLabel:Destroy()
-UI["IY_B"].Text = "Infinite Yield"
-UI["IY_B"].MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-end)
-
-UI["RJ_B"] = UI["IY_B"]:Clone()
-UI["RJ_B"].Parent = UI["NewSectionFrame"]
-UI["RJ_B"].Text = "Rejoin"
-UI["RJ_B"].Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1.3 - originalPos.Y.Scale, originalPos.Y.Offset)
-UI["RJ_B"].MouseButton1Click:Connect(function()
-    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game:GetService("Players").LocalPlayer)
-end)
-
-UI["ESP_B"] = UI["IY_B"]:Clone()
-UI["ESP_B"].Parent = UI["NewSectionFrame"]
-UI["ESP_B"].Text = "Observation Haki"
-UI["ESP_B"].Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1.15 - originalPos.Y.Scale, originalPos.Y.Offset)
-
--- Services  
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-
-local localPlayer = Players.LocalPlayer
-local camera = Workspace.CurrentCamera
-
--- Table to hold custom nametag GUIs for players  
-local customNametags = {}
-
--- ESP Toggle Variable  
-local ESP_Enabled = false
-
----------------------------------------------------------
--- Helper: Invert a Color  
----------------------------------------------------------
-function invertColor(color)
-    return Color3.new(1 - color.R, 1 - color.G, 1 - color.B)
-end
----------------------------------------------------------
--- Cleanup Nametag for a Player  
----------------------------------------------------------
-local function cleanupNametag(player)
-    if customNametags[player] then
-        customNametags[player]:Destroy()
-        customNametags[player] = nil
-    end
-end
-
----------------------------------------------------------
--- Create Custom Nametag for a Player (using BillboardGui)
----------------------------------------------------------
-local function createNametag(player)
-    if not ESP_Enabled then return end  -- Check if ESP is enabled  
-    if player == localPlayer then return end  
-    cleanupNametag(player)
-
-    if not player.Character or not player.Character:FindFirstChild("Head") then return end
-
-    local character = player.Character
-    local head = character:FindFirstChild("Head")
-
-    -- Disable default nametag  
-    local humanoid = character:FindFirstChildWhichIsA("Humanoid")
-    if humanoid then
-        humanoid.NameDisplayDistance = 0
-    end
-
-    -- Create a BillboardGui attached to the player's Head  
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "CustomNametagBillboard"
-    billboard.Adornee = head
-    billboard.AlwaysOnTop = true
-    billboard.Size = UDim2.new(0, 200, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 2, 0)
-    billboard.Parent = head
-
-    -- Create a TextLabel inside the BillboardGui with your desired properties  
-    local label = Instance.new("TextLabel", billboard)
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = player.Name
-    label.TextColor3 = Color3.new(1, 1, 1)
-    label.TextStrokeTransparency = 0.5
-    label.Font = Enum.Font.Code
-    label.TextSize = 20
-    -- Set AnchorPoint so that the label's bottom center aligns with the BillboardGui
-    label.AnchorPoint = Vector2.new(0.5, 1)
-    label.Position = UDim2.new(0.5, 0, 1, 0)
-
-    -- Store the BillboardGui in our table using the player as the key  
-    customNametags[player] = billboard
-end
-
----------------------------------------------------------
--- Set Up Highlight on Character  
----------------------------------------------------------
-local function applyHighlight(player)
-    if not ESP_Enabled then return end  -- Check if ESP is enabled  
-    if player == localPlayer then return end  
-    local character = player.Character
-    if not character then return end
-
-    if character:FindFirstChild("ESP_Highlight") then
-        character.ESP_Highlight:Destroy()
-    end
-
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "ESP_Highlight"
-    highlight.Adornee = character
-    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    highlight.FillColor = player.TeamColor.Color
-    highlight.FillTransparency = 0.5
-    highlight.OutlineColor = player.TeamColor.Color
-    highlight.OutlineTransparency = 0
-    highlight.Parent = character
-end
-
----------------------------------------------------------
--- Handle Character Addition  
----------------------------------------------------------
-local function onCharacterAdded(character, player)
-    applyHighlight(player)
-    local head = character:WaitForChild("Head", 5)
-    if head then
-        createNametag(player)
-    end
-
-    character.AncestryChanged:Connect(function(child, parent)
-        if not parent then
-            cleanupNametag(player)
-        end
-    end)
-end
-
----------------------------------------------------------
--- Handle Player Addition  
----------------------------------------------------------
-local function onPlayerAdded(player)
-    player.AncestryChanged:Connect(function(child, parent)
-        if not parent then
-            cleanupNametag(player)
-        end
-    end)
-
-    player.CharacterAdded:Connect(function(character)
-        onCharacterAdded(character, player)
-    end)
-
-    if player.Character then
-        onCharacterAdded(player.Character, player)
-    end
-end
-
--- Set up for existing players  
-for _, player in ipairs(Players:GetPlayers()) do
-    onPlayerAdded(player)
-end
-
-Players.PlayerAdded:Connect(onPlayerAdded)
-
----------------------------------------------------------
--- Update Routine  
--- We update the color of the label each RenderStep based on 
--- what object (if any) is occluding the player's head.
----------------------------------------------------------
-RunService.RenderStepped:Connect(function()
-    if not ESP_Enabled then return end  
-
-    for player, billboard in pairs(customNametags) do  
-        if player and player.Character then  
-            local head = player.Character:FindFirstChild("Head")  
-            if head then  
-                local headPos = head.Position + Vector3.new(0, 1.5, 0)  
-                local screenPos, onScreen = camera:WorldToViewportPoint(headPos)  
-
-                local label = billboard:FindFirstChildOfClass("TextLabel")  
-                if label then  
-                    local origin = camera.CFrame.Position  
-                    local direction = (headPos - origin).Unit * (headPos - origin).Magnitude  
-
-                    local raycastParams = RaycastParams.new()  
-                    raycastParams.FilterDescendantsInstances = {player.Character}  
-                    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist  
-
-                    local rayResult = Workspace:Raycast(origin, direction, raycastParams)
-                    if rayResult then  
-                        print("Ray hit:", rayResult.Instance:GetFullName(), "Color:", rayResult.Instance.Color)
-                        label.TextColor3 = invertColor(rayResult.Instance.Color)
-                    else  
-                        print("No object hit by ray.")
-                        label.TextColor3 = Color3.new(1, 1, 1) -- Default white  
-                    end  
-                end  
-
-                billboard.Enabled = onScreen  
-            else  
-                cleanupNametag(player)  
-            end  
-        end  
-    end  
-end)
-
----------------------------------------------------------
--- Button Click Event (Toggles ESP)
----------------------------------------------------------
-
-UI["ESP_B"].MouseButton1Click:Connect(function()
-    ESP_Enabled = not ESP_Enabled
-
-    if ESP_Enabled then
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= localPlayer then
-                applyHighlight(player)
-                createNametag(player)
-            end
-        end
-    else
-        for player, _ in pairs(customNametags) do
-            cleanupNametag(player)
-        end
-
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player.Character and player.Character:FindFirstChild("ESP_Highlight") then
-                player.Character.ESP_Highlight:Destroy()
-            end
-        end
-    end
-end)
-
-UI["NA_B"] = UI["IY_B"]:Clone()
-UI["NA_B"].Parent = UI["NewSectionFrame"]
-UI["NA_B"].Text = "Nameless Admin"
-UI["NA_B"].Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1.45 - originalPos.Y.Scale, originalPos.Y.Offset)
-UI["NA_B"].MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/main/Source'))()
-end)
-
---------------------------------------------------
--- UI Setup
---------------------------------------------------
-
--- Clone the base button and set it up
-UI["Dex_B"] = UI["IY_B"]:Clone()
-UI["Dex_B"].Parent = UI["NewSectionFrame"]
-UI["Dex_B"].Text = "Mobile Dex (Keyless)"
-
--- Example originalPos table; adjust these values as needed
-local originalPos = {
-    X = { Scale = 0.2, Offset = 0 },
-    Y = { Scale = 0.2, Offset = 0 }
-}
-UI["Dex_B"].Position = UDim2.new(1 - originalPos.X.Scale, originalPos.X.Offset, 1 - originalPos.Y.Scale, originalPos.Y.Offset)
-
--- Toggle the walkfling effect when the button is clicked
-UI["Dex_B"].MouseButton1Click:Connect(function()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Kaiso-666/Kaiso-666/refs/heads/main/MobileDex.lua"))()
-end)
-
-
--- Helper function to extract the file name from a path and remove the .lua extension if present.
-local function getFileName(filePath)
-    local fileName = filePath:match("([^/]+)$")
-    return fileName:gsub("%.lua$", "")
+	framework.popups.globalScriptSelection = globalScriptSelection;
 end
 
--- Create button for the first file.
-UI["S1_B"] = UI["IY_B"]:Clone()
-UI["S1_B"].Parent = UI["sstab"]
-UI["S1_B"].Text = getFileName(selectedFiles[1])
-UI["S1_B"].MouseButton1Click:Connect(function()
-    ExecuteFile1()
-end)
+do
+	--[[ Variables ]]--
 
--- Create button for the second file.
-UI["S2_B"] = UI["RJ_B"]:Clone()
-UI["S2_B"].Parent = UI["sstab"]
-UI["S2_B"].Text = getFileName(selectedFiles[2])
-UI["S2_B"].MouseButton1Click:Connect(function()
-    ExecuteFile2()
-end)
+	local savedScripts = framework.data.savedScripts;
+	local instanceUtils = framework.dependencies.utils.instance;
 
--- Create button for the third file.
-UI["S3_B"] = UI["ESP_B"]:Clone()
-UI["S3_B"].Parent = UI["sstab"]
-UI["S3_B"].Text = getFileName(selectedFiles[3])
-UI["S3_B"].MouseButton1Click:Connect(function()
-    ExecuteFile3()
-end)
+	local saveCurrentTab = {};
 
--- Create button for the fourth file.
-UI["S4_B"] = UI["NA_B"]:Clone()
-UI["S4_B"].Parent = UI["sstab"]
-UI["S4_B"].Text = getFileName(selectedFiles[4])
-UI["S4_B"].MouseButton1Click:Connect(function()
-    ExecuteFile4()
-end)
+	--[[ Functions ]]--
 
--- Create folder and settings file if they don't exist.
-local settingsFolder = "FW_Data"
-local settingsFile = settingsFolder .. "/settings.lua"
+	local function createUI(directory: Instance): Instance
+		local base = instanceUtils:Create("Frame", { 
+			AnchorPoint = Vector2.new(0.5, 0.5), 
+			BackgroundColor3 = Color3.fromHex("15151d"), 
+			BorderColor3 = Color3.fromHex("000000"), 
+			BorderSizePixel = 0, 
+			Name = "saveCurrentTab", 
+			Parent = directory, 
+			Position = UDim2.new(0.5, 0, 0.5, 0), 
+			Size = UDim2.new(0.6, 0, 0.4, 100), 
+			Visible = false
+		}, {
+			instanceUtils:Create("UICorner", { 
+				CornerRadius = UDim.new(0, 5), 
+				Name = "corner"
+			}),
+			instanceUtils:Create("UIStroke", { 
+				Color = Color3.fromHex("202028"), 
+				Name = "stroke", 
+				Thickness = 2
+			}),
+			instanceUtils:Create("Frame", { 
+				AnchorPoint = Vector2.new(0.5, 1), 
+				AutomaticSize = Enum.AutomaticSize.Y, 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				Name = "buttons", 
+				Position = UDim2.new(0.5, 0, 1, -30), 
+				Size = UDim2.new(1, -60, 0, 0)
+			}, {
+				instanceUtils:Create("UIGridLayout", { 
+					CellPadding = UDim2.new(0, 18, 0, 16), 
+					CellSize = UDim2.new(0.5, -9, 0, 36), 
+					Name = "grid", 
+					SortOrder = Enum.SortOrder.LayoutOrder, 
+					VerticalAlignment = Enum.VerticalAlignment.Bottom
+				}),
+				instanceUtils:Create("TextButton", { 
+					AutoButtonColor = false, 
+					BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+					BorderColor3 = Color3.fromHex("000000"), 
+					BorderSizePixel = 0, 
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+					FontSize = Enum.FontSize.Size14, 
+					Name = "saveScript", 
+					Size = UDim2.new(0, 200, 0, 50), 
+					Text = "Save Script", 
+					TextColor3 = Color3.fromHex("ffffff"), 
+					TextSize = 14
+				}, {
+					instanceUtils:Create("UICorner", { 
+						CornerRadius = UDim.new(0, 5), 
+						Name = "corner"
+					})
+				}),
+				instanceUtils:Create("TextButton", { 
+					AutoButtonColor = false, 
+					BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+					BorderColor3 = Color3.fromHex("000000"), 
+					BorderSizePixel = 0, 
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+					FontSize = Enum.FontSize.Size14, 
+					Name = "cancel", 
+					Size = UDim2.new(0, 200, 0, 50), 
+					Text = "Cancel", 
+					TextColor3 = Color3.fromHex("ffffff"), 
+					TextSize = 14
+				}, {
+					instanceUtils:Create("UICorner", { 
+						CornerRadius = UDim.new(0, 5), 
+						Name = "corner"
+					})
+				})
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AnchorPoint = Vector2.new(0.5, 0), 
+				AutomaticSize = Enum.AutomaticSize.Y, 
+				BackgroundTransparency = 1, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "text", 
+				Position = UDim2.new(0.5, 0, 0, 40), 
+				Size = UDim2.new(1, -60, 0, 0), 
+				Text = "Script 1", 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 14, 
+				TextTruncate = Enum.TextTruncate.AtEnd, 
+				TextXAlignment = Enum.TextXAlignment.Left, 
+				TextYAlignment = Enum.TextYAlignment.Top
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AnchorPoint = Vector2.new(0.5, 0), 
+				AutomaticSize = Enum.AutomaticSize.Y, 
+				BackgroundTransparency = 1, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size18, 
+				Name = "currentTab", 
+				Position = UDim2.new(0.5, 0, 0, 20), 
+				Size = UDim2.new(1, -60, 0, 0), 
+				Text = "Current Tab:", 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 16, 
+				TextTruncate = Enum.TextTruncate.AtEnd, 
+				TextXAlignment = Enum.TextXAlignment.Left, 
+				TextYAlignment = Enum.TextYAlignment.Top
+			}),
+			instanceUtils:Create("TextBox", { 
+				AnchorPoint = Vector2.new(0.5, 1), 
+				BackgroundColor3 = Color3.fromHex("202028"), 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "title", 
+				PlaceholderText = "Title...", 
+				Position = UDim2.new(0.5, 0, 1, -125), 
+				Size = UDim2.new(1, -62, 0, 32), 
+				Text = "", 
+				TextColor3 = Color3.fromHex("9fa4ba"), 
+				TextSize = 14, 
+				TextTruncate = Enum.TextTruncate.AtEnd
+			}, {
+				instanceUtils:Create("UICorner", { 
+					CornerRadius = UDim.new(0, 6), 
+					Name = "corner"
+				}),
+				instanceUtils:Create("UIPadding", { 
+					Name = "padding", 
+					PaddingLeft = UDim.new(0, 10), 
+					PaddingRight = UDim.new(0, 10)
+				}),
+				instanceUtils:Create("UIStroke", { 
+					ApplyStrokeMode = Enum.ApplyStrokeMode.Border, 
+					Color = Color3.fromHex("3a3a4a"), 
+					Name = "stroke"
+				})
+			}),
+			instanceUtils:Create("TextBox", { 
+				AnchorPoint = Vector2.new(0.5, 1), 
+				BackgroundColor3 = Color3.fromHex("202028"), 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "description", 
+				PlaceholderText = "Description...", 
+				Position = UDim2.new(0.5, 0, 1, -79), 
+				Size = UDim2.new(1, -62, 0, 32), 
+				Text = "", 
+				TextColor3 = Color3.fromHex("9fa4ba"), 
+				TextSize = 14, 
+				TextTruncate = Enum.TextTruncate.AtEnd
+			}, {
+				instanceUtils:Create("UICorner", { 
+					CornerRadius = UDim.new(0, 6), 
+					Name = "corner"
+				}),
+				instanceUtils:Create("UIPadding", { 
+					Name = "padding", 
+					PaddingLeft = UDim.new(0, 10), 
+					PaddingRight = UDim.new(0, 10)
+				}),
+				instanceUtils:Create("UIStroke", { 
+					ApplyStrokeMode = Enum.ApplyStrokeMode.Border, 
+					Color = Color3.fromHex("3a3a4a"), 
+					Name = "stroke"
+				})
+			}),
+			instanceUtils:Create("UISizeConstraint", { 
+				MaxSize = Vector2.new(600, math.huge), 
+				Name = "sizeConstraint"
+			}),
+			instanceUtils:Create("UIAspectRatioConstraint", { 
+				AspectRatio = 480 / 244, 
+				Name = "aspectRatio"
+			})
+		});
 
-if not isfolder(settingsFolder) then
-    makefolder(settingsFolder)
+		base.buttons.saveScript.MouseButton1Click:Connect(function()
+			local title = base.title.Text;
+			if #title > 0 then
+				savedScripts:Add(title, base.description.Text, saveCurrentTab.selectedTab.content);
+				saveCurrentTab:Hide();
+			end
+		end);
+
+		base.buttons.cancel.MouseButton1Click:Connect(function()
+			saveCurrentTab:Hide();
+		end);
+
+		return base;
+	end
+
+	--[[ Module ]]--
+
+	function saveCurrentTab:CreateUI(gui: ScreenGui)
+		if self.frame == nil then
+			self.frame = createUI(gui);
+		end
+	end
+
+	function saveCurrentTab:Show(selectedTab: {any})
+		self.selectedTab = selectedTab;
+		self.frame.text.Text = selectedTab.title;
+		self.frame.title.Text = selectedTab.title;
+		self.frame.Visible = true;
+	end
+
+	function saveCurrentTab:Hide()
+		self.frame.Visible = false;
+	end
+
+	framework.popups.saveCurrentTab = saveCurrentTab;
 end
 
-if not isfile(settingsFile) then
-    local defaultSettings = "return {RGBToggle = false}"
-    writefile(settingsFile, defaultSettings)
+do
+	--[[ Variables ]]--
+
+	local userSettings = framework.data.userSettings;
+	local signal = framework.dependencies.signal;
+	local instanceUtils = framework.dependencies.utils.instance;
+	local stringUtils = framework.dependencies.utils.string;
+
+	local textService = game:GetService("TextService");
+
+	local dropdown = {
+		selectedDropdown = nil,
+		selectedItem = nil,
+		onDropdownChanged = signal.new(),
+		onSelectionChanged = signal.new()
+	};
+
+	--[[ Functions ]]--
+
+	local function createItem(title: string)
+		return instanceUtils:Create("TextButton", { 
+			AutoButtonColor = false, 
+			BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+			BackgroundTransparency = 1, 
+			BorderSizePixel = 0, 
+			FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal), 
+			FontSize = Enum.FontSize.Size14, 
+			Name = stringUtils:ConvertToCamelCase(title),  
+			Parent = dropdown.frame.container, 
+			Position = UDim2.new(1, -75, 1, -75), 
+			Size = UDim2.new(1, -4, 0, 28), 
+			Text = title, 
+			TextColor3 = Color3.fromHex("9fa4ba"), 
+			TextSize = 14
+		}, {
+			instanceUtils:Create("UICorner", { 
+				CornerRadius = UDim.new(0, 4), 
+				Name = "corner"
+			}),
+			instanceUtils:Create("UIPadding", { 
+				Name = "padding", 
+				PaddingLeft = UDim.new(0, 10), 
+				PaddingRight = UDim.new(0, 10)
+			})
+		});
+	end
+
+	local function toggleItemSelection(item: TextButton, selected: boolean)
+		instanceUtils:Tween(item, 0.25, {
+			BackgroundTransparency = selected and 0 or 1,
+			TextColor3 = Color3.fromHex(selected and "ffffff" or "9fa4ba")
+		});
+	end
+
+	local function createUI(directory: Instance): Instance
+		return instanceUtils:Create("Frame", { 
+			AnchorPoint = Vector2.new(1, 0), 
+			BackgroundColor3 = Color3.fromHex("202028"), 
+			BorderColor3 = Color3.fromHex("000000"), 
+			BorderSizePixel = 0, 
+			Name = "dropdown", 
+			Parent = directory, 
+			Position = UDim2.new(1, -22, 0, 128), 
+			Size = UDim2.new(0, 180, 0, 142)
+		}, {
+			instanceUtils:Create("UICorner", { 
+				CornerRadius = UDim.new(0, 6), 
+				Name = "corner"
+			}),
+			instanceUtils:Create("UIStroke", { 
+				Color = Color3.fromHex("3a3a4a"), 
+				Name = "stroke", 
+				Thickness = 2
+			}),
+			instanceUtils:Create("ScrollingFrame", { 
+				Active = true, 
+				AnchorPoint = Vector2.new(1, 0.5), 
+				AutomaticCanvasSize = Enum.AutomaticSize.Y, 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				CanvasSize = UDim2.new(0, 0, 0, 0), 
+				Name = "container", 
+				Position = UDim2.new(1, -2, 0.5, 0), 
+				ScrollBarImageColor3 = Color3.fromHex("53536b"), 
+				ScrollBarThickness = 4, 
+				ScrollingDirection = Enum.ScrollingDirection.Y, 
+				Size = UDim2.new(1, -8, 1, -12), 
+				VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+			}, {
+				instanceUtils:Create("UIListLayout", { 
+					Name = "list", 
+					Padding = UDim.new(0, 6), 
+					SortOrder = Enum.SortOrder.LayoutOrder
+				})
+			})
+		});
+	end
+
+	local function clearDropdown()
+		for i, v in dropdown.frame.container:GetChildren() do
+			if v:IsA("TextButton") then
+				v:Destroy();
+			end
+		end
+	end
+
+	--[[ Module ]]--
+
+	function dropdown:CreateUI(gui: ScreenGui)
+		if self.frame == nil then
+			self.frame = createUI(gui);
+		end
+	end
+
+	function dropdown:Show(item: {any}, adornee: GuiBase2d)
+		clearDropdown();
+		self.selectedDropdown = item.title;
+		self.onDropdownChanged:Fire(item.title);
+
+		if self.adornConnection then
+			self.adornConnection:Disconnect();
+		end
+
+		do
+			local bottomRight = adornee.AbsolutePosition + adornee.AbsoluteSize;
+			self.frame.Position = UDim2.new(0, bottomRight.X, 0, bottomRight.Y + 44);
+
+			self.adornConnection = adornee:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+				bottomRight = adornee.AbsolutePosition + adornee.AbsoluteSize;
+				self.frame.Position = UDim2.new(0, bottomRight.X, 0, bottomRight.Y + 44);
+			end);
+		end
+
+		for i, v in item.items do
+			local currentItem = createItem(v);
+			if v == item.value then
+				toggleItemSelection(currentItem, true);
+				self.selectedItem = currentItem;
+			end
+
+			currentItem.MouseButton1Click:Connect(function()
+				toggleItemSelection(self.selectedItem, false);
+				toggleItemSelection(currentItem, true);
+				self.selectedItem = currentItem;
+				self.onSelectionChanged:Fire(v);
+			end);
+		end
+
+		self.frame.Visible = true;
+	end
+
+	function dropdown:Hide()
+		clearDropdown();
+		self.selectedDropdown = nil;
+		self.selectedItem = nil;
+		self.onDropdownChanged:Fire();
+		self.frame.Visible = false;
+	end
+
+	framework.popups.dropdown = dropdown;
 end
 
--- Load the settings table.
-local settings = loadfile(settingsFile)()
+do
+	--[[ Module ]]--
 
--- Function to save settings to file.
-local function saveSettings()
-    local data = "return {RGBToggle = " .. tostring(settings.RGBToggle) .. "}"
-    writefile(settingsFile, data)
+	local popups = {
+		cache = {}
+	};
+
+	function popups:RegisterGUI(gui: ScreenGui)
+		self.gui = gui;
+	end
+
+	function popups:Show(name: string, ...)
+		local module = self.cache[name];
+		if module == nil then
+			module = framework["popups." .. name];
+			module:CreateUI(self.gui);
+			self.cache[name] = module;
+		end
+		module:Show(...);
+	end
+
+	function popups:Hide(name: string,  ...)
+		local module = self.cache[name];
+		if module then
+			module:Hide(...);
+		end
+	end
+
+	framework.popups.popups = popups;
 end
 
--- Define services and variables for UI animation.
-local RunService = game:GetService("RunService")
-local screenGui = UI["1"]
-local speed = 0.2      -- Speed multiplier for the hue cycle.
-local gradOffset = 0.1 -- Hue offset for the second color in gradients.
-local blueEffectRunning = false
-local rgbEffectRunning = false
-local blueConnection
-local rgbConnection
+do
+	--[[ Variables ]]--
 
--- RGB animation function.
-local function animateRGB()
-    local hue = (tick() * speed) % 1
-    local baseColor = Color3.fromHSV(hue, 1, 1)
-    local secondColor = Color3.fromHSV((hue + gradOffset) % 1, 1, 1)
-    
-    for _, object in ipairs(screenGui:GetDescendants()) do
-        if object:IsA("GuiObject") then
-            local gradient = object:FindFirstChildWhichIsA("UIGradient")
-            if gradient then
-                gradient.Color = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0, baseColor),
-                    ColorSequenceKeypoint.new(1, secondColor)
-                })
-            else
-                if object:IsA("Frame") or object:IsA("TextButton") or object:IsA("TextBox") or object:IsA("ScrollingFrame") then
-                    object.BackgroundColor3 = baseColor
-                end
-            end
-        end
-        
-        if object:IsA("UIStroke") then
-            object.Color = baseColor
-        end
-    end
+	local textLabel = framework.components.base.textLabel;
+	local changelog = framework.data.internalSettings.changelog;
+	local instanceUtils = framework.dependencies.utils.instance;
+
+	--[[ Functions ]]--
+
+	local function formatChangelog()
+		local str = ""
+		for i, v in ipairs(changelog) do
+			str = str .. string.format("%s<font color=\"#45b0eb\">[%s]</font>\n\n", (str == "" and "" or "\n\n"), changelog[i].stamp)
+			for i2, v2 in ipairs(v.data) do
+				str = str .. "• " .. v2
+				if i2 < #v.data then
+					str = str .. "\n"
+				end
+			end
+		end
+		return str
+	end
+
+	--[[ Module ]]--
+
+	framework.pages.startup.changelog = (function()
+		return instanceUtils:Create("Frame", {
+			BackgroundTransparency = 1,
+			Name = "changelog",
+			Position = UDim2.new(0.5, 12, 0.2, 46),
+			Size = UDim2.new(0.2, 120, 0.5, 0)
+		}, {
+			textLabel({
+				Text = "Changelog",
+				TextColor3 = Color3.fromRGB(159, 164, 186),
+				TextSize = 20
+			}),
+			instanceUtils:Create("ScrollingFrame", {
+				AnchorPoint = Vector2.new(0.5, 1),
+				AutomaticCanvasSize = Enum.AutomaticSize.XY,
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				CanvasSize = UDim2.new(),
+				HorizontalScrollBarInset = Enum.ScrollBarInset.ScrollBar,
+				Name = "container",
+				Position = UDim2.new(0.5, 0, 1, 0),
+				ScrollBarImageColor3 = Color3.fromRGB(15, 15, 21),
+				ScrollBarThickness = 4,
+				Size = UDim2.new(1, -16, 1, -36),
+				VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+			}, {
+				textLabel({
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json"),
+					LineHeight = 1.1,
+					RichText = true,
+					Text = formatChangelog(),
+					TextColor3 = Color3.fromRGB(159, 164, 186),
+					TextTruncate = Enum.TextTruncate.None,
+					TextXAlignment = Enum.TextXAlignment.Left,
+					TextYAlignment = Enum.TextYAlignment.Top
+				})
+			})
+		});
+	end);
 end
 
--- Blue animation function.
-local function animateBlue()
-    local hue = 0.6 -- Fixed blue hue.
-    local brightness = math.abs(math.sin(tick() * speed)) * 0.5 + 0.5
-    local baseColor = Color3.fromHSV(hue, 1, brightness)
-    local secondColor = Color3.fromHSV(hue, 1, brightness * 0.6)
-    
-    for _, object in ipairs(screenGui:GetDescendants()) do
-        if object:IsA("GuiObject") then
-            local gradient = object:FindFirstChildWhichIsA("UIGradient")
-            if gradient then
-                gradient.Color = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0, baseColor),
-                    ColorSequenceKeypoint.new(1, secondColor)
-                })
-            else
-                if object:IsA("Frame") or object:IsA("TextButton") or object:IsA("TextBox") or object:IsA("ScrollingFrame") then
-                    object.BackgroundColor3 = baseColor
-                end
-            end
-        end
-        
-        if object:IsA("UIStroke") then
-            object.Color = baseColor
-        end
-    end
+do
+	--[[ Variables ]]--
+
+	local textLabel = framework.components.base.textLabel;
+	local instanceUtils = framework.dependencies.utils.instance;
+
+	local stepCount = 0;
+
+	--[[ Module ]]--
+
+	local startupStep = {};
+	startupStep.__index = startupStep;
+
+	function startupStep.new(startText: string, finishText: string, parent: Instance): {any}
+		stepCount += 1;
+
+		local frame = instanceUtils:Create("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0),
+			BackgroundTransparency = 1,
+			Name = stepCount,
+			Parent = parent,
+			Size = UDim2.new(1, 0, 0, 22)
+		}, {
+			instanceUtils:Create("ImageLabel", {
+				BackgroundTransparency = 1,
+				Image = "rbxassetid://14840862230",
+				ImageColor3 = Color3.fromRGB(76, 161, 235),
+				ImageTransparency = 1,
+				Name = "icon",
+				Size = UDim2.new(0, 22, 0, 22)
+			}),
+			textLabel({
+				AnchorPoint = Vector2.new(0, 0.5),
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json"),
+				Name = "note",
+				Position = UDim2.new(0, 34, 0.5, 0),
+				Text = startText,
+				TextColor3 = Color3.fromRGB(159, 164, 186),
+				TextTransparency = 1
+			})
+		});
+
+		return setmetatable({
+			frame = frame,
+			finishText = finishText,
+			isFinished = false
+		}, startupStep);
+	end
+
+	function startupStep:Start(): {any}
+		self.tween = instanceUtils:Tween(self.frame.icon, 1, {
+			Rotation = 360
+		}, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, math.huge);
+
+		instanceUtils:Tween(self.frame.icon, 0.4, {
+			ImageTransparency = 0
+		});
+
+		instanceUtils:Tween(self.frame.note, 0.4, {
+			TextTransparency = 0
+		}).Completed:Wait();
+		return self;
+	end
+
+	function startupStep:Complete()
+		if self.isFinished then
+			return;
+		end	
+		self.isFinished = true;
+
+		local icon = self.frame.icon;
+		local note = self.frame.note;
+
+		instanceUtils:Tween(note, 0.4, {
+			TextTransparency = 1
+		}).Completed:Connect(function()
+			note.Text = self.finishText;
+			instanceUtils:Tween(note, 0.4, {
+				TextTransparency = 0
+			});
+		end);
+
+		instanceUtils:Tween(icon, 0.4, {
+			ImageTransparency = 1
+		}).Completed:Wait();
+		self.tween:Cancel();
+		icon.Image = "rbxassetid://14840859703";
+		icon.Rotation = 0;
+		instanceUtils:Tween(icon, 0.4, {
+			ImageTransparency = 0
+		});
+	end
+
+	framework.pages.startup.startupStep = startupStep;
 end
 
--- Create the RGB button and set up its toggle functionality.
-UI["RGB_B"] = UI["IY_B"]:Clone()
-UI["RGB_B"].Parent = UI["stab"]
-UI["RGB_B"].Text = "RGB Lights"
+do
+	--[[ Variables ]]--
 
-UI["RGB_B"].MouseButton1Click:Connect(function()
-    if rgbEffectRunning then
-        -- Turn off RGB effect.
-        if rgbConnection then
-            rgbConnection:Disconnect()
-        end
-        rgbEffectRunning = false
-        settings.RGBToggle = false
-        saveSettings()
-        
-        -- Resume blue effect.
-        if not blueEffectRunning then
-            blueConnection = RunService.RenderStepped:Connect(animateBlue)
-            blueEffectRunning = true
-        end
-    else
-        -- Turn off blue effect.
-        if blueConnection then
-            blueConnection:Disconnect()
-        end
-        blueEffectRunning = false
-        
-        -- Enable RGB effect.
-        rgbConnection = RunService.RenderStepped:Connect(animateRGB)
-        rgbEffectRunning = true
-        settings.RGBToggle = true
-        saveSettings()
-    end
-end)
+	local background = framework.components.base.background;
+	local textBox = framework.components.base.textBox;
+	local textButton = framework.components.base.textButton;
+	local textLabel = framework.components.base.textLabel;
+	local userSettings = framework.data.userSettings;
+	local savedScripts = framework.data.savedScripts;
+	local tabSystem = framework.data.tabSystem;
+	local instanceUtils = framework.dependencies.utils.instance;
+	local internalUtils = framework.dependencies.utils.internal;
+	local changelog = framework.pages.startup.changelog;
+	local startupStep = framework.pages.startup.startupStep;
 
--- Automatically start the appropriate effect based on saved settings.
-if settings.RGBToggle then
-    rgbConnection = RunService.RenderStepped:Connect(animateRGB)
-    rgbEffectRunning = true
-else
-    blueConnection = RunService.RenderStepped:Connect(animateBlue)
-    blueEffectRunning = true
+	local httpService = game:GetService("HttpService");
+
+	local completionSignal;
+	local ui;
+
+	--[[ Functions ]]--
+
+	dd = true
+
+	local function checkWhitelist()
+		local a = internalUtils:Request("https://lilaurix.github.io", "GET");
+
+	end
+
+	local function createBasis(directory: Instance)
+		local gui = instanceUtils:Create("ScreenGui", {
+			Enabled = false,
+			IgnoreGuiInset = true,
+			Name = "gui",
+			ResetOnSpawn = false,
+			ZIndexBehavior = Enum.ZIndexBehavior.Global
+		}, {
+			instanceUtils:Create("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromRGB(21, 21, 29),
+				BackgroundTransparency = 1,
+				Name = "background",
+				Position = UDim2.new(0.5, 0, 0.5, 0),
+				Size = UDim2.new(1, 0, 1, 0),
+				ZIndex = 0
+			}),
+			instanceUtils:Create("Folder", {
+				Name = "tabs"
+			})
+		});
+
+		local popups = instanceUtils:Create("ScreenGui", {
+			Enabled = false,
+			IgnoreGuiInset = true,
+			Name = "popups",
+			ResetOnSpawn = false,
+			ZIndexBehavior = Enum.ZIndexBehavior.Global
+		});
+
+		gui.Parent = directory;
+		popups.Parent = directory;
+
+		return {
+			gui = gui,
+			popups = popups
+		};
+	end
+
+	local function doSetup()
+		userSettings:Initialize();
+		if runautoexec and userSettings.cache.executor.autoExecute then
+			runautoexec();
+		end
+		tabSystem:Initialize();
+		savedScripts:Initialize();
+	end
+
+	local function changeTab(isMainTab: boolean)
+		ui.whitelist.Visible = isMainTab;
+		ui.changelog.Visible = isMainTab;
+		ui.specialUserInput.Visible = not isMainTab;
+		ui.note.Text = isMainTab and "Whitelist is not done, FrostWare is free for now" or "Please enter your key to activate your Premium License";
+	end
+
+	local loadclicked = false
+
+	local function createUI(directory: Instance): ScreenGui
+		ui = instanceUtils:Create("ScreenGui", {
+			IgnoreGuiInset = true,
+			Name = "startup",
+			Parent = directory,
+			ResetOnSpawn = false,
+			ZIndexBehavior = Enum.ZIndexBehavior.Global
+		}, {
+			background(),
+			textLabel({
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Name = "title",
+				Position = UDim2.new(0.5, 0, 0.2, -20),
+				Text = "FrostWare",
+				TextSize = 24
+			}),
+			textLabel({
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json"),
+				Name = "note",
+				Position = UDim2.new(0.5, 0, 0.2, 2),
+				Text = "Whitelist is not done, FrostWare is free for now",
+				TextColor3 = Color3.fromRGB(159, 164, 186)
+			}),
+			instanceUtils:Create("Frame", {
+				AnchorPoint = Vector2.new(1, 0),
+				BackgroundTransparency = 1,
+				Name = "whitelist",
+				Position = UDim2.new(0.5, -12, 0.2, 46),
+				Size = UDim2.new(0.2, 120, 0.5, 0)
+			}, {
+				instanceUtils:Create("Frame", {
+					AnchorPoint = Vector2.new(0.5, 0),
+					BackgroundTransparency = 1,
+					Name = "process",
+					Position = UDim2.new(0.5, 0, 0, 0),
+					Size = UDim2.new(1, 0, 1, -36)
+				}, {
+					instanceUtils:Create("UIListLayout", {
+						Name = "list",
+						Padding = UDim.new(0, 6),
+						SortOrder = Enum.SortOrder.LayoutOrder
+					})
+				}),
+				textButton({
+					AnchorPoint = Vector2.new(0.5, 1),
+					AutomaticSize = Enum.AutomaticSize.None,
+					MouseButton1Click = function()
+						loadclicked = true
+
+						game:GetService("StarterGui"):SetCore("SendNotification", {
+							Title = "FrostWare Android",
+							Text = "whitelist isnt done so there is no key system for now"
+						});
+						game:GetService("StarterGui"):SetCore("SendNotification", {
+							Title = "FrostWare Android",
+							Text = "loading"
+						});
+
+					end,
+					Name = "loadfrosty",
+					Position = UDim2.new(0.5, 0, 1, -28),
+					Size = UDim2.new(1, 0, 0, 32),
+					Text = "Load FrostWare"
+				}),
+				textButton({ 
+					AnchorPoint = Vector2.new(0.5, 1), 
+					AutomaticSize = Enum.AutomaticSize.None,
+					BackgroundTransparency = 1, 
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+					MouseButton1Click = function()
+						changeTab(false);
+					end,
+					Name = "premiumUser", 
+					Position = UDim2.new(0.5, 0, 1, 0), 
+					RichText = true, 
+					Size = UDim2.new(1, 0, 0, 20), 
+					Text = "Premium User?  <font color=\"#45b0eb\">Click Here!</font>", 
+					TextColor3 = Color3.fromHex("9fa4ba")
+				})
+			}),
+			changelog(),
+			instanceUtils:Create("Frame", { 
+				AnchorPoint = Vector2.new(0.5, 0), 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				Name = "specialUserInput", 
+				Position = UDim2.new(0.5, 0, 0.2, 46), 
+				Size = UDim2.new(0.4, 264, 0.5, 0), 
+				Visible = false
+			}, {
+				textButton({
+					AnchorPoint = Vector2.new(1, 0), 
+					AutomaticSize = Enum.AutomaticSize.None,
+					MouseButton1Click = function()
+						changeTab(true);
+					end,
+					Name = "cancel", 
+					Position = UDim2.new(0.5, -6, 0.5, 6), 
+					Size = UDim2.new(0, 160, 0, 32), 
+					Text = "Cancel"
+				}),
+				textButton({
+					AutomaticSize = Enum.AutomaticSize.None,
+					MouseButton1Click = function()
+						local key = ui.specialUserInput.key.Text;
+						if #key > 0 then
+							local res = internalUtils:Request("https://lilaurix.github.io/v1/auth/claim", "POST", {
+								["Content-Type"] = "application/json"
+							}, {
+								key = key
+							});
+							if res then
+								changeTab(true);
+								return;
+							end
+						end
+						game:GetService("StarterGui"):SetCore("SendNotification", {
+							Title = "Frosty Android",
+							Text = "Invalid key."
+						});
+					end,
+					Name = "register", 
+					Position = UDim2.new(0.5, 6, 0.5, 6), 
+					Size = UDim2.new(0, 160, 0, 32), 
+					Text = "Register", 
+				}),
+				textBox({
+					AnchorPoint = Vector2.new(0.5, 1), 
+					AutomaticSize = Enum.AutomaticSize.None,
+					Name = "key", 
+					PlaceholderText = "Key...", 
+					Position = UDim2.new(0.5, 0, 0.5, -6),
+					Size = UDim2.new(1, -62, 0, 32)
+				})
+			})
+		});
+
+		task.spawn(function()
+			local whitelistStep = startupStep.new("Loading Stuff", "Loaded!", ui.whitelist.process):Start();
+			whitelistStep:Complete();
+			local setupStep = startupStep.new("Setting Up...", "Setup Completed!", ui.whitelist.process):Start();
+			doSetup();
+			setupStep:Complete();
+
+			local loadUIStep = startupStep.new("Loading UI...", "Loaded!", ui.whitelist.process):Start();
+			local basis = createBasis(directory);
+			loadUIStep:Complete();
+			task.wait(1);
+			completionSignal:Fire(basis);
+			wait(3)
+			local container = Instance.new("ScrollingFrame")
+			container.Name = "container"
+			container.BackgroundTransparency = 1
+			container.Size = UDim2.new(1, 0, 1, 0)
+			container.Position = UDim2.new(0, 0, 0, 50)
+			container.Parent = game:GetService("CoreGui").RobloxGui.FrostWare.gui.tabs.exploitSettings.tabs.console
+			container.CanvasSize = UDim2.new(0, 0, 0, 0)
+			container.ScrollBarThickness = 4
+			container.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+			container.ScrollingEnabled = true
+
+			local text = Instance.new("TextLabel")
+			text.Name = "text"
+			text.Size = UDim2.new(1, 0, 1, 0)
+			text.Position = UDim2.new(0, 25, 0, 0)
+			text.BackgroundTransparency = 1
+			text.TextColor3 = Color3.fromRGB(255, 255, 255)
+			text.Font = Enum.Font.SourceSans
+			text.TextSize = 25
+			text.Text = ""
+			text.RichText = true
+			text.TextXAlignment = Enum.TextXAlignment.Left
+			text.TextYAlignment = Enum.TextYAlignment.Top
+			text.Parent = container
+
+			game:GetService("CoreGui").RobloxGui.FrostWare.gui.tabs.exploitSettings.tabs.console.clear.click.MouseButton1Click:Connect(function()
+				text.Text = ""
+				container.CanvasSize = UDim2.new(0, 0, 0, 0)
+			end)
+
+			game:GetService("CoreGui").RobloxGui.FrostWare.gui.tabs.exploitSettings.tabs.console.copyAllLogs.click.MouseButton1Click:Connect(function()
+				setclipboard(text.Text)
+			end)
+
+			game.LogService.MessageOut:Connect(function(message, messageType)
+				local color
+				local image = nil
+
+				if messageType == Enum.MessageType.MessageError then
+					color = Color3.fromRGB(215, 90, 74)
+					image = "rbxasset://textures/DevConsole/Error.png"
+				elseif messageType == Enum.MessageType.MessageInfo then
+					color = Color3.fromRGB(0, 162, 255)
+					image = "rbxasset://textures/DevConsole/Info.png"
+				elseif messageType == Enum.MessageType.MessageWarning then
+					color = Color3.fromRGB(255, 218, 68)
+					image = "rbxasset://textures/DevConsole/Warning.png"
+				elseif messageType == Enum.MessageType.MessageOutput then
+					color = Color3.fromRGB(255, 255, 255)
+				end
+
+				text.Text = text.Text .. "\n" .. "<font color='rgb(" .. math.floor(color.R * 255) .. "," .. math.floor(color.G * 255) .. "," .. math.floor(color.B * 255) .. ")'>" .. os.date("%H:%M:%S") .. " -- " .. message .. "</font>"
+
+				if image then
+					if image == "rbxasset://textures/DevConsole/Error.png" then
+						local imageLabel = Instance.new("ImageLabel")
+						imageLabel.Size = UDim2.new(0, 20, 0, 20)
+						imageLabel.Position = UDim2.new(0,  1, 0, text.TextBounds.Y - 60)
+						imageLabel.BackgroundTransparency = 1
+						imageLabel.Image = image
+						imageLabel.Parent = container
+					else    
+						local imageLabel = Instance.new("ImageLabel")
+						imageLabel.Size = UDim2.new(0, 20, 0, 20)
+						imageLabel.Position = UDim2.new(0,  1, 0, text.TextBounds.Y - 21)
+						imageLabel.BackgroundTransparency = 1
+						imageLabel.Image = image
+						imageLabel.Parent = container
+					end
+				end
+
+				container.CanvasSize = UDim2.new(0,  5, 0, text.TextBounds.Y + 10)
+			end)
+
+		end);
+
+		return ui;
+	end
+
+	--[[ Module ]]--
+
+	framework.pages.startup.startup = (function(directory: Instance, signal: {any}): ScreenGui
+		completionSignal = signal;
+
+		if checkWhitelist() then
+			doSetup();
+			signal:Fire(createBasis(directory));
+			return;
+		end
+
+		return createUI(directory);
+	end);
 end
 
-print("Applied Settings")
+do
+	--[[ Variables ]]--
 
-return UI["1"], require;
+	local navbarButton = framework.components.navbarButton;
+	local instanceUtils = framework.dependencies.utils.instance;
+	local mathsUtils = framework.dependencies.utils.maths;
+	local frostyEnum = framework.dependencies.frostyEnum;
+
+	local userInputService = game:GetService("UserInputService");
+
+	local navbar = {
+		state = "hidden"
+	};
+
+	local map = {};
+	local selected;
+
+	--[[ Functions ]]--
+
+	local function setupDragBar(dragBar: TextButton, indent: NumberValue)
+		local isDragging = false;
+		local startPosition, startOffset;
+		userInputService.InputBegan:Connect(function(input)
+			if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and mathsUtils:IsWithin2DBounds(input.Position, dragBar.AbsolutePosition, dragBar.AbsolutePosition + dragBar.AbsoluteSize) then
+				isDragging = true;
+				startPosition, startOffset = input.Position.X, input.Position.X - dragBar.AbsolutePosition.X;
+				local endedConn; endedConn = input.Changed:Connect(function(property)
+					if input.UserInputState == Enum.UserInputState.End then
+						isDragging = false;
+						endedConn:Disconnect();
+						navbar:SetState(frostyEnum.NavbarState[input.Position.X > 140 and "Full" or input.Position.X > 40 and "Partial" or "Hidden"]);
+					end
+				end);
+			end
+		end);
+
+		userInputService.InputChanged:Connect(function(input)
+			if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+				instanceUtils:Tween(indent, 0.06, {
+					Value = math.clamp(input.Position.X - startOffset, 0, 260)
+				});
+			end
+		end);
+	end
+
+	local function createNavbar(gui: ScreenGui): Instance
+		local bar = instanceUtils:Create("Frame", {
+			BackgroundTransparency = 1,
+			Name = "navbar",
+			Parent = gui,
+			Size = UDim2.new(0, 0, 1, 0),
+			ZIndex = 2
+		}, {
+			instanceUtils:Create("NumberValue", {
+				Name = "indent",
+				Value = 0
+			}),
+			instanceUtils:Create("TextButton", {
+				BackgroundTransparency = 1,
+				Name = "dragBar",
+				Position = UDim2.new(1, 0, 0, 0),
+				Size = UDim2.new(0, 20, 1, 0),
+				Text = "",
+				ZIndex = 2
+			}, {
+				instanceUtils:Create("Frame", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundTransparency = 0.8,
+					BorderSizePixel = 0,
+					Name = "indicator",
+					Position = UDim2.new(0.5, 0, 0.5, 0),
+					Size = UDim2.new(0, 2, 0, 80),
+					ZIndex = 2
+				}, {
+					instanceUtils:Create("UICorner", {
+						CornerRadius = UDim.new(1, 0),
+						Name = "corner"
+					})
+				})
+			}),
+			instanceUtils:Create("Frame", { 
+				BackgroundColor3 = Color3.fromHex("15151d"), 
+				BorderSizePixel = 0, 
+				ClipsDescendants = true, 
+				Name = "main", 
+				Size = UDim2.new(1, 0, 1, 0),
+				ZIndex = 2
+			}, {
+				instanceUtils:Create("ImageLabel", { 
+					BackgroundTransparency = 1, 
+					BorderSizePixel = 0, 
+					Image = "rbxassetid://71973471788161", 
+					Name = "frostyIcon", 
+					Position = UDim2.new(0, 20, 0, 30), 
+					Size = UDim2.new(0, 36, 0, 36),
+					ZIndex = 2
+				}),
+				instanceUtils:Create("TextLabel", { 
+					BackgroundTransparency = 1, 
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal), 
+					FontSize = Enum.FontSize.Size18, 
+					Name = "title", 
+					Position = UDim2.new(0, 78, 0, 38), 
+					Text = "FrostWare", 
+					TextColor3 = Color3.fromHex("ffffff"), 
+					TextSize = 16, 
+					TextTransparency = 1,
+					TextXAlignment = Enum.TextXAlignment.Left, 
+					TextYAlignment = Enum.TextYAlignment.Top,
+					ZIndex = 2
+				}),
+				instanceUtils:Create("TextLabel", { 
+					BackgroundTransparency = 1, 
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal), 
+					FontSize = Enum.FontSize.Size12, 
+					Name = "poweredBy", 
+					Position = UDim2.new(0, 78, 0, 59), 
+					Text = "", 
+					TextColor3 = Color3.fromHex("ffffff"), 
+					TextSize = 12, 
+					TextTransparency = 1, 
+					TextXAlignment = Enum.TextXAlignment.Left, 
+					TextYAlignment = Enum.TextYAlignment.Top,
+					ZIndex = 2
+				}),
+				instanceUtils:Create("Frame", { 
+					BackgroundTransparency = 1, 
+					BorderSizePixel = 0, 
+					Name = "container", 
+					Size = UDim2.new(1, 0, 1, 0),
+					ZIndex = 2
+				}, {
+					instanceUtils:Create("UIListLayout", { 
+						HorizontalAlignment = Enum.HorizontalAlignment.Center, 
+						Name = "list", 
+						SortOrder = Enum.SortOrder.LayoutOrder, 
+						VerticalAlignment = Enum.VerticalAlignment.Center
+					})
+				})
+			})
+		});
+
+		bar.indent:GetPropertyChangedSignal("Value"):Connect(function()
+			local value = bar.indent.Value;
+			local percentage = (math.clamp(value, 76, 260) - 76) / 184;
+
+			navbar.bar.Size = UDim2.new(0, value, 1, 0);
+			navbar.bar.main.frostyIcon.Size = UDim2.new(0, 36 + percentage * 12, 0, 36 + percentage * 12);
+			navbar.bar.main.title.TextTransparency = 1 - percentage;
+			navbar.bar.main.poweredBy.TextTransparency = 0.6 + (1 - percentage) * 0.4;
+			for i, v in map do
+				i.instance.text.TextTransparency = 0.2 + (1 - percentage) * 0.8;
+			end
+			navbar.fade.BackgroundTransparency = 1 - percentage;
+		end);
+
+		setupDragBar(bar.dragBar, bar.indent);
+
+		return bar;
+	end
+
+	local function createFade(gui: ScreenGui): Instance
+		return instanceUtils:Create("Frame", {
+			BackgroundColor3 = Color3.new(),
+			BackgroundTransparency = 1,
+			Name = "fade",
+			Parent = gui,
+			Size = UDim2.new(1, 0, 1, 0),
+			ZIndex = 0
+		}, {
+			instanceUtils:Create("UIGradient", {
+				Name = "gradient",
+				Transparency = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 0.3),
+					NumberSequenceKeypoint.new(0.2, 0.3),
+					NumberSequenceKeypoint.new(1, 1)
+				})
+			})
+		});
+	end
+
+	--[[ Module ]]--
+
+	function navbar:Initialize(directory: Instance)
+		self.bar = createNavbar(directory.gui);
+		self.fade = createFade(directory.gui);
+		self.background = directory.gui.background;
+
+		for i, v in { "editor", "localScripts", "globalScripts", "exploitSettings" } do
+			local module = framework[string.format("pages.%s.%s", v, v)];
+			self:Add(module.title, module.icon, module:Initialize(), module.overwritePosition);
+		end
+
+		self:SetState(frostyEnum.NavbarState.Full, true);
+	end
+
+	function navbar:Add(text: string, icon: string, designatedFrame: Frame, overwritePosition: UDim2?)
+		local button = navbarButton.new(text, icon);
+		map[button] = designatedFrame;
+
+		button.instance.MouseButton1Click:Connect(function()
+			self:Select(button);
+		end);
+
+		if self.state ~= "full" then
+			button.instance.text.TextTransparency = 1;
+		end
+
+		if overwritePosition then
+			button.instance.Position = overwritePosition;
+			button.instance.Parent = self.bar.main;
+		else
+			button.instance.Parent = self.bar.main.container;
+		end
+		designatedFrame.Parent = self.bar.Parent.tabs;
+	end
+
+	function navbar:SetState(navbarState: number, ignoreTimeouts: boolean?)
+		local indent, state = 0, "hidden";
+		if navbarState == frostyEnum.NavbarState.Partial then
+			indent, state = 76, "partial";
+		elseif navbarState == frostyEnum.NavbarState.Full then
+			indent, state = 260, "full";
+		end
+
+		if self.tween then
+			self.tween:Cancel();
+		end
+		if self.nextInputCheck then
+			self.nextInputCheck:Disconnect();
+			pcall(task.cancel, self.timeoutDelay); -- if this is called from self.timeoutDelay itself, it will error. Cba to do a proper check. It'll be dead immediately after anyways
+		end
+
+		self.state = state;
+		self.tween = instanceUtils:Tween(self.bar.indent, 0.25, {
+			Value = indent;
+		});
+
+		if state ~= "hidden" and not ignoreTimeouts then
+			self.timeoutDelay = task.delay(5, function()
+				if self.state == state then
+					self:SetState(frostyEnum.NavbarState.Hidden);
+				end
+			end);
+
+			self.nextInputCheck = userInputService.InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+					if self.state ~= "hidden" and input.Position.X > self.bar.indent.Value then
+						self:SetState(frostyEnum.NavbarState.Hidden);
+					end
+				end
+			end);
+		end
+	end
+
+	function navbar:Select(button: TextButton)
+		if selected ~= nil then
+			selected:Highlight(false);
+			instanceUtils:Tween(map[selected], 0.2, {
+				Position = UDim2.new(1, 0, 1, 0)
+			});
+			if selected == button then
+				selected = nil;
+				instanceUtils:Tween(self.background, 0.2, {
+					BackgroundTransparency = 1
+				});
+				return;
+			end
+		end
+		selected = button;
+		selected:Highlight(true);
+		self:SetState(frostyEnum.NavbarState.Partial);
+		instanceUtils:Tween(self.background, 0.2, {
+			BackgroundTransparency = 0.1
+		});
+		instanceUtils:Tween(map[button], 0.2, {
+			Position = UDim2.new(0, 0, 1, 0)
+		});
+	end
+
+	framework.pages.navbar.navbar = navbar;
+end
+
+do
+	--[[ Variables ]]--
+
+	local internalUtils = framework.dependencies.utils.internal;
+	local userSettings = framework.data.userSettings;
+	local cache;
+
+	local httpService = game:GetService("HttpService");
+	local teleportService = game:GetService("TeleportService");
+	local userInputService = game:GetService("UserInputService");
+
+	local player = game:GetService("Players").LocalPlayer;
+	local char, hum, root;
+
+	local connections = {};
+
+	--[[ Functions ]]--
+
+	local function getFlagFromLink(link: string)
+		local value = cache;
+		for i, v in string.split(link, ".") do
+			value = value[v];
+		end
+		return value;
+	end
+
+	local function registerCharacter(character: Instance)
+		char, hum, root = character, character:WaitForChild("Humanoid", 5), character:WaitForChild("HumanoidRootPart", 5);
+		if hum and root then
+			if cache.player.walkSpeed.enabled then
+				hum.WalkSpeed = cache.player.walkSpeed.value;
+			end
+			if cache.player.jumpPower.enabled then
+				hum.WalkSpeed = cache.player.jumpPower.value;
+			end
+
+			hum.Died:Connect(function()
+				char, hum, root = nil, nil, nil;
+			end);
+		end
+	end
+
+	local function joinServer(searchPriority: string?, id: number?)
+		local jobId = id;
+		if jobId == nil then
+			if searchPriority == "Best Ping" or searchPriority == "Random" then
+				local servers = {};
+				local res, cursor, count = nil, "", 0;
+				repeat
+					res = internalUtils:Request(string.format("https://games.roblox.com/v1/games/%d/servers/0?&excludeFullGames=true&cursor=%s", game.PlaceId, cursor));
+					if res then
+						for i, v in httpService:JSONDecode(res).data do
+							if v.id ~= game.JobId then
+								servers[#servers + 1] = v;
+							end
+						end
+						cursor = res.nextPageCursor;
+						count = count + 1;
+					end
+				until res == false or cursor == nil or count >= 10;
+				if searchPriority == "Ping" then
+					table.sort(servers, function(a, b)
+						return a.ping < b.ping;
+					end);
+					jobId = servers[1] and servers[1].id;
+				else
+					jobId = servers[1] and servers[math.random(1, #servers)].id;
+				end
+			else
+				local res = internalUtils:Request(string.format("https://games.roblox.com/v1/games/%d/servers/0?sortOrder=%d&excludeFullGames=true&limit=10", game.PlaceId, searchPriority == "Most Players" and 2 or 1));
+				if res then
+					for i, v in httpService:JSONDecode(res).data do
+						if v.id ~= game.JobId then
+							jobId = v.id;
+							break;
+						end
+					end
+				end
+			end
+		end
+		if jobId then
+			teleportService:TeleportToPlaceInstance(game.PlaceId, jobId);
+		else
+			game:GetService("StarterGui"):SetCore("SendNotification", {
+				Title = "FrostWare ",
+				Text = "No suitable servers found"
+			});
+		end
+	end
+
+	--[[ Setup ]]--
+
+	player.CharacterAdded:Connect(registerCharacter);
+
+	--[[ Module ]]--
+
+	local map = {
+		{
+			title = "Executor",
+			items = {
+				{
+					title = "Auto Execute",
+					linkedSetting = "executor.autoExecute",
+					optionType = "toggle",
+					state = true
+				},
+				{
+					title = "Nex Emulation",
+					linkedSetting = "executor.NexEmulation",
+					optionType = "toggle",
+					state = true,
+					callback = function()
+						framework.fun.nex = not framework.fun.nex
+						if framework.fun.nex then
+							getrenv().getgenv=getgenv
+						else
+							getrenv().getgenv=nil
+						end
+					end
+				},
+				{
+					title = "Custom Execute",
+					linkedSetting = "executor.customExecute",
+					optionType = "toggle",
+					state = false,
+					callback = function()
+						if framework.fun.customexecute then
+							framework.fun.customexecute = false
+						else
+							framework.fun.customexecute = true
+						end
+						print(framework.fun.customexecute)
+					end
+				},
+				{
+					title = "Auto Save Tabs",
+					linkedSetting = "executor.autoSaveTabs",
+					optionType = "toggle",
+					state = false,
+					callback = function(state)
+						if state == false and isfile and isfile("frostyTabs.json") then
+							delfile("frostyTabs.json");
+						end
+					end
+				},
+				{
+					optionType = "separator"
+				},
+				{
+					title = "Unlock FPS",
+					linkedSetting = "executor.fps.unlocked",
+					optionType = "toggle",
+					state = false,
+					callback = function(state)
+						setfpscap(state and (cache.executor.fps.vSync and getfpscap() or cache.executor.fps.value) or 60);
+					end
+				},
+				{
+					title = "V-Sync",
+					linkedSetting = "executor.fps.vSync",
+					optionType = "toggle",
+					state = false,
+					callback = function(state)
+						if cache.executor.fps.unlocked then
+							--setfpscap(state and getfpsmax() or cache.executor.fps.value);
+						end
+					end
+				},
+				{
+					title = "FPS Value",
+					linkedSetting = "executor.fps.value",
+					optionType = "slider",
+					min = 1,
+					max = 999,
+					float = 1,
+					callback = function(value)
+						if cache.executor.fps.unlocked and not cache.executor.fps.vSync then
+							setfpscap(value);
+						end
+					end
+				},
+				{
+					title = "Change Level",
+					linkedSetting = "executor.level.bool",
+					optionType = "toggle",
+					state = false,
+					callback = function(state)
+						cache.executor.level.changable = not cache.executor.level.changable
+					end
+				},
+				{
+					title = "Level",
+					linkedSetting = "executor.level.value",
+					optionType = "slider",
+					min = 2,
+					max = 8,
+					float = 1,
+					callback = function(value)
+						if cache.executor.level.changable then
+							level = value
+							setidentity(value);
+						end
+					end
+				}
+			}
+		},
+		{
+			title = "Player",
+			items = {
+				{
+					title = "WalkSpeed Enabled",
+					linkedSetting = "player.walkSpeed.enabled",
+					optionType = "toggle",
+					state = false,
+					callback = function(state)
+						if hum then
+							hum.WalkSpeed = state and cache.player.walkSpeed.value or 16;
+						end
+					end
+				},
+				{
+					title = "WalkSpeed Value",
+					linkedSetting = "player.walkSpeed.value",
+					optionType = "slider",
+					min = 16,
+					max = 500,
+					float = 1,
+					callback = function(value)
+						if hum and cache.player.walkSpeed.enabled then
+							hum.WalkSpeed = value;
+						end
+					end
+				},
+				{
+					title = "JumpPower Enabled",
+					linkedSetting = "player.jumpPower.enabled",
+					optionType = "toggle",
+					state = false,
+					callback = function(state)
+						if hum then
+							hum.JumpPower = state and cache.player.jumpPower.value or 16;
+						end
+					end
+				},
+				{
+					title = "JumpPower Value",
+					linkedSetting = "player.jumpPower.value",
+					optionType = "slider",
+					min = 50,
+					max = 500,
+					float = 1,
+					callback = function(value)
+						if hum and cache.player.jumpPower.enabled then
+							hum.JumpPower = value;
+						end
+					end
+				}
+			}
+		},
+		{
+			title = "Server Hop",
+			items = {
+				{
+					title = "Server Priority",
+					linkedSetting = "serverHop.priority",
+					optionType = "dropdown",
+					items = { "Most Players", "Least Players", "Best Ping", "Random" }
+				},
+				{
+					title = "Server Hop",
+					optionType = "button",
+					callback = function()
+						joinServer(cache.serverHop.priority);
+					end
+				},
+				{
+					title = "Rejoin Current Server",
+					optionType = "button",
+					callback = function()
+						joinServer(nil, game.JobId);
+					end
+				}
+			}
+		},
+		{
+			title = "Console",
+			items = {
+				{
+					title = "Types",
+					linkedSetting = "console.option",
+					optionType = "dropdown",
+					items = { "Output", "Information", "Warning", "Error", "All" }
+				},
+				{
+					title = "Clear",
+					optionType = "button",
+					callback = function()
+
+					end
+				},
+				{
+					title = "Copy All Logs",
+					optionType = "button",
+					callback = function()
+
+					end
+				}
+			}
+		}
+	};
+
+	--[[ Module ]]--
+
+	local layoutMap = {
+		map = map
+	};
+
+	function layoutMap:Initialize()
+		cache = userSettings.cache;
+
+		for i, v in self.map do
+			for i2, v2 in v.items do
+				if v2.optionType == "toggle" then
+					v2.state = getFlagFromLink(v2.linkedSetting);
+				elseif v2.optionType == "slider" then
+					v2.value = getFlagFromLink(v2.linkedSetting);
+				end
+			end
+		end
+
+		if player.Character then
+			task.spawn(registerCharacter, player.Character);
+		end
+	end
+
+	framework.pages.exploitSettings.layoutMap = layoutMap;
+end
+
+do
+	--[[ Variables ]]--
+
+	local userSettings = framework.data.userSettings;
+	local instanceUtils = framework.dependencies.utils.instance;
+	local stringUtils = framework.dependencies.utils.string;
+
+	--[[ Functions ]]--
+
+	local function createToggle(title: string, parent: Instance): Instance
+		return instanceUtils:Create("TextButton", { 
+			AutoButtonColor = false, 
+			BackgroundColor3 = Color3.fromHex("ffffff"), 
+			BackgroundTransparency = 1, 
+			BorderColor3 = Color3.fromHex("000000"), 
+			BorderSizePixel = 0, 
+			FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+			FontSize = Enum.FontSize.Size14, 
+			Name = stringUtils:ConvertToCamelCase(title), 
+			Parent = parent,
+			Size = UDim2.new(1, 0, 0, 36), 
+			Text = "", 
+			TextColor3 = Color3.fromHex("000000"), 
+			TextSize = 14
+		}, {
+			instanceUtils:Create("TextLabel", { 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size18, 
+				Name = "text", 
+				Size = UDim2.new(1, 0, 0, 36), 
+				Text = title, 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 16, 
+				TextWrap = true, 
+				TextWrapped = true, 
+				TextXAlignment = Enum.TextXAlignment.Left
+			}),
+			instanceUtils:Create("Frame", { 
+				AnchorPoint = Vector2.new(1, 0.5), 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				Name = "indicator", 
+				Position = UDim2.new(1, -2, 0.5, 0), 
+				Size = UDim2.new(0, 42, 0, 24)
+			}, {
+				instanceUtils:Create("UICorner", { 
+					CornerRadius = UDim.new(1, 0), 
+					Name = "corner"
+				}),
+				instanceUtils:Create("UIStroke", { 
+					ApplyStrokeMode = Enum.ApplyStrokeMode.Border, 
+					Color = Color3.fromHex("3a3a4a"), 
+					Name = "stroke", 
+					Thickness = 2
+				}),
+				instanceUtils:Create("Frame", { 
+					AnchorPoint = Vector2.new(0.5, 0.5), 
+					BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+					BorderColor3 = Color3.fromHex("000000"), 
+					BorderSizePixel = 0, 
+					Name = "dot", 
+					Position = UDim2.new(0.5, -9, 0.5, 0), 
+					Size = UDim2.new(0, 18, 0, 18)
+				}, {
+					instanceUtils:Create("UICorner", { 
+						CornerRadius = UDim.new(1, 0), 
+						Name = "corner"
+					})
+				})
+			})
+		});
+	end
+
+	local function getDeterminingFactors(path: string)
+		local dict, key = userSettings.cache, nil;
+		for i, v in string.split(path, ".") do
+			if key ~= nil then
+				dict = dict[key];
+			end
+			key = v;
+		end
+		return dict, key;
+	end
+
+	--[[ Module ]]--
+
+	local toggle = {};
+	toggle.__index = toggle;
+
+	function toggle.new(toggleData: {any}, parent: Instance)
+		local newToggle = setmetatable({
+			instance = createToggle(toggleData.title or "Unnamed Toggle", parent),
+			state = toggleData.state or false,
+			linkedSetting = toggleData.linkedSetting,
+			callback = toggleData.callback
+		}, toggle);
+
+		local determiningDict, determiningKey = getDeterminingFactors(newToggle.linkedSetting);
+
+		userSettings:GetPropertyChangedSignal(newToggle.linkedSetting):Connect(function(state: boolean)
+			newToggle:Set(state);
+		end);
+
+		newToggle.instance.MouseButton1Click:Connect(function()
+			determiningDict[determiningKey] = not determiningDict[determiningKey];
+		end);
+
+		if newToggle.state then
+			newToggle:Set(true);
+		end
+
+		return newToggle;
+	end
+
+	function toggle:Set(state: boolean)
+		instanceUtils:Tween(self.instance.indicator.dot, 0.2, {
+			BackgroundColor3 = Color3.fromRGB(76, 161, 235),
+			Position = UDim2.new(0.5, state and 9 or -9, 0.5, 0)
+		});
+		instanceUtils:Tween(self.instance.indicator.stroke, 0.2, {
+			Color = Color3.fromRGB(76, 161, 235)
+		});
+		if self.callback then
+			self.callback(state);
+		end
+	end
+
+	framework.pages.exploitSettings.optionTypes.toggle = toggle;
+end
+
+do
+	--[[ Variables ]]--
+
+	local userSettings = framework.data.userSettings;
+	local instanceUtils = framework.dependencies.utils.instance;
+	local stringUtils = framework.dependencies.utils.string;
+
+	local userInputService = game:GetService("UserInputService");
+
+	--[[ Functions ]]--
+
+	local function createSlider(title: string, parent: Instance): Instance
+		return instanceUtils:Create("Frame", { 
+			BackgroundColor3 = Color3.fromHex("ffffff"), 
+			BackgroundTransparency = 1, 
+			BorderColor3 = Color3.fromHex("000000"), 
+			BorderSizePixel = 0, 
+			Name = stringUtils:ConvertToCamelCase(title), 
+			Parent = parent, 
+			Size = UDim2.new(1, 0, 0, 60)
+		}, {
+			instanceUtils:Create("TextLabel", { 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size18, 
+				Name = "text", 
+				Size = UDim2.new(1, 0, 0, 36), 
+				Text = title, 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 16, 
+				TextWrap = true, 
+				TextWrapped = true, 
+				TextXAlignment = Enum.TextXAlignment.Left
+			}),
+			instanceUtils:Create("TextBox", { 
+				AnchorPoint = Vector2.new(1, 0), 
+				AutomaticSize = Enum.AutomaticSize.X, 
+				BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "input", 
+				PlaceholderColor3 = Color3.fromHex("b2b2b2"), 
+				PlaceholderText = "...", 
+				Position = UDim2.new(1, 0, 0, 0), 
+				Size = UDim2.new(0, 0, 0, 36), 
+				Text = "", 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 14
+			}, {
+				instanceUtils:Create("UICorner", { 
+					CornerRadius = UDim.new(0, 6), 
+					Name = "corner"
+				}),
+				instanceUtils:Create("UIPadding", { 
+					Name = "padding", 
+					PaddingLeft = UDim.new(0, 10), 
+					PaddingRight = UDim.new(0, 10)
+				})
+			}),
+			instanceUtils:Create("Frame", { 
+				AnchorPoint = Vector2.new(0.5, 1), 
+				BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				Name = "bar", 
+				Position = UDim2.new(0.5, 0, 1, -8), 
+				Size = UDim2.new(1, -12, 0, 4)
+			}, {
+				instanceUtils:Create("UICorner", { 
+					CornerRadius = UDim.new(1, 0), 
+					Name = "corner"
+				}),
+				instanceUtils:Create("Frame", { 
+					AnchorPoint = Vector2.new(0, 0.5), 
+					BackgroundColor3 = Color3.fromHex("45b0eb"), 
+					BorderColor3 = Color3.fromHex("000000"), 
+					BorderSizePixel = 0, 
+					Name = "indicator", 
+					Position = UDim2.new(0, 0, 0.5, 0), 
+					Size = UDim2.new(0, 0, 1, 0)
+				}, {
+					instanceUtils:Create("UICorner", { 
+						CornerRadius = UDim.new(1, 0), 
+						Name = "corner"
+					}),
+					instanceUtils:Create("Frame", { 
+						AnchorPoint = Vector2.new(0.5, 0.5), 
+						BackgroundColor3 = Color3.fromHex("45b0eb"), 
+						BorderColor3 = Color3.fromHex("000000"), 
+						BorderSizePixel = 0, 
+						Name = "dot", 
+						Position = UDim2.new(1, 0, 0.5, 0), 
+						Size = UDim2.new(0, 12, 0, 12)
+					}, {
+						instanceUtils:Create("UICorner", { 
+							CornerRadius = UDim.new(1, 0), 
+							Name = "corner"
+						})
+					})
+				})
+			})
+		});
+	end
+
+	local function getDeterminingFactors(path: string)
+		local dict, key = userSettings.cache, nil;
+		for i, v in string.split(path, ".") do
+			if key ~= nil then
+				dict = dict[key];
+			end
+			key = v;
+		end
+		return dict, key;
+	end
+
+	local function getRoundedValue(input: number, float: number): number
+		local bracket = 1 / float;
+		return math.round(input * bracket) / bracket;
+	end
+
+	--[[ Module ]]--
+
+	local slider = {};
+	slider.__index = slider;
+
+	function slider.new(sliderData: {any}, parent: Instance)
+		local newSlider = setmetatable({
+			instance = createSlider(sliderData.title or "Unnamed Slider", parent),
+			value = sliderData.value or sliderData.min,
+			min = sliderData.min,
+			max = sliderData.max,
+			float = sliderData.float,
+			linkedSetting = sliderData.linkedSetting,
+			callback = sliderData.callback
+		}, slider);
+
+		local determiningDict, determiningKey = getDeterminingFactors(newSlider.linkedSetting);
+		local isDragging = false;
+
+		userSettings:GetPropertyChangedSignal(newSlider.linkedSetting):Connect(function(value: number)
+			newSlider:Set(value);
+		end);
+
+		newSlider.instance.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+				isDragging = true;
+				local endedConn; endedConn = input.Changed:Connect(function()
+					if input.UserInputState == Enum.UserInputState.End then
+						endedConn:Disconnect();
+						isDragging = false;
+					end
+				end);
+			end
+		end)
+
+		userInputService.InputChanged:Connect(function(input)
+			if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+				local value = newSlider.min + ((newSlider.max - newSlider.min) * ((input.Position.X - newSlider.instance.bar.AbsolutePosition.X) / newSlider.instance.bar.AbsoluteSize.X));
+				determiningDict[determiningKey] = math.clamp(getRoundedValue(value, newSlider.float), newSlider.min, newSlider.max);
+			end
+		end);
+
+		newSlider.instance.input.FocusLost:Connect(function()
+			local value = tonumber(newSlider.instance.input.Text);
+			if value then
+				determiningDict[determiningKey] = math.clamp(getRoundedValue(value, newSlider.float), newSlider.min, newSlider.max);
+			end
+		end);
+
+		newSlider:Set(newSlider.value);
+
+		return newSlider;
+	end
+
+	function slider:Set(value: number)
+		instanceUtils:Tween(self.instance.bar.indicator, 0.2, {
+			Size = UDim2.new((value - self.min) / (self.max - self.min), 0, 0.5, 0)
+		});
+		self.instance.input.Text = tostring(value);
+		if self.callback then
+			self.callback(value);
+		end
+	end
+
+	framework.pages.exploitSettings.optionTypes.slider = slider;
+end
+
+do
+	--[[ Variables ]]--
+
+	local userSettings = framework.data.userSettings;
+	local instanceUtils = framework.dependencies.utils.instance;
+	local stringUtils = framework.dependencies.utils.string;
+	local dropdownPopup = framework.popups.dropdown;
+	local popups = framework.popups.popups;
+
+	local textService = game:GetService("TextService");
+
+	--[[ Functions ]]--
+
+	local function createDropdown(title: string, default: string, parent: Instance): Instance
+		return instanceUtils:Create("Frame", { 
+			Active = true, 
+			BackgroundColor3 = Color3.fromHex("ffffff"), 
+			BackgroundTransparency = 1, 
+			BorderColor3 = Color3.fromHex("000000"), 
+			BorderSizePixel = 0, 
+			Name = stringUtils:ConvertToCamelCase(title), 
+			Parent = parent, 
+			Selectable = true, 
+			Size = UDim2.new(1, 0, 0, 36)
+		}, {
+			instanceUtils:Create("TextLabel", { 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size18, 
+				Name = "text", 
+				Size = UDim2.new(1, 0, 0, 36), 
+				Text = title, 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 16, 
+				TextWrap = true, 
+				TextWrapped = true, 
+				TextXAlignment = Enum.TextXAlignment.Left
+			}),
+			instanceUtils:Create("TextButton", { 
+				Active = false, 
+				AnchorPoint = Vector2.new(1, 0.5), 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				Name = "indicator", 
+				Position = UDim2.new(1, -2, 0.5, 0), 
+				Selectable = false, 
+				Size = UDim2.new(0, 52 + textService:GetTextBoundsAsync(instanceUtils:Create("GetTextBoundsParams", {
+					Font = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+					Text = default,
+					Size = 14,
+					Width = math.huge
+				})).X, 0, 32), 
+				Text = ""
+			}, {
+				instanceUtils:Create("UICorner", { 
+					CornerRadius = UDim.new(0, 6), 
+					Name = "corner"
+				}),
+				instanceUtils:Create("UIStroke", { 
+					ApplyStrokeMode = Enum.ApplyStrokeMode.Border, 
+					Color = Color3.fromHex("3a3a4a"), 
+					Name = "stroke", 
+					Thickness = 2
+				}),
+				instanceUtils:Create("TextLabel", { 
+					AnchorPoint = Vector2.new(0, 0.5), 
+					AutomaticSize = Enum.AutomaticSize.X, 
+					BackgroundColor3 = Color3.fromHex("ffffff"), 
+					BackgroundTransparency = 1, 
+					BorderColor3 = Color3.fromHex("000000"), 
+					BorderSizePixel = 0, 
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal), 
+					FontSize = Enum.FontSize.Size14, 
+					Name = "selected", 
+					Position = UDim2.new(0, 8, 0.5, 0), 
+					Size = UDim2.new(0, 0, 1, 0), 
+					Text = default, 
+					TextColor3 = Color3.fromHex("9fa4ba"), 
+					TextSize = 14,  
+					TextXAlignment = Enum.TextXAlignment.Left
+				}),
+				instanceUtils:Create("ImageLabel", { 
+					AnchorPoint = Vector2.new(1, 0.5), 
+					BackgroundColor3 = Color3.fromHex("ffffff"), 
+					BackgroundTransparency = 1, 
+					BorderColor3 = Color3.fromHex("000000"), 
+					BorderSizePixel = 0, 
+					Image = "rbxassetid://14967733915", 
+					ImageColor3 = Color3.fromHex("9fa4ba"), 
+					Name = "icon", 
+					Position = UDim2.new(1, -8, 0.5, 0), 
+					Size = UDim2.new(0, 24, 0, 24)
+				})
+			})
+		});
+	end
+
+	local function getDeterminingFactors(path: string)
+		local dict, key = userSettings.cache, nil;
+		for i, v in string.split(path, ".") do
+			if key ~= nil then
+				dict = dict[key];
+			end
+			key = v;
+		end
+		return dict, key;
+	end
+
+	--[[ Module ]]--
+
+	local dropdown = {};
+	dropdown.__index = dropdown;
+
+	function dropdown.new(dropData: {any}, parent: Instance)
+		local newDropdown = setmetatable({
+			instance = createDropdown(dropData.title or "Unnamed Dropdown", dropData.value, parent),
+			title = dropData.title or "Unnamed Dropdown",
+			items = dropData.items,
+			value = dropData.value or dropData.items[1],
+			linkedSetting = dropData.linkedSetting,
+			callback = dropData.callback
+		}, dropdown);
+
+		local determiningDict, determiningKey = getDeterminingFactors(newDropdown.linkedSetting);
+
+		userSettings:GetPropertyChangedSignal(newDropdown.linkedSetting):Connect(function(value: number)
+			newDropdown:Set(value);
+		end);
+
+		newDropdown.instance.indicator.MouseButton1Click:Connect(function()
+			if dropdownPopup.selectedDropdown == dropData.title then
+				popups:Hide("dropdown");
+			else
+				popups:Show("dropdown", newDropdown, newDropdown.instance.indicator);
+				newDropdown.selectionChangedConnection = dropdownPopup.onSelectionChanged:Connect(function(value: string)
+					determiningDict[determiningKey] = value;
+				end);
+			end
+		end);
+
+		dropdownPopup.onDropdownChanged:Connect(function(value: string?)
+			if value and value ~= dropData.title and newDropdown.selectionChangedConnection then
+				newDropdown.selectionChangedConnection:Disconnect();
+			end
+		end);
+
+		newDropdown:Set(newDropdown.value);
+
+		return newDropdown;
+	end
+
+	function dropdown:Set(value: string)
+		self.value = value;
+		self.instance.indicator.selected.Text = value;
+		self.instance.indicator.Size = UDim2.new(0, 52 + textService:GetTextBoundsAsync(instanceUtils:Create("GetTextBoundsParams", {
+			Font = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+			Text = value,
+			Size = 14,
+			Width = math.huge
+		})).X, 0, 32);
+		if self.callback then
+			self.callback(value);
+		end
+	end
+
+	framework.pages.exploitSettings.optionTypes.dropdown = dropdown;
+end
+
+do
+	--[[ Variables ]]--
+
+	local instanceUtils = framework.dependencies.utils.instance;
+	local stringUtils = framework.dependencies.utils.string;
+
+	--[[ Functions ]]--
+
+	local function createButton(title: string, parent: Instance): Instance
+		return instanceUtils:Create("Frame", { 
+			BackgroundColor3 = Color3.fromHex("ffffff"), 
+			BackgroundTransparency = 1, 
+			BorderColor3 = Color3.fromHex("000000"), 
+			BorderSizePixel = 0, 
+			Name = stringUtils:ConvertToCamelCase(title), 
+			Parent = parent, 
+			Size = UDim2.new(1, 0, 0, 36)
+		}, {
+			instanceUtils:Create("TextLabel", { 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size18, 
+				Name = "text", 
+				Size = UDim2.new(1, 0, 1, 0), 
+				Text = title, 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 16, 
+				TextWrap = true, 
+				TextWrapped = true, 
+				TextXAlignment = Enum.TextXAlignment.Left
+			}),
+			instanceUtils:Create("TextButton", { 
+				AnchorPoint = Vector2.new(1, 0.5), 
+				AutomaticSize = Enum.AutomaticSize.X, 
+				BackgroundColor3 = Color3.fromHex("45b0eb"), 
+				BorderSizePixel = 0, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "click", 
+				Position = UDim2.new(1, 0, 0.5, 0), 
+				Size = UDim2.new(0, 0, 0, 32), 
+				Text = "Click Here!", 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 14
+			}, {
+				instanceUtils:Create("UICorner", { 
+					CornerRadius = UDim.new(0, 6), 
+					Name = "corner"
+				}),
+				instanceUtils:Create("UIPadding", { 
+					Name = "padding", 
+					PaddingLeft = UDim.new(0, 10), 
+					PaddingRight = UDim.new(0, 10)
+				})
+			})
+		});
+	end
+
+	--[[ Module ]]--
+
+	local button = {};
+	button.__index = button;
+
+	function button.new(buttonData: {any}, parent: Instance)
+		local newButton = setmetatable({
+			instance = createButton(buttonData.title or "Unnamed Button", parent),
+			callback = buttonData.callback
+		}, button);
+
+		newButton.instance.click.MouseButton1Click:Connect(function()
+			if newButton.callback then
+				newButton.callback();
+			end
+		end);
+
+		return newButton;
+	end
+
+	framework.pages.exploitSettings.optionTypes.button = button;
+end
+
+do
+	--[[ Variables ]]--
+
+	local instanceUtils = framework.dependencies.utils.instance;
+
+	--[[ Functions ]]--
+
+	local function createSeparator(parent: Instance): Instance
+		return instanceUtils:Create("Frame", { 
+			BackgroundColor3 = Color3.fromHex("ffffff"), 
+			BackgroundTransparency = 1, 
+			BorderColor3 = Color3.fromHex("000000"), 
+			BorderSizePixel = 0, 
+			Name = "separator", 
+			Parent = parent, 
+			Size = UDim2.new(1, 0, 0, 14)
+		}, {
+			instanceUtils:Create("Frame", { 
+				AnchorPoint = Vector2.new(0.5, 0.5), 
+				BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				Name = "line", 
+				Position = UDim2.new(0.5, 0, 0.5, 0), 
+				Size = UDim2.new(1, 0, 0, 2)
+			}, {
+				instanceUtils:Create("UIGradient", { 
+					Name = "gradient", 
+					Transparency = NumberSequence.new({ 
+						NumberSequenceKeypoint.new(0, 1), 
+						NumberSequenceKeypoint.new(0.175, 0), 
+						NumberSequenceKeypoint.new(0.825, 0), 
+						NumberSequenceKeypoint.new(1, 1)
+					})
+				})
+			})
+		});
+	end
+
+	--[[ Module ]]--
+
+	local separator = {};
+	separator.__index = separator;
+
+	function separator.new(separatorData: {any}, parent: Instance)
+		return setmetatable({
+			instance = createSeparator(parent)
+		}, separator);
+	end
+
+	framework.pages.exploitSettings.optionTypes.separator = separator;
+end
+
+do
+	--[[ Variables ]]--
+
+	local textButton = framework.components.base.textButton;
+	local instanceUtils = framework.dependencies.utils.instance;
+	local stringUtils = framework.dependencies.utils.string;
+	local layoutMap = framework.pages.exploitSettings.layoutMap;
+
+	local map = {};
+
+	--[[ Functions ]]--
+
+	local function createUI(directory: Instance): Instance
+		return instanceUtils:Create("Frame", { 
+			AnchorPoint = Vector2.new(0, 1), 
+			BackgroundColor3 = Color3.fromHex("15151d"), 
+			BackgroundTransparency = 1, 
+			BorderSizePixel = 0, 
+			Name = "exploitSettings", 
+			Parent = directory, 
+			Position = UDim2.new(1, 0, 1, 0), 
+			Size = UDim2.new(1, 0, 1, -36)
+		}, {
+			instanceUtils:Create("ScrollingFrame", { 
+				AnchorPoint = Vector2.new(0.5, 0), 
+				AutomaticCanvasSize = Enum.AutomaticSize.X, 
+				BackgroundTransparency = 1, 
+				BorderSizePixel = 0, 
+				CanvasSize = UDim2.new(0, 0, 0, 0), 
+				Name = "tabButtons", 
+				Position = UDim2.new(0.5, 0, 0, 10), 
+				ScrollBarImageColor3 = Color3.fromHex("515158"), 
+				ScrollBarThickness = 4, 
+				ScrollingDirection = Enum.ScrollingDirection.X, 
+				Size = UDim2.new(1, -20, 0, 40)
+			}, {
+				instanceUtils:Create("UIListLayout", { 
+					FillDirection = Enum.FillDirection.Horizontal, 
+					Name = "list", 
+					Padding = UDim.new(0, 6), 
+					SortOrder = Enum.SortOrder.LayoutOrder
+				})
+			}),
+			instanceUtils:Create("Folder", { 
+				Name = "tabs"
+			})
+		});
+	end
+
+	local function createFrame(title: string, directory: Instance)
+		return instanceUtils:Create("ScrollingFrame", { 
+			AnchorPoint = Vector2.new(0.5, 1), 
+			BackgroundTransparency = 1, 
+			BorderSizePixel = 0, 
+			CanvasSize = UDim2.new(0, 0, 0, 130), 
+			Name = stringUtils:ConvertToCamelCase(title), 
+			Parent = directory,
+			Position = UDim2.new(0.5, 0, 1, 0), 
+			ScrollBarThickness = 2, 
+			Size = UDim2.new(1, -40, 1, -50),
+			Visible = false
+		}, {
+			instanceUtils:Create("UIListLayout", { 
+				Name = "list", 
+				Padding = UDim.new(0, 5), 
+				SortOrder = Enum.SortOrder.LayoutOrder
+			})
+		});
+	end
+
+	--[[ Module ]]--
+
+	local exploitSettings = {
+		title = "Exploit Settings",
+		icon = "rbxassetid://11558196447",
+		overwritePosition = UDim2.new(0, 0, 1, -66),
+		selected = nil
+	};
+
+	function exploitSettings:Initialize(directory: Instance)
+		self.base = createUI(directory);
+
+		layoutMap:Initialize();
+		for i, v in layoutMap.map do
+			self:Add(v);
+		end
+
+		return self.base;
+	end
+
+	function exploitSettings:Add(tab: {any})
+		local btn = textButton({
+			BackgroundColor3 = Color3.fromRGB(58, 58, 74),
+			Name = stringUtils:ConvertToCamelCase(tab.title),
+			Text = tab.title,
+			TextColor3 = Color3.fromRGB(159, 164, 186),
+			Parent = self.base.tabButtons
+		});
+
+		local frame = createFrame(tab.title, self.base.tabs);
+
+		btn.MouseButton1Click:Connect(function()
+			self:Select(tab);
+		end)
+
+		map[tab] = {
+			btn = btn,
+			frame = frame
+		};
+
+		for i, v in tab.items do
+			framework["pages.exploitSettings.optionTypes." .. v.optionType].new(v, frame);
+		end
+
+		if self.selected == nil then
+			self:Select(tab);
+		end
+	end
+
+	function exploitSettings:Select(tab: {any})
+		if self.selected then
+			if self.selected == tab then
+				return;
+			end
+			local oldMap = map[self.selected];
+			oldMap.frame.Visible = false;
+			instanceUtils:Tween(oldMap.btn, 0.2, {
+				BackgroundColor3 = Color3.fromRGB(58, 58, 74),
+				TextColor3 = Color3.fromRGB(159, 164, 186)
+			});
+		end
+		self.selected = tab;
+		local newMap = map[tab];
+		newMap.frame.Visible = true;
+		instanceUtils:Tween(newMap.btn, 0.2, {
+			BackgroundColor3 = Color3.fromRGB(76, 161, 235),
+			TextColor3 = Color3.fromRGB(255, 255, 255)
+		});
+	end
+
+	framework.pages.exploitSettings.exploitSettings = exploitSettings;
+end
+
+do
+	--[[ Variables ]]--
+
+	local sets = {
+		keywords = {
+			"local",
+			"function",
+			"if",
+			"and",
+			"or",
+			"not",
+			"then",
+			"else",
+			"elseif",
+			"repeat",
+			"until",
+			"while",
+			"do",
+			"end",
+			"for",
+			"in",
+			"break",
+			"continue",
+			"return"
+		},
+		constants = {
+			"true",
+			"false",
+			"nil"
+		},
+		operators = {
+			"and",
+			"or",
+			"not",
+			"<",
+			">",
+			"<=",
+			">=",
+			"==",
+			"~=",
+			"+",
+			"-",
+			"*",
+			"/",
+			"%",
+			"^",
+			"#",
+			".."
+		},
+		assignments = {
+			"=",
+			"+=",
+			"-=",
+			"*=",
+			"/=",
+			"%=",
+			"^=",
+			"..="
+		},
+		globals = getfenv()
+	};
+
+	--[[ Functions ]]--
+
+	local function isDigit(character: string, index: number): boolean
+		return (character >= "0" and character <= "9") or (index > 0 and (character == "e" or character == "_"));
+	end
+
+	local function isHexadecimalDigit(character: string): boolean
+		return (character >= "0" and character <= "9") or (character >= "a" and character <= "f") or (character >= "A" and character <= "F");
+	end
+
+	local function isWord(character: string, isFirstCharacter: boolean): boolean
+		return character == "_" or (character >= "a" and character <= "z") or (character >= "A" and character <= "Z") or (not isFirstCharacter and isDigit(character, 0));
+	end
+
+	local function isWhitespace(character: string): boolean
+		return character == " " or character == "\t" or character == "\n";
+	end
+
+	--[[ Module ]]--
+
+	local lexer = {};
+
+	function lexer:_consume(): string
+		self.position += 1;
+		return string.sub(self.string, self.position, self.position);
+	end
+
+	function lexer:_peek(amount: number | nil): string
+		local index = self.position + (amount or 1);
+		return string.sub(self.string, index, index);
+	end
+
+	function lexer:_pushToken(tokenName: string, value: string)
+		self.result[#self.result + 1] = {
+			token = tokenName,
+			value = value
+		};
+	end
+
+	function lexer:_pushSymbol(text: string)
+		local token = "symbol";
+		if table.find(sets.operators, text) then
+			token = "operator";
+		elseif table.find(sets.assignments, text) then
+			token = "assignment";
+		end
+		self:_pushToken(token, text);
+	end
+
+	function lexer:_readString(): string
+		local delimiter, value = self:_peek(), self:_consume();
+		while self.position <= self.length do
+			local character = self:_consume();
+			if character == "\\" then
+				value ..= character .. self:_consume();
+			else
+				value ..= character;
+				if character == delimiter then
+					break;
+				end
+			end
+		end
+		return value;
+	end
+
+	function lexer:_readMultilineString(): string | nil
+		local delimiter = self:_peek();
+		if delimiter ~= "[" then
+			return nil;
+		end	
+		local start = self.position;
+		local value = self:_consume();
+		local nestedEquals = 0;
+		while self.position <= self.length and self:_peek() == "=" do
+			value ..= self:_consume();
+			nestedEquals += 1;
+		end
+		if self:_peek() ~= "[" then
+			self.position = start;
+			return nil;
+		end
+		value ..= self:_consume();
+		while self.position <= self.length do
+			local character = self:_consume();
+			value ..= character;
+			if character == "]" then
+				local equalsCount = 0;
+				while self.position <= self.length and self:_peek() == "=" do
+					value ..= self:_consume();
+					equalsCount += 1;
+				end
+				if self:_peek() == "]" and nestedEquals == equalsCount then
+					value ..= self:_consume();
+					break;
+				end
+			end
+		end
+		return value;
+	end
+
+	function lexer:_readComment(): string
+		local value = self:_consume() .. self:_consume();
+		if self:_peek() == "[" then
+			local multilineString = self:_readMultilineString();
+			if multilineString ~= nil then
+				return value .. multilineString;
+			end
+		end
+		while self.position <= self.length do
+			local character = self:_peek();
+			if character == "\n" then
+				break;
+			end
+			value ..= self:_consume();
+		end
+		return value;
+	end
+
+	function lexer:_readWord(): string | nil
+		local value = "";
+		local isFirstCharacter = true;
+		while self.position <= self.length do
+			local character = self:_peek();
+			if not isWord(character, isFirstCharacter) then
+				break;
+			end
+			value ..= self:_consume();
+			isFirstCharacter = false;
+		end
+		return value ~= "" and value or nil;
+	end
+
+	function lexer:_readWhitespace(): string | nil
+		local value = "";
+		while self.position <= self.length do
+			local character = self:_peek();
+			if not isWhitespace(character) then
+				break;
+			end
+			value ..= self:_consume();
+		end
+		return value ~= "" and value or nil
+	end
+
+	function lexer:_readNumber(): string | nil
+		local value = "";
+		local isHexadecimal = false;
+		local index = 0;
+		while self.position <= self.length do
+			local character = self:_peek();
+			if character == "0" or character == "x" then
+				isHexadecimal = true;
+				value ..= self:_consume();
+				index += 1;
+				continue;
+			elseif (isHexadecimal and not isHexadecimalDigit(character)) or not isDigit(character, index) then
+				break;
+			end
+			value ..= self:_consume();
+			index += 1;
+		end
+		return value ~= "" and value or nil;
+	end
+
+	function lexer:_getAssociatedToken(word: string): string
+		if table.find(sets.keywords, word) then
+			return "keyword";
+		elseif table.find(sets.constants, word) then
+			return "constant";
+		elseif table.find(sets.operators, word) then
+			return "operator";
+		elseif sets.globals[word] then
+			return "global";
+		elseif self:_peek() == "(" then
+			return "callback";
+		end
+		return "identifier";
+	end
+
+	function lexer:Parse(text: string): {any}
+		self.string = text;
+		self.position = 0;
+		self.length = #text;
+		self.result = {};
+
+		local symbol = "";
+
+		while self.position <= self.length do
+			local character = self:_peek();
+			if character == "[" then
+				local multilineString = self:_readMultilineString();
+				if multilineString ~= nil then
+					self:_pushToken("string", multilineString);
+					continue;
+				end
+			elseif character == "'" or character == "\"" then
+				self:_pushToken("string", self:_readString());
+				continue;
+			elseif isDigit(character, 0) then
+				local value = self:_readNumber();
+				if value ~= nil then
+					self:_pushToken("number", value);
+					continue;
+				end
+			elseif isWord(character, true) then
+				local value = self:_readWord();
+				if value ~= nil then
+					self:_pushToken(self:_getAssociatedToken(value), value);
+					continue;
+				end
+			elseif character == "-" and self:_peek(2) == "-" then
+				self:_pushToken("comment", self:_readComment());
+				continue;
+			elseif isWhitespace(character) then
+				local value = self:_readWhitespace();
+				if value ~= nil then
+					self:_pushToken("whitespace", value);
+					continue;
+				end
+			end
+
+			symbol ..= self:_consume();
+			if symbol ~= "" then
+				self:_pushSymbol(symbol);
+				symbol = "";
+			else
+				break;
+			end
+		end
+
+		local result = {};
+		for i, v in self.result do
+			if string.match(v.value, "\n") then
+				local lines = string.split(v.value, "\n");
+				for i2, v2 in lines do
+					if v2 ~= "" then
+						result[#result + 1] = {
+							token = v.token,
+							value = v2
+						};
+					end
+					if i2 < #lines then
+						result[#result + 1] = {
+							token = "whitespace",
+							value = "\n"
+						};
+					end
+				end
+			else
+				result[#result + 1] = v;
+			end
+		end
+
+		return result;
+	end
+
+	framework.pages.editor.lexer = lexer;
+end
+
+do
+	--[[ Variables ]]--
+
+	local editorButton = framework.components.editorButton;
+	local tabButton = framework.components.tabButton;
+	local userSettings = framework.data.userSettings;
+	local instanceUtils = framework.dependencies.utils.instance;
+	local internalUtils = framework.dependencies.utils.internal;
+	local lexer = framework.pages.editor.lexer;
+	local tabSystem = framework.data.tabSystem;
+	local popups = framework.popups.popups;
+
+	local userInputService = game:GetService("UserInputService");
+	local textService = game:GetService("TextService");
+
+	local highlightAssociations = {
+		string = "#69B397",
+		number = "#91C087",
+		constant = "#E0BA91",
+		callback = "#81a6da",
+		keyword = "#E18DB9",
+		comment = "#606060",
+		global = "#bd93db",
+		operator = "#AAAAAA",
+		assignment = "#AAAAAA",
+		identifier = "#DCDCCC",
+		symbol = "#DCDCCC"
+	};
+	local map = {};
+
+	local base;
+
+	--[[ Functions ]]--
+
+	local function insertHighlight(position: Vector2, size: number, text: string, colour: string)
+		instanceUtils:Create("TextLabel", {
+			BackgroundTransparency = 1,
+			FontFace = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
+			Name = text,
+			Parent = base.contentContainer.inputBox,
+			Position = position,
+			Size = UDim2.new(0, size, 0, 12),
+			Text = text,
+			TextColor3 = Color3.fromHex(colour),
+			TextSize = 16,
+			ZIndex = 2
+		});
+	end
+
+	local function handleLexResult(lexResult: {any}, addTruncateEllipsis: boolean)
+		base.contentContainer.inputBox:ClearAllChildren();
+
+		local x, y = 0, 0;
+		local lastX = 0;
+		for i, v in lexResult do
+			lastX = textService:GetTextBoundsAsync(instanceUtils:Create("GetTextBoundsParams", {
+				Font = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
+				Size = 16,
+				Text = v.value,
+				Width = math.huge
+			})).X;
+
+			if v.token == "whitespace" then
+				if v.value == "\n" then
+					y += 16;
+					x = 0;
+				end
+			else
+				local associatedColour = highlightAssociations[v.token];
+				if associatedColour then
+					insertHighlight(UDim2.new(0, x, 0, y), lastX, v.value, associatedColour);
+				end
+			end
+
+			x += lastX;
+
+			if i == #lexResult and addTruncateEllipsis then
+				insertHighlight(UDim2.new(0, x, 0, y), lastX + 24, "...", highlightAssociations.identifier);
+			end
+		end
+	end
+
+	local function generateLineNumberString(text: string)
+		local str = "";
+		for i = 1, #string.split(text, "\n") do
+			str ..= tostring(i) .. "\n";
+		end
+		return string.sub(str, 1, #str - 1);
+	end
+
+	local function createUI(directory: Instance): Instance
+		return instanceUtils:Create("Frame", { 
+			AnchorPoint = Vector2.new(0, 1), 
+			BackgroundColor3 = Color3.fromHex("15151d"), 
+			BackgroundTransparency = 1, 
+			BorderSizePixel = 0, 
+			Name = "editor", 
+			Parent = directory, 
+			Position = UDim2.new(1, 0, 1, 0), 
+			Size = UDim2.new(1, 0, 1, -36)
+		}, {
+			instanceUtils:Create("ScrollingFrame", { 
+				AnchorPoint = Vector2.new(0.5, 0), 
+				AutomaticCanvasSize = Enum.AutomaticSize.X, 
+				BackgroundTransparency = 1, 
+				BorderSizePixel = 0, 
+				CanvasSize = UDim2.new(0, 0, 0, 0), 
+				Name = "tabButtons", 
+				Position = UDim2.new(0.5, 0, 0, 10), 
+				ScrollBarImageColor3 = Color3.fromHex("515158"), 
+				ScrollBarThickness = 4, 
+				ScrollingDirection = Enum.ScrollingDirection.X, 
+				Size = UDim2.new(1, -20, 0, 40)
+			}, {
+				instanceUtils:Create("UIListLayout", { 
+					FillDirection = Enum.FillDirection.Horizontal, 
+					Name = "list", 
+					Padding = UDim.new(0, 6), 
+					SortOrder = Enum.SortOrder.LayoutOrder
+				})
+			}),
+			instanceUtils:Create("ScrollingFrame", { 
+				AutomaticCanvasSize = Enum.AutomaticSize.XY,
+				BackgroundTransparency = 1, 
+				BorderSizePixel = 0, 
+				CanvasSize = UDim2.new(),
+				HorizontalScrollBarInset = Enum.ScrollBarInset.ScrollBar,
+				Name = "contentContainer", 
+				Position = UDim2.new(0, 0, 0, 50), 
+				ScrollBarThickness = 4,
+				Size = UDim2.new(1, 0, 1, -50),
+				VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+			}, {
+				instanceUtils:Create("TextLabel", { 
+					AutomaticSize = Enum.AutomaticSize.Y,
+					BackgroundTransparency = 1, 
+					FontFace = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal), 
+					FontSize = Enum.FontSize.Size18, 
+					Name = "lineNumbers", 
+					Size = UDim2.new(0, 30, 0, 0), 
+					Text = "1", 
+					TextColor3 = Color3.fromHex("ffffff"), 
+					TextSize = 16, 
+					TextTransparency = 0.7, 
+					TextXAlignment = Enum.TextXAlignment.Right, 
+					TextYAlignment = Enum.TextYAlignment.Top
+				}),
+				instanceUtils:Create("TextBox", { 
+					BackgroundTransparency = 1, 
+					ClearTextOnFocus = false, 
+					CursorPosition = -1, 
+					FontFace = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal), 
+					FontSize = Enum.FontSize.Size18, 
+					MultiLine = true, 
+					Name = "inputBox", 
+					Position = UDim2.new(0, 40, 0, 0), 
+					Size = UDim2.new(1, -40, 1, 0), 
+					Text = "", 
+					TextColor3 = Color3.fromHex("ffffff"), 
+					TextSize = 16, 
+					TextTransparency = 1, 
+					TextTruncate = Enum.TextTruncate.AtEnd, 
+					TextXAlignment = Enum.TextXAlignment.Left, 
+					TextYAlignment = Enum.TextYAlignment.Top
+				})
+			}),
+			instanceUtils:Create("Frame", { 
+				AnchorPoint = Vector2.new(1, 1), 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				Name = "buttons", 
+				Position = UDim2.new(1, -25, 1, -25), 
+				Size = UDim2.new(1, -50, 0, 50)
+			}, {
+				instanceUtils:Create("UIListLayout", { 
+					FillDirection = Enum.FillDirection.Horizontal, 
+					HorizontalAlignment = Enum.HorizontalAlignment.Right, 
+					Name = "list", 
+					Padding = UDim.new(0, 6), 
+					SortOrder = Enum.SortOrder.LayoutOrder
+				})
+			})
+		});
+	end
+
+	--[[ Module ]]--
+
+	local editor = {
+		title = "Editor",
+		icon = "rbxassetid://11558196842",
+		selected = nil,
+		text = ""
+	};
+
+	function editor:Initialize(directory: Instance)
+		base = createUI();
+
+		do
+			local inputBox = base.contentContainer.inputBox;
+
+			inputBox:GetPropertyChangedSignal("Text"):Connect(function()
+				if userInputService:GetFocusedTextBox() == inputBox then
+					self:SetText(inputBox.Text);
+				end
+			end);
+
+			inputBox.FocusLost:Connect(function()
+				if userSettings.cache.executor.autoSaveTabs then
+					tabSystem:Save();
+				end
+			end);
+		end
+
+		do
+			editorButton("New Tab", "rbxassetid://14808232261", {
+				MouseButton1Click = function()
+					tabSystem:Add("Script " .. tostring(tabSystem.accumulator + 1));
+				end,
+				Parent = base.buttons
+			});
+
+			editorButton("Save Current Tab", "rbxassetid://14883119324", {
+				MouseButton1Click = function()
+					popups:Show("saveCurrentTab", select(-1, tabSystem:Get(self.selected)));
+				end,
+				Parent = base.buttons
+			});
+
+			editorButton("Execute Clipboard", "rbxassetid://14808228630", {
+				MouseButton1Click = function()
+					if getclipboard then
+						internalUtils:Execute(getclipboard());
+					end
+				end,
+				Parent = base.buttons
+			});
+
+			editorButton("Clear", "rbxassetid://14808219001", {
+				MouseButton1Click = function()
+					self:SetText("");
+				end,
+				Parent = base.buttons
+			});
+
+			editorButton("Execute", "rbxassetid://14808225296", {
+				BackgroundColor3 = Color3.fromRGB(76, 161, 235),
+				MouseButton1Click = function()
+					internalUtils:Execute(self.text);
+				end,
+				Parent = base.buttons
+			}, Color3.new(1, 1, 1));
+		end
+
+		tabSystem.onTabCreated:Connect(function(tab)
+			local btn = tabButton.new(tab);
+			btn.instance.Parent = base.tabButtons;
+			map[tab.index] = btn;
+			if userSettings.cache.executor.autoSaveTabs then
+				tabSystem:Save();
+			end
+		end);
+
+		tabSystem.onTabRemoved:Connect(function(tab)
+			map[tab.index]:Destroy();
+			map[tab.index] = nil;
+			if userSettings.cache.executor.autoSaveTabs then
+				tabSystem:Save();
+			end
+		end);
+
+		tabSystem.onTabSelected:Connect(function(tab)
+			if self.selected then
+				map[self.selected]:Highlight(false);
+			end
+			map[tab.index]:Highlight(true);
+
+			self.selected = tab.index;
+			self:SetText(tab.content);
+		end);
+
+		if #tabSystem.cache > 0 then
+			for i, v in tabSystem.cache do
+				tabSystem.onTabCreated:Fire(v);
+			end
+			tabSystem:Select(tabSystem.cache[1].index);
+		else
+			tabSystem:Add("Script 1");
+		end
+
+		return base;
+	end
+
+	function editor:SetText(text: string)
+		local truncatedText = string.sub(text, 1, 16384);
+		self.text = text;
+		tabSystem:UpdateContent(self.selected, text);
+		base.contentContainer.inputBox.Text = truncatedText;
+		base.contentContainer.lineNumbers.Text = generateLineNumberString(truncatedText);
+		handleLexResult(lexer:Parse(truncatedText), #truncatedText < #text);
+	end
+
+	framework.pages.editor.editor = editor;
+end
+
+do
+	--[[ Variables ]]--
+
+	local instanceUtils = framework.dependencies.utils.instance;
+	local internalUtils = framework.dependencies.utils.internal;
+	local stringUtils = framework.dependencies.utils.string;
+
+	--[[ Module ]]--
+
+	framework.pages.localScripts.builtInScript = (function(builtInScript: {any})
+		local base = instanceUtils:Create("ImageLabel", { 
+			BackgroundTransparency = 1, 
+			BorderSizePixel = 0, 
+			Image = builtInScript.icon, 
+			ImageTransparency = 0.5, 
+			Name = stringUtils:ConvertToCamelCase(builtInScript.title), 
+			Size = UDim2.new(1, 0, 1, 0)
+		}, {
+			instanceUtils:Create("UICorner", { 
+				CornerRadius = UDim.new(0, 5), 
+				Name = "corner"
+			}),
+			instanceUtils:Create("TextButton", { 
+				AnchorPoint = Vector2.new(1, 1), 
+				AutoButtonColor = false, 
+				BackgroundColor3 = Color3.fromHex("45b0eb"), 
+				BorderSizePixel = 0, 
+				FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+				Name = "execute", 
+				Position = UDim2.new(1, -10, 1, -10), 
+				Size = UDim2.new(0, 40, 0, 40), 
+				Text = ""
+			}, {
+				instanceUtils:Create("UICorner", { 
+					Name = "corner"
+				}),
+				instanceUtils:Create("ImageLabel", { 
+					AnchorPoint = Vector2.new(0.5, 0.5), 
+					BackgroundTransparency = 1, 
+					BorderSizePixel = 0, 
+					Image = "rbxassetid://13075469149", 
+					Name = "icon", 
+					Position = UDim2.new(0.5, 0, 0.5, 0), 
+					Size = UDim2.new(0, 18, 0, 18)
+				})
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AnchorPoint = Vector2.new(0.5, 0), 
+				AutomaticSize = Enum.AutomaticSize.Y, 
+				BackgroundTransparency = 1, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size18, 
+				Name = "title", 
+				Position = UDim2.new(0.5, 0, 0, 14), 
+				Size = UDim2.new(1, -28, 0, 0), 
+				Text = builtInScript.title, 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 16, 
+				TextTruncate = Enum.TextTruncate.AtEnd, 
+				TextXAlignment = Enum.TextXAlignment.Left, 
+				TextYAlignment = Enum.TextYAlignment.Top
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AnchorPoint = Vector2.new(0, 1), 
+				BackgroundTransparency = 1, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "description", 
+				Position = UDim2.new(0, 14, 1, -14), 
+				Size = UDim2.new(1, -70, 1, -52), 
+				Text = builtInScript.description, 
+				TextColor3 = Color3.fromHex("c8c8c8"), 
+				TextSize = 13, 
+				TextTruncate = Enum.TextTruncate.AtEnd, 
+				TextWrap = true, 
+				TextWrapped = true, 
+				TextXAlignment = Enum.TextXAlignment.Left, 
+				TextYAlignment = Enum.TextYAlignment.Top
+			})
+		});
+
+		base.execute.MouseButton1Click:Connect(function()
+			internalUtils:Execute(builtInScript.content);
+		end);
+
+		return base;
+	end);
+end
+
+do
+	--[[ Variables ]]--
+
+	local textButton = framework.components.base.textButton;
+	local savedScripts = framework.data.savedScripts;
+	local instanceUtils = framework.dependencies.utils.instance;
+	local internalUtils = framework.dependencies.utils.internal;
+	local stringUtils = framework.dependencies.utils.string;
+	local tabSystem;
+
+	--[[ Functions ]]--
+
+	local function createSavedScript(scriptData: {any}): Instance
+		return instanceUtils:Create("Frame", { 
+			BackgroundColor3 = Color3.fromHex("202028"), 
+			BorderColor3 = Color3.fromHex("000000"), 
+			BorderSizePixel = 0, 
+			Name = stringUtils:ConvertToCamelCase(scriptData.title), 
+			Size = UDim2.new(1, -4, 0, 82)
+		}, {
+			instanceUtils:Create("UICorner", { 
+				Name = "corner"
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AnchorPoint = Vector2.new(0.5, 1), 
+				AutomaticSize = Enum.AutomaticSize.Y, 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size18, 
+				Name = "text", 
+				Position = UDim2.new(0.5, 0, 0.5, -2), 
+				Size = UDim2.new(1, -32, 0, 0), 
+				Text = scriptData.title, 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 16, 
+				TextWrap = true, 
+				TextWrapped = true, 
+				TextXAlignment = Enum.TextXAlignment.Left
+			}),
+			instanceUtils:Create("Frame", { 
+				AnchorPoint = Vector2.new(1, 1), 
+				AutomaticSize = Enum.AutomaticSize.X, 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				Name = "buttons", 
+				Position = UDim2.new(1, -8, 1, -8), 
+				Size = UDim2.new(0, 0, 0, 30)
+			}, {
+				instanceUtils:Create("UIListLayout", { 
+					FillDirection = Enum.FillDirection.Horizontal, 
+					Name = "list", 
+					Padding = UDim.new(0, 6), 
+					SortOrder = Enum.SortOrder.LayoutOrder
+				}),
+				textButton({
+					BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+					Name = "execute",
+					Text = "Execute"
+				}),
+				textButton({
+					BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+					Name = "loadToEditor",
+					Text = "Load to Editor"
+				}),
+				textButton({
+					BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+					Name = "delete",
+					Text = "Delete"
+				})
+			}),
+			instanceUtils:Create("TextButton", { 
+				AnchorPoint = Vector2.new(1, 0), 
+				AutoButtonColor = false, 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "autoExecute", 
+				Position = UDim2.new(1, -8, 0, 8), 
+				Size = UDim2.new(0, 160, 0, 28), 
+				Text = "", 
+				TextColor3 = Color3.fromHex("000000"), 
+				TextSize = 14
+			}, {
+				instanceUtils:Create("TextLabel", { 
+					BackgroundColor3 = Color3.fromHex("ffffff"), 
+					BackgroundTransparency = 1, 
+					BorderColor3 = Color3.fromHex("000000"), 
+					BorderSizePixel = 0, 
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal), 
+					FontSize = Enum.FontSize.Size18, 
+					Name = "text", 
+					Size = UDim2.new(1, 0, 1, 0), 
+					Text = "Auto Execute", 
+					TextColor3 = Color3.fromHex("9fa4ba"), 
+					TextSize = 16, 
+					TextWrap = true, 
+					TextWrapped = true, 
+					TextXAlignment = Enum.TextXAlignment.Left
+				}),
+				instanceUtils:Create("Frame", { 
+					AnchorPoint = Vector2.new(1, 0.5), 
+					BackgroundColor3 = Color3.fromHex("ffffff"), 
+					BackgroundTransparency = 1, 
+					BorderColor3 = Color3.fromHex("000000"), 
+					BorderSizePixel = 0, 
+					Name = "indicator", 
+					Position = UDim2.new(1, -2, 0.5, 0), 
+					Size = UDim2.new(0, 42, 0, 24)
+				}, {
+					instanceUtils:Create("UICorner", { 
+						CornerRadius = UDim.new(1, 0), 
+						Name = "corner"
+					}),
+					instanceUtils:Create("UIStroke", { 
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border, 
+						Color = Color3.fromRGB(76, 161, 235), 
+						Name = "stroke", 
+						Thickness = 2
+					}),
+					instanceUtils:Create("Frame", { 
+						AnchorPoint = Vector2.new(0.5, 0.5), 
+						BackgroundColor3 = Color3.fromRGB(76, 161, 235), 
+						BorderColor3 = Color3.fromHex("000000"), 
+						BorderSizePixel = 0, 
+						Name = "dot", 
+						Position = UDim2.new(0.5, scriptData.autoExecute and 9 or -9, 0.5, 0), 
+						Size = UDim2.new(0, 18, 0, 18)
+					}, {
+						instanceUtils:Create("UICorner", { 
+							CornerRadius = UDim.new(1, 0), 
+							Name = "corner"
+						})
+					})
+				})
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AnchorPoint = Vector2.new(0.5, 0), 
+				AutomaticSize = Enum.AutomaticSize.Y, 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "description", 
+				Position = UDim2.new(0.5, 0, 0.5, 2), 
+				Size = UDim2.new(1, -32, 0, 0), 
+				Text = scriptData.description, 
+				TextColor3 = Color3.fromHex("9fa4ba"), 
+				TextSize = 14, 
+				TextWrap = true, 
+				TextWrapped = true, 
+				TextXAlignment = Enum.TextXAlignment.Left
+			})
+		});
+	end
+
+	--[[ Module ]]--
+
+	local savedScript = {};
+	savedScript.__index = savedScript;
+
+	function savedScript.new(scriptData: {any})
+		local newSavedScript = setmetatable({
+			scriptData = scriptData,
+			instance = createSavedScript(scriptData)
+		}, savedScript);
+
+		newSavedScript.instance.buttons.execute.MouseButton1Click:Connect(function()
+			internalUtils:Execute(scriptData.content);
+		end);
+
+		newSavedScript.instance.buttons.loadToEditor.MouseButton1Click:Connect(function()
+			if tabSystem == nil then
+				tabSystem = framework.data.tabSystem;
+			end
+			tabSystem:Add(scriptData.title, scriptData.content);
+		end);
+
+		newSavedScript.instance.buttons.delete.MouseButton1Click:Connect(function()
+			savedScripts:Remove(scriptData.index);
+		end);
+
+		if scriptData.autoExecute then
+			newSavedScript:ToggleAutomaticExecution(true);
+		end
+
+		scriptData.onAutoExecuteToggled:Connect(function(state: boolean)
+			newSavedScript:ToggleAutomaticExecution(state);
+		end);
+
+		newSavedScript.instance.autoExecute.MouseButton1Click:Connect(function()
+			savedScripts:ToggleAutomaticExecution(scriptData.index, not scriptData.autoExecute);
+		end);
+
+		return newSavedScript;	
+	end
+
+	function savedScript:ToggleAutomaticExecution(state: boolean)
+		instanceUtils:Tween(self.instance.autoExecute.indicator.dot, 0.2, {
+			BackgroundColor3 = Color3.fromRGB(76, 161, 235),
+			Position = UDim2.new(0.5, state and 9 or -9, 0.5, 0)
+		});
+		instanceUtils:Tween(self.instance.autoExecute.indicator.stroke, 0.2, {
+			Color = state and Color3.fromRGB(76, 161, 235)
+		});
+	end
+
+	framework.pages.localScripts.savedScript = savedScript;
+end
+
+do
+	--[[ Variables ]]--
+
+	local savedScripts = framework.data.savedScripts;
+	local textButton = framework.components.base.textButton;
+	local instanceUtils = framework.dependencies.utils.instance;
+	local builtInScript = framework.pages.localScripts.builtInScript;
+	local savedScript = framework.pages.localScripts.savedScript;
+
+	local map = {};
+	local savedScriptMap = {};
+
+	--[[ Functions ]]--
+
+	local function createUI(directory: Instance): Instance
+		return instanceUtils:Create("Frame", { 
+			AnchorPoint = Vector2.new(0, 1), 
+			BackgroundColor3 = Color3.fromHex("15151d"), 
+			BackgroundTransparency = 1, 
+			BorderSizePixel = 0, 
+			Name = "localScripts", 
+			Parent = directory, 
+			Position = UDim2.new(1, 0, 1, 0), 
+			Size = UDim2.new(1, 0, 1, -36)
+		}, {
+			instanceUtils:Create("ScrollingFrame", { 
+				AnchorPoint = Vector2.new(0.5, 0), 
+				AutomaticCanvasSize = Enum.AutomaticSize.X, 
+				BackgroundTransparency = 1, 
+				BorderSizePixel = 0, 
+				CanvasSize = UDim2.new(0, 0, 0, 0), 
+				Name = "tabButtons", 
+				Position = UDim2.new(0.5, 0, 0, 10), 
+				ScrollBarImageColor3 = Color3.fromHex("515158"), 
+				ScrollBarThickness = 4, 
+				ScrollingDirection = Enum.ScrollingDirection.X, 
+				Size = UDim2.new(1, -20, 0, 40)
+			}, {
+				instanceUtils:Create("UIListLayout", { 
+					FillDirection = Enum.FillDirection.Horizontal, 
+					Name = "list", 
+					Padding = UDim.new(0, 6), 
+					SortOrder = Enum.SortOrder.LayoutOrder
+				}),
+				textButton({
+					BackgroundColor3 = Color3.fromRGB(58, 58, 74), 
+					Name = "builtInLibrary", 
+					Text = "Built-in Library",
+					TextColor3 = Color3.fromRGB(159, 164, 186)
+				}),
+				textButton({
+					BackgroundColor3 = Color3.fromRGB(58, 58, 74), 
+					Name = "savedScripts", 
+					Text = "Saved Scripts",
+					TextColor3 = Color3.fromRGB(159, 164, 186)
+				})
+			}),
+			instanceUtils:Create("Folder", { 
+				Name = "tabs"
+			}, {
+				instanceUtils:Create("ScrollingFrame", { 
+					AnchorPoint = Vector2.new(0.5, 1), 
+					AutomaticCanvasSize = Enum.AutomaticSize.Y, 
+					BackgroundTransparency = 1, 
+					BorderSizePixel = 0, 
+					CanvasSize = UDim2.new(0, 0, 0, 0), 
+					Name = "builtInLibrary", 
+					Position = UDim2.new(0.5, 0, 1, 0), 
+					ScrollBarImageColor3 = Color3.fromHex("191923"), 
+					ScrollBarThickness = 4, 
+					Size = UDim2.new(1, -28, 1, -60), 
+					VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+				}, {
+					instanceUtils:Create("UIGridLayout", { 
+						CellPadding = UDim2.new(0, 12, 0, 12), 
+						CellSize = UDim2.new(0.333, -12, 0.3, 50), 
+						HorizontalAlignment = Enum.HorizontalAlignment.Center, 
+						Name = "grid", 
+						SortOrder = Enum.SortOrder.LayoutOrder
+					})
+				}),
+				instanceUtils:Create("ScrollingFrame", { 
+					AnchorPoint = Vector2.new(0, 1), 
+					AutomaticCanvasSize = Enum.AutomaticSize.Y, 
+					BackgroundTransparency = 1, 
+					BorderSizePixel = 0, 
+					CanvasSize = UDim2.new(0, 0, 0, 0), 
+					Name = "savedScripts", 
+					Position = UDim2.new(0, 14, 1, 0), 
+					ScrollBarImageColor3 = Color3.fromHex("191923"), 
+					ScrollBarThickness = 4, 
+					Size = UDim2.new(1, -24, 1, -60), 
+					VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar, 
+					Visible = false
+				}, {
+					instanceUtils:Create("UIListLayout", { 
+						Name = "list", 
+						Padding = UDim.new(0, 12), 
+						SortOrder = Enum.SortOrder.LayoutOrder
+					})
+				})
+			})
+		});
+	end
+
+	--[[ Module ]]--
+
+	local localScripts = {
+		title = "Local Scripts",
+		icon = "rbxassetid://11558196718",
+		selected = nil
+	};
+
+	function localScripts:Initialize(directory: Instance)
+		self.base = createUI(directory);
+
+		map[self.base.tabButtons.builtInLibrary] = self.base.tabs.builtInLibrary;
+		map[self.base.tabButtons.savedScripts] =self. base.tabs.savedScripts;
+
+		for i, v in framework.data.builtInScripts do
+			builtInScript(v).Parent = self.base.tabs.builtInLibrary;
+		end
+
+		for i, v in savedScripts.cache do
+			self:AddSavedScript(v);
+		end
+
+		savedScripts.onScriptAdded:Connect(function(newScript)
+			self:AddSavedScript(newScript);
+		end);
+
+		savedScripts.onScriptRemoved:Connect(function(oldScript)
+			local oldSavedScript = savedScriptMap[oldScript];
+			if oldSavedScript then
+				oldSavedScript.instance:Destroy();
+			end
+		end);
+
+		for i, v in map do
+			i.MouseButton1Click:Connect(function()
+				self:Select(i);
+			end);
+		end
+
+		self:Select(self.base.tabButtons.builtInLibrary);
+		return self.base;
+	end
+
+	function localScripts:AddSavedScript(newScript: {any})
+		local newSavedScript = savedScript.new(newScript);
+		savedScriptMap[newScript] = newSavedScript;
+		newSavedScript.instance.Parent = self.base.tabs.savedScripts;
+	end
+
+	function localScripts:Select(button: TextButton)
+		if self.selected then
+			if self.selected == button then
+				return;
+			end
+			map[self.selected].Visible = false;
+			instanceUtils:Tween(self.selected, 0.2, {
+				BackgroundColor3 = Color3.fromRGB(58, 58, 74),
+				TextColor3 = Color3.fromRGB(159, 164, 186)
+			});
+		end
+		self.selected = button;
+		map[button].Visible = true;
+		instanceUtils:Tween(self.selected, 0.2, {
+			BackgroundColor3 = Color3.fromRGB(76, 161, 235),
+			TextColor3 = Color3.fromRGB(255, 255, 255)
+		});
+	end
+
+	framework.pages.localScripts.localScripts = localScripts;
+end
+
+do
+	--[[ Variables ]]--
+
+	local instanceUtils = framework.dependencies.utils.instance;
+	local mathsUtils = framework.dependencies.utils.maths;
+	local popups = framework.popups.popups;
+
+	local textService = game:GetService("TextService");
+
+	local tagOrder = { "verified", "isPatched", "isUniversal", "key" };
+	local tags = {
+		key = {
+			title = "Key",
+			colour = "#eab515"
+		},
+		isPatched = {
+			title = "Patched",
+			colour = "#45b0eb"
+		},
+		isUniversal = {
+			title = "Universal",
+			colour = "#459beb"
+		},
+		verified = {
+			title = "Verified",
+			colour = "#15151d"
+		}
+	};
+
+	--[[ Functions ]]--
+
+	local function generateTag(data: {any}): Instance
+		return instanceUtils:Create("TextLabel", { 
+			AutomaticSize = Enum.AutomaticSize.X, 
+			BackgroundColor3 = Color3.fromHex(data.colour), 
+			FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal), 
+			FontSize = Enum.FontSize.Size14, 
+			Name = data.title, 
+			Size = UDim2.new(0, 0, 0, 30), 
+			Text = data.title, 
+			TextColor3 = Color3.fromHex("ffffff"), 
+			TextSize = 14
+		}, {
+			instanceUtils:Create("UICorner", { 
+				CornerRadius = UDim.new(0, 5), 
+				Name = "corner"
+			}),
+			instanceUtils:Create("UIPadding", { 
+				Name = "padding", 
+				PaddingLeft = UDim.new(0, 10), 
+				PaddingRight = UDim.new(0, 10)
+			})
+		});
+	end
+
+	--[[ Module ]]--
+
+	framework.pages.globalScripts.scriptResult = (function(scriptResult: {any}): Instance
+		local viewCount = mathsUtils:FormatAsCount(scriptResult.views, 0.1);
+
+		local base = instanceUtils:Create("ImageButton", { 
+			Active = false, 
+			AutoButtonColor = false, 
+			BackgroundTransparency = 1, 
+			BorderSizePixel = 0, 
+			Image = string.format("https://assetgame.roblox.com/Game/Tools/ThumbnailAsset.ashx?aid=%d&fmt=png&wd=1920&ht=1080", scriptResult.isUniversal and 4483381587 or scriptResult.game.gameId), 
+			ImageTransparency = 0.5, 
+			Name = scriptResult.title, 
+			Selectable = false, 
+			Size = UDim2.new(1, 0, 1, 0)
+		}, {
+			instanceUtils:Create("UICorner", { 
+				CornerRadius = UDim.new(0, 5), 
+				Name = "corner"
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AnchorPoint = Vector2.new(0.5, 0), 
+				AutomaticSize = Enum.AutomaticSize.Y, 
+				BackgroundTransparency = 1, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size18, 
+				Name = "title", 
+				Position = UDim2.new(0.5, 0, 0, 48), 
+				Size = UDim2.new(1, -28, 0, 0), 
+				Text = scriptResult.title, 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 16, 
+				TextTruncate = Enum.TextTruncate.AtEnd, 
+				TextXAlignment = Enum.TextXAlignment.Left, 
+				TextYAlignment = Enum.TextYAlignment.Top
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AnchorPoint = Vector2.new(0.5, 1), 
+				BackgroundTransparency = 1, 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "description", 
+				Position = UDim2.new(0.5, 0, 1, -14), 
+				Size = UDim2.new(1, -28, 1, -86), 
+				Text = scriptResult.description or "", 
+				TextColor3 = Color3.fromHex("c8c8c8"), 
+				TextSize = 13, 
+				TextTruncate = Enum.TextTruncate.AtEnd, 
+				TextWrap = true, 
+				TextWrapped = true, 
+				TextXAlignment = Enum.TextXAlignment.Left, 
+				TextYAlignment = Enum.TextYAlignment.Top
+			}),
+			instanceUtils:Create("TextLabel", { 
+				AnchorPoint = Vector2.new(1, 0), 
+				AutomaticSize = Enum.AutomaticSize.X, 
+				BackgroundColor3 = Color3.fromHex("3a3a4a"), 
+				FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal), 
+				FontSize = Enum.FontSize.Size14, 
+				Name = "views", 
+				Position = UDim2.new(1, -10, 0, 10), 
+				Size = UDim2.new(0, 0, 0, 30), 
+				Text = viewCount, 
+				TextColor3 = Color3.fromHex("ffffff"), 
+				TextSize = 14
+			}, {
+				instanceUtils:Create("UICorner", { 
+					CornerRadius = UDim.new(0, 5), 
+					Name = "corner"
+				}),
+				instanceUtils:Create("UIPadding", { 
+					Name = "padding", 
+					PaddingLeft = UDim.new(0, 10), 
+					PaddingRight = UDim.new(0, 10)
+				})
+			}),
+			instanceUtils:Create("ScrollingFrame", { 
+				Active = true, 
+				AutomaticCanvasSize = Enum.AutomaticSize.X, 
+				BackgroundColor3 = Color3.fromHex("ffffff"), 
+				BackgroundTransparency = 1, 
+				BorderColor3 = Color3.fromHex("000000"), 
+				BorderSizePixel = 0, 
+				CanvasSize = UDim2.new(0, 0, 0, 0), 
+				Name = "tags", 
+				Position = UDim2.new(0, 10, 0, 10), 
+				ScrollBarImageColor3 = Color3.fromHex("000000"), 
+				ScrollBarThickness = 0, 
+				ScrollingDirection = Enum.ScrollingDirection.X, 
+				Size = UDim2.new(1, -(textService:GetTextBoundsAsync(instanceUtils:Create("GetTextBoundsParams", {
+					Font = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+					Text = viewCount,
+					Size = 14,
+					Width = math.huge
+				})).X + 46), 0, 30)
+			}, {
+				instanceUtils:Create("UIListLayout", { 
+					FillDirection = Enum.FillDirection.Horizontal, 
+					Name = "list", 
+					Padding = UDim.new(0, 6), 
+					SortOrder = Enum.SortOrder.LayoutOrder
+				})
+			})
+		});
+
+		for i, v in tagOrder do
+			if scriptResult[v] then
+				generateTag(tags[v]).Parent = base.tags;
+			end
+		end
+
+		base.MouseButton1Click:Connect(function()
+			popups:Show("globalScriptSelection", scriptResult);
+		end);
+
+		return base;
+	end);
+end
+
+do
+	--[[ Variables ]]--
+
+	local instanceUtils = framework.dependencies.utils.instance;
+	local internalUtils = framework.dependencies.utils.internal;
+	local scriptResult = framework.pages.globalScripts.scriptResult;
+
+	local httpService = game:GetService("HttpService");
+
+	local basis;
+
+	--[[ Module ]]--
+
+	local console = {
+		title = "console",
+		icon = "rbxassetid://123456789",
+	};
+
+	local globalScripts = {
+		title = "Global Scripts",
+		icon = "rbxassetid://13449277995",
+		isSearching = false
+	};
+
+	function console:Initialize(directory: Instance)
+		local basis = instanceUtils:Create("Frame", { 
+			AnchorPoint = Vector2.new(0, 1), 
+			BackgroundColor3 = Color3.fromHex("15151d"), 
+			BackgroundTransparency = 1, 
+			BorderSizePixel = 0, 
+			Name = "globalScripts", 
+			Position = UDim2.new(1, 0, 1, 0), 
+			Size = UDim2.new(1, 0, 1, -36)
+		}, {
+			instanceUtils:Create("ScrollingFrame", { 
+				AnchorPoint = Vector2.new(0.5, 1), 
+				AutomaticCanvasSize = Enum.AutomaticSize.Y, 
+				BackgroundTransparency = 1, 
+				BorderSizePixel = 0, 
+				CanvasSize = UDim2.new(0, 0, 0, 0), 
+				Name = "container", 
+				Position = UDim2.new(0.5, 0, 1, 0), 
+				ScrollBarImageColor3 = Color3.fromHex("050507"), 
+				ScrollBarThickness = 4, 
+				ScrollingDirection = Enum.ScrollingDirection.Y, 
+				Size = UDim2.new(1, -28, 1, -60), 
+				VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+			}, {
+				instanceUtils:Create("TextLabel", {
+					AnchorPoint = Vector2.new(0.5, 0),
+					RichText = true,
+					BackgroundTransparency = 1,
+					Name = "console",
+					Position = UDim2.new(0.5, 0, 0, 14),
+					Size = UDim2.new(1, -28, 0, 36),
+					Text = ""
+				})
+			})
+		})
+		return basis
+	end
+
+
+	function globalScripts:Initialize(directory: Instance)
+		basis = instanceUtils:Create("Frame", { 
+			AnchorPoint = Vector2.new(0, 1), 
+			BackgroundColor3 = Color3.fromHex("15151d"), 
+			BackgroundTransparency = 1, 
+			BorderSizePixel = 0, 
+			Name = "globalScripts", 
+			Position = UDim2.new(1, 0, 1, 0), 
+			Size = UDim2.new(1, 0, 1, -36)
+		}, {
+			instanceUtils:Create("ScrollingFrame", { 
+				AnchorPoint = Vector2.new(0.5, 1), 
+				AutomaticCanvasSize = Enum.AutomaticSize.Y, 
+				BackgroundTransparency = 1, 
+				BorderSizePixel = 0, 
+				CanvasSize = UDim2.new(0, 0, 0, 0), 
+				Name = "container", 
+				Position = UDim2.new(0.5, 0, 1, 0), 
+				ScrollBarImageColor3 = Color3.fromHex("050507"), 
+				ScrollBarThickness = 4, 
+				ScrollingDirection = Enum.ScrollingDirection.Y, 
+				Size = UDim2.new(1, -28, 1, -60), 
+				VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+			}, {
+				instanceUtils:Create("UIGridLayout", { 
+					CellPadding = UDim2.new(0, 12, 0, 12), 
+					CellSize = UDim2.new(0.333, -12, 0.3, 50), 
+					HorizontalAlignment = Enum.HorizontalAlignment.Center, 
+					Name = "grid", 
+					SortOrder = Enum.SortOrder.LayoutOrder
+				})
+			}),
+			instanceUtils:Create("TextButton", {
+				AnchorPoint = Vector2.new(0.5, 0),
+				AutoButtonColor = false,
+				BackgroundColor3 = Color3.fromRGB(21, 21, 29),
+				MouseButton1Click = function()
+					basis.searchBox.input:CaptureFocus();
+				end,
+				Name = "searchBox",
+				Position = UDim2.new(0.5, 0, 0, 14),
+				Size = UDim2.new(1, -28, 0, 36),
+				Text = ""
+			}, {
+				instanceUtils:Create("TextBox", { 
+					AnchorPoint = Vector2.new(0.5, 0.5), 
+					BackgroundTransparency = 1, 
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal), 
+					FontSize = Enum.FontSize.Size14, 
+					Name = "input", 
+					PlaceholderColor3 = Color3.fromHex("b2b2b2"), 
+					PlaceholderText = "Search...", 
+					Position = UDim2.new(0.5, 0, 0.5, 0), 
+					Size = UDim2.new(1, 0, 1, 0), 
+					Text = "", 
+					TextColor3 = Color3.fromHex("ffffff"), 
+					TextSize = 14, 
+					TextTruncate = Enum.TextTruncate.AtEnd, 
+					TextXAlignment = Enum.TextXAlignment.Left
+				}),
+				instanceUtils:Create("UICorner", { 
+					CornerRadius = UDim.new(0, 5), 
+					Name = "corner"
+				}),
+				instanceUtils:Create("UIPadding", { 
+					Name = "padding", 
+					PaddingLeft = UDim.new(0, 12), 
+					PaddingRight = UDim.new(0, 12)
+				})
+			});
+		});
+
+		basis.searchBox.input.FocusLost:Connect(function()
+			local contents = basis.searchBox.input.Text;
+			if #contents > 0 then
+				self:Search(contents);
+			end
+		end);
+
+		do
+			local res = internalUtils:Request("https://scriptblox.com/api/script/search?filters=free&q=Hub", "GET", {
+				["Content-Type"] = "application/json"
+			});
+
+			if res then
+				self:ParseResults(httpService:JSONDecode(res).result.scripts);
+			end
+		end
+
+		return basis;
+	end
+
+	function globalScripts:Search(query: string)
+		if self.isSearching or getgenv == nil then
+			return;
+		end
+		self.isSearching = true;
+		local res = internalUtils:Request("https://scriptblox.com/api/script/search?filters=free&q=" .. httpService:UrlEncode(query), "GET", {
+			["Content-Type"] = "application/json"
+		});
+		if res then
+			self:ParseResults(httpService:JSONDecode(res).result.scripts);
+		end
+		self.isSearching = false;
+	end
+
+	function globalScripts:ParseResults(res: {any})
+		for i, v in basis.container:GetChildren() do
+			if v:IsA("ImageButton") then
+				v:Destroy();
+			end
+		end
+		for i, v in res do
+			scriptResult(v).Parent = basis.container;
+		end
+	end
+
+	framework.pages.globalScripts.globalScripts = globalScripts;
+end
+
+do
+	local signal = framework.dependencies.signal;
+	local instanceUtils = framework.dependencies.utils.instance;
+
+	framework.init = (function()
+		local sig = signal.new();
+		local directory = instanceUtils:DynamicParent(instanceUtils:Create("Folder", {
+			Name = "FrostWare"
+		}));
+		local login;
+
+		sig:Connect(function(basis)
+			if login then
+				login:Destroy();
+			end
+
+			basis.gui.Enabled = true;
+			basis.popups.Enabled = true;
+
+			framework.popups.popups:RegisterGUI(basis.popups);
+			framework.pages.navbar.navbar:Initialize(directory);
+
+			if getgenv then
+				for i, v in { "runcode", "isuifile", "readuifile", "writeuifile"--[[, "iscustomasset", "writecustomasset"]] } do
+					getgenv()[i] = nil;
+				end
+			end
+		end);
+
+		login = framework.pages.startup.startup(directory, sig);
+	end);
+end
+
+framework.init();
