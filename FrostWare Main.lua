@@ -104,7 +104,7 @@ setreadonly(dtc, true);
 local UI = {}
 
 -- // StarterGui.FrostWareUI \\ --
-UI["1"] = Instance.new("ScreenGui", game:GetService("CoreGui"))
+UI["1"] = Instance.new("ScreenGui", gethui())
 UI["1"]["IgnoreGuiInset"] = true
 UI["1"]["ScreenInsets"] = Enum.ScreenInsets.None
 UI["1"]["Name"] = [[FrostWareUI]]
