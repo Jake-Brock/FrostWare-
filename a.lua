@@ -15,23 +15,6 @@ local KeySys = Config:Start({
 })
 
 
-
-local _auto = clonefunction(dtc.pushautoexec);
-
-
-
-setreadonly(dtc, false);
-
-dtc.auth = nil;
-
-dtc.flow = nil;
-
-dtc.pushautoexec = nil;
-
-setreadonly(dtc, true);
-
-
-
 getgenv().gethui = function()
 
 	return game.CoreGui
@@ -41,8 +24,6 @@ end
 
 
 if isfile("FrostWare_Key.txt") and (KeySys:Verify_Default(readfile("FrostWare_Key.txt")) == true or KeySys:Verify_Premium(readfile("FrostWare_Key.txt")) == true) then
-
-  _auto()
 
   loadstring(game:HttpGet("https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"))()
 
