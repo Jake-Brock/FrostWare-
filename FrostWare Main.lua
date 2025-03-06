@@ -96,6 +96,11 @@ else
     pcall(function() error("Error occurred: " .. tostring(files_or_error)) end) -- Print the exact error
 end
 
+-- Enables autoexec
+setreadonly(dtc, false);
+dtc.pushautoexec()
+setreadonly(dtc, true);
+
 local UI = {}
 
 -- // StarterGui.FrostWareUI \\ --
