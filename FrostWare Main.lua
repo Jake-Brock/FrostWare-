@@ -211,7 +211,7 @@ UI["c"]["Size"] = UDim2.new(0.973, 0, 0.39953, 0)
 UI["c"]["Position"] = UDim2.new(0.02746, 0, 0, 0)
 UI["c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
 UI["c"]["Text"] = [[print('Hello World')
--- FrostWare V2.0.0]]
+-- FrostWare V3.7]]
 UI["c"]["BackgroundTransparency"] = 1
 
 -- // StarterGui.FrostWareUI.EditorFrame.Frame.ScrollingFrame.SyntaxEditor.SyntaxScript \\ --
