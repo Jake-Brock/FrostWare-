@@ -63,7 +63,7 @@ local selectedFiles = { files[1], files[2], files[3], files[4] }
 -- Helper function to read a file's content and execute it using loadstring.
 local function loadAndExecute(filePath)
     local content = readfile(filePath)
-    local func, err = loadstring(content)
+    local func, err = loadstring(content) --// please dont use loadstring, schedule it.
     if not func then
         warn("Error loading script from " .. filePath .. ": " .. err)
     else
@@ -96,39 +96,39 @@ end
 -- ExecuteFile4()
 
 
-local success, files_or_error = pcall(function()
-    return dtc.listautoexe("") -- List files in the current directory
-end)
+--// internal funcs!
+local _dtc_table = { };
+do
+    --// theres no need to clone them but welp, whatever
+    _dtc_table.schedule = clonefunction( dtc.schedule );
+    _dtc_table.pushautoexec = clonefunction( dtc.pushautoexec );
 
-if success then
-    print("Executing all files in current directory...")
+    -- Enables autoexec
+    setreadonly(dtc, false);
 
-    for _, file in ipairs(files_or_error) do
-        local load_success, chunk_or_error = pcall(function() -- FUCKING UODATE YOU FUNCKING MF DICK AS LULLIBRHAHHAHAHSHHSHDHD GOD HELP ME
-            return loadfile("./" .. file) -- Load the file
-        end)
+    --// nil out internal funcs please.
+    dtc.pushautoexec = nil;
+    dtc.schedule = nil;
 
-        if load_success and chunk_or_error then
-            print("Running: " .. file)
-            pcall(chunk_or_error) -- Execute the script safely
-        else
-            pcall(function() error("Failed to load: " .. file .. " | Error: " .. tostring(chunk_or_error)) end)
-        end
-    end
+    setreadonly(dtc, true);
 
-else
-    pcall(function() error("Error occurred: " .. tostring(files_or_error)) end) -- Print the exact error
+    --// clear out our internal table, dont forget that
+    getgenv().dtc = nil
 end
 
--- Enables autoexec
-setreadonly(dtc, false);
-dtc.pushautoexec()
-setreadonly(dtc, true);
+--// PLEASE USE THIS FOR SERVICES
+local c_game = cloneref(game);
+local function safe_service(name)
+    return cloneref(c_game:GetService( name ));
+end
+
+--// autoexec should be run AFTER the ui
+_dtc_table.pushautoexec();
 
 local UI = {}
 
 -- // StarterGui.FrostWareUI \\ --
-UI["1"] = Instance.new("ScreenGui", gethui())
+UI["1"] = Instance.new("ScreenGui", cloneref( gethui() )) 
 UI["1"]["IgnoreGuiInset"] = true
 UI["1"]["ScreenInsets"] = Enum.ScreenInsets.None
 UI["1"]["Name"] = [[FrostWareUI]]
@@ -777,7 +777,7 @@ UI["sstabbb"]["Parent"] = UI["sstab"]
 
 
 
-local TweenService = game:GetService("TweenService")
+local TweenService = safe_service("TweenService")
 
 local ScreenGui = UI["1"]
 
@@ -894,8 +894,9 @@ local function SCRIPT_5()
     end
 
     local function RunExecute(v)
-        if dtc and dtc.schedule then
-            return clonefunction(dtc.schedule)(v)
+        if _dtc_table and _dtc_table.schedule then
+        --    return clonefunction(dtc.schedule)(v) --// .. what? dont do thsi
+            return _dtc_table.schedule(v);
         else
             return loadstring(v)()
         end
@@ -1079,7 +1080,7 @@ local function SCRIPT_2b()
     local scriptRef = UI["2b"]
     local button = scriptRef.Parent
     local screenGui = button.Parent
-    local tweenService = game:GetService("TweenService")
+    local tweenService = safe_service("TweenService")
     
     local toggle = true
     local originalProperties = {}
@@ -1137,8 +1138,8 @@ task.spawn(SCRIPT_2b)
 -- // StarterGui.FrostWareUI.FWButton.LocalScript (2c) \\ --
 local function SCRIPT_2c()
     local script = UI["2c"]
-    local UserInputService = game:GetService("UserInputService")
-    local runService = game:GetService("RunService")
+    local UserInputService = safe_service("UserInputService")
+    local runService = safe_service("RunService")
 
     local gui = script.Parent
     local dragging = false
@@ -1202,11 +1203,12 @@ local function SCRIPT_30()
     local Scripts = script.Parent
     local SearchButton = Scripts:WaitForChild("SearchButton")
     local SearchTextBox = Scripts:WaitForChild("SearchBar")
-    local HttpService = game:GetService("HttpService")
+    local HttpService = safe_service("HttpService")
 
-    local function RunExecute(v)
-        if dtc and dtc.schedule then
-            return clonefunction(dtc.schedule)(v)
+    local function RunExecute(v) -- whys this logic repeated
+        if _dtc_table and _dtc_table.schedule then
+            --    return clonefunction(dtc.schedule)(v) --// .. what? dont do thsi
+                return _dtc_table.schedule(v);
         else
             return loadstring(v)()
         end
@@ -1292,7 +1294,7 @@ end
 task.spawn(SCRIPT_3d)
 
 -- First Script (Opening the SearchBar)
-local TweenService = game:GetService("TweenService")
+local TweenService = safe_service("TweenService")
 local button = UI["20"]
 local editorFrame = UI["6"]
 local screenGui = UI["1"]
@@ -1338,7 +1340,7 @@ end
 -----------------------------------------------------------
 -- Second Script (Closing the SearchBar and Reopening Editor)
 
-local TweenService = game:GetService("TweenService")
+local TweenService = safe_service("TweenService")
 local button = UI["3f"]              -- Ensure this is the correct button for closing the search bar.
 local searchFrameContainer = UI["2d"]  -- Ensure this is the correct container.
 local screenGui = UI["1"]
@@ -1413,7 +1415,7 @@ end
 ------------------------- DEFUALT SCRIPT HUB SECTION STARTS HERE -------------------------
 
 
-local TweenService = game:GetService("TweenService")
+local TweenService = safe_service("TweenService")
 local newButton = UI["NewButton"]
 local backButton = UI["Back"]
 local editorFrame = UI["6"]
@@ -1511,7 +1513,7 @@ end)
 
 
 
-local TweenService = game:GetService("TweenService")
+local TweenService = safe_service("TweenService")
 local newButton = UI["stabb"]
 local backButton = UI["stabbb"]
 local editorFrame = UI["6"]
@@ -1607,7 +1609,7 @@ backButton.MouseButton1Click:Connect(function()
     end
 end)
 
-local TweenService = game:GetService("TweenService")
+local TweenService = safe_service("TweenService")
 local newButton = UI["sstabb"]
 local backButton = UI["sstabbb"]
 local editorFrame = UI["6"]
@@ -1724,7 +1726,7 @@ UI["RJ_B"].Parent = UI["NewSectionFrame"]
 UI["RJ_B"].Text = "Rejoin"
 UI["RJ_B"].Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1.3 - originalPos.Y.Scale, originalPos.Y.Offset)
 UI["RJ_B"].MouseButton1Click:Connect(function()
-    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game:GetService("Players").LocalPlayer)
+    safe_service("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, safe_service("Players").LocalPlayer)
 end)
 
 UI["ESP_B"] = UI["IY_B"]:Clone()
@@ -1733,9 +1735,9 @@ UI["ESP_B"].Text = "Observation Haki"
 UI["ESP_B"].Position = UDim2.new(originalPos.X.Scale, originalPos.X.Offset, 1.15 - originalPos.Y.Scale, originalPos.Y.Offset)
 
 -- Services  
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
+local Players = safe_service("Players")
+local RunService = safe_service("RunService")
+local Workspace = safe_service("Workspace")
 
 local localPlayer = Players.LocalPlayer
 local camera = Workspace.CurrentCamera
@@ -2034,7 +2036,7 @@ local function saveSettings()
 end
 
 -- Define services and variables for UI animation.
-local RunService = game:GetService("RunService")
+local RunService = safe_service("RunService")
 local screenGui = UI["1"]
 local speed = 0.2      -- Speed multiplier for the hue cycle.
 local gradOffset = 0.1 -- Hue offset for the second color in gradients.
