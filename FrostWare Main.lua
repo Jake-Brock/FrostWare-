@@ -23,7 +23,7 @@ do
             headers = { };
         end
 
-        headers["User-Agent"] = "FrostWare-Android";
+        headers["User-Agent"] = "Frostware Android";
         req["Headers"] = headers;
         return org(req);
     end);
