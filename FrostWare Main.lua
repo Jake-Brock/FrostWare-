@@ -113,7 +113,6 @@ do
     setreadonly(dtc, true);
 
     --// clear out our internal table, dont forget that
-    getgenv().dtc = nil
 end
 
 --// PLEASE USE THIS FOR SERVICES
