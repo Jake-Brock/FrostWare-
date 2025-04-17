@@ -1,0 +1,4 @@
+{
+  "ui": "loadstring(game:HttpGet(\"https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua\"))()",
+  "version": "2.668.660"
+}
