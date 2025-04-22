@@ -101,7 +101,7 @@ local copyLink = function()
     local success, link = cacheLink();
     
     if success then
-        fSetClipboard(link);
+        setclipboard(link);
     end
 end
 
@@ -486,13 +486,8 @@ else
   end)
 
   GET.MouseButton1Click:Connect(function()
-    local Succ = pcall(function()
-      setclipboard(cacheLink())
-    end)
-
-    if Succ then
+      copyLink()
       TextLabel.Text = "Key link copied to clipboard!"
-    end
   end)
 
   -- [[ UI Scripts ]] --
