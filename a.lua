@@ -487,7 +487,7 @@ else
 
   GET.MouseButton1Click:Connect(function()
     local Succ = pcall(function()
-      copyLink();
+      setclipboard(cacheLink())
     end)
 
     if Succ then
