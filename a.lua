@@ -261,7 +261,7 @@ local getFlag = function(name)
     end
 end
 
-if verifyKey(readfile("Frostware_key.lua")) then
+if isfile("Frostware_key.lua") and verifyKey(readfile("Frostware_key.lua")) then
   loadstring(game:HttpGet("https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"))()
 else
   local KeyGui = Instance.new("ScreenGui")
