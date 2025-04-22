@@ -486,8 +486,7 @@ else
   end)
 
   GET.MouseButton1Click:Connect(function()
-      print(cacheLink())
-      --copyLink()
+      copyLink()
       TextLabel.Text = "Key link copied to clipboard!"
   end)
 
