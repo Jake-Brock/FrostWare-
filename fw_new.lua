@@ -71,23 +71,11 @@ end
 -- ExecuteFile3()
 -- ExecuteFile4()
 
---// internal funcs!
-local _enableautoexec = clonefunction( client.enableautoexec )
-setreadonly(client, false);
-client.enableautoexec = nil
-client.execute = nil
-setreadonly(client, true);
-
-getgenv().client = nil
-
 --// PLEASE USE THIS FOR SERVICES
 local c_game = cloneref(game);
 local function safe_service(name)
     return cloneref(c_game:GetService( name ));
 end
-
---// autoexec should be run AFTER the ui
-_enableautoexec()
 
 local UI = {}
 
