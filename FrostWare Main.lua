@@ -6,30 +6,6 @@
 -- Define the folder path
 local folder = "FW_Data/Scripts/"
 
---// User agent header
-do
-    local org;
-    org = hookfunction(request, function(req)
-        if type(req) ~= "table" then
-            return org(req); -- will error for us
-        end
-
-        if type(req["Headers"]) == "table" and req["Headers"]["User-Agent"] ~= nil then
-            return org(req); -- ua set by script, like eclipse
-        end
-
-        local headers = req["Headers"];
-        if type(req["Headers"]) ~= "table" then
-            headers = { };
-        end
-
-        headers["User-Agent"] = "Frostware Android";
-        req["Headers"] = headers;
-        return org(req);
-    end);
-end
-
-
 -- Ensure the parent folder exists
 if not isfolder("FW_Data") then
     makefolder("FW_Data")
@@ -95,34 +71,11 @@ end
 -- ExecuteFile3()
 -- ExecuteFile4()
 
-
---// internal funcs!
-local _dtc_table = { };
-do
-    --// theres no need to clone them but welp, whatever
-    _dtc_table.schedule = clonefunction( dtc.schedule );
-    _dtc_table.pushautoexec = clonefunction( dtc.pushautoexec );
-
-    -- Enables autoexec
-    setreadonly(dtc, false);
-
-    --// nil out internal funcs please.
-    dtc.pushautoexec = nil;
-    dtc.schedule = nil;
-
-    setreadonly(dtc, true);
-
-    --// clear out our internal table, dont forget that
-end
-
 --// PLEASE USE THIS FOR SERVICES
 local c_game = cloneref(game);
 local function safe_service(name)
     return cloneref(c_game:GetService( name ));
 end
-
---// autoexec should be run AFTER the ui
-_dtc_table.pushautoexec();
 
 local UI = {}
 
