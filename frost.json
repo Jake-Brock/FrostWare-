@@ -1,7 +1,7 @@
 {
   "moduleName": "FrostWare",
   "rbxhttp": false,
-  "script": "dtc.schedule(game:HttpGet('https://raw.githubusercontent.com/Jake-Brock/FrostWare-/refs/heads/main/FrostWare%20Main.lua', true))",
-  "versionName": "3.9",
+  "script": "dtc.schedule(game:HttpGet('https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/a.lua', true))",
+  "versionName": "5.3",
   "Keysystem": false
 }
