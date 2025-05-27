@@ -1,5 +1,5 @@
--- This file was protected using Luraph Obfuscator v14.4.1 [https://lura.ph/]
 repeat task.wait(0.1)until game:IsLoaded()
+
 local wU="https://api.heatherx.site"
 local dU="https://heatherx.site"
 local mU="https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"
