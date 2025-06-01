@@ -1,4 +1,4 @@
-getgenv()._frostw = "https://system.heatherx.site"
+getgenv()._frostw = "https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"
 getgenv()._dc = "https://getfrosts.xyz"
 getgenv()._frost = "https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"
 local mU = "https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"
