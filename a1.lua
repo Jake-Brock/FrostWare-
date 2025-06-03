@@ -1,9 +1,13 @@
-repeat task.wait(0.1) until game:IsLoaded()
+getgenv()._frostw = "https://system.heatherx.site"
+getgenv()._dc = "https://getfrosts.xyz"
+getgenv()._frost = "https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua"
 
-getgenv()._frostw = "https://system.heatherx.site" -- no change
-getgenv()._dc = "https://getfrosts.xyz" -- discord link
-getgenv()._frost = "https://raw.githubusercontent.com/Jake-Brock/FrostWare-/main/FrostWare%20Main.lua" -- url gui or Script
+local response = game:HttpGet(getgenv()._frostw .. "/check-access/" .. gethwid())
+local hasAccess = response:find('"valid"%s*:%s*true') ~= nil
 
-
-repeat task.wait(0.1) until game:IsLoaded()
-loadstring(game:HttpGet(getgenv()._frostw .. "/init"))()
+if hasAccess then
+    loadstring(game:HttpGet(getgenv()._frost))()
+else
+    repeat task.wait(0.1) until game:IsLoaded()
+    loadstring(game:HttpGet(getgenv()._frostw .. "/init"))()
+end
