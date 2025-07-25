@@ -1,7 +1,7 @@
 {
   "moduleName": "FrostWare",
   "rbxhttp": false,
-  "script": "dtc.schedule(game:HttpGet('https://raw.githubusercontent.com/OneCreatorX/FrostWare/refs/heads/main/Extra.lua', true))",
+  "script": "dtc.schedule(game:HttpGet('https://raw.githubusercontent.com/Snowie3310/Frostware/main/Frostware', true))",
   "versionName": "5",
   "Keysystem": false
 }
